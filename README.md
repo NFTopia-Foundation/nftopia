@@ -20,7 +20,6 @@ The platform is built using modern web technologies, including **Next.js** for t
 ## Technologies Used
 
 - **Frontend**:
-  - [Vite](https://vitejs.dev/) - Blazing-fast JavaScript bundler and development server.
   - [Next.js](https://nextjs.org/) - React framework for server-side rendering and static site generation.
   - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework for styling.
   - [ShadCN](https://ui.shadcn.com/) - Reusable UI components for building modern interfaces.
@@ -49,28 +48,33 @@ The platform is built using modern web technologies, including **Next.js** for t
 2. **Clone the Repository**:
    ```bash
    git clone https://github.com/your-username/nftopia.git
-   cd nftopia
+   cd nftopia  to access project root
+   or
+   cd nftopia/apps/frontend to access frontend root
+   or
+   cd nftopia/apps/backend to access backend root
+   or 
+   cd nftopia/on-chain to access cairo on-chain contracts
    ```
 
 ## Install Dependencies
 
-Ensure you have **npm** or **yarn** installed. Install dependencies using the following command:  
-`npm install`
+Ensure you have **pnpm** installed. Install dependencies using the following command:  
+`pnpm install`
 
 ---
 
 ## To Run the Project in Development Mode
 
-Start the development server using one of the following commands:  
-`npm run dev`  
-or  
-`yarn dev`  
-or  
-`pnpm dev`  
-or  
-`bun dev`
+Start the development server using the following commands:  
+`pnpm run dev`  
 
-Access the application at [http://localhost:3000](http://localhost:3000).
+
+
+Access the frontend application at [http://localhost:5000](http://localhost:5000).
+
+
+Access the backend application at [http://localhost:9000](http://localhost:9000).
 
 ---
 
