@@ -81,7 +81,6 @@ export function Navbar() {
               />
             </div>
             <Button
-              variant="gradient"
               className="hidden md:block rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90"
             >
               Register
@@ -152,7 +151,6 @@ export function Navbar() {
 
           {/* Mobile Register Button */}
           <Button
-            variant="gradient"
             className="w-full rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90 mt-4"
             onClick={() => setIsMenuOpen(false)}
           >
