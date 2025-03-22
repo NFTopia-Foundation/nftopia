@@ -2,6 +2,7 @@
 import { Inter } from "next/font/google";
 import { Navbar } from "@/components/navbar";
 import "./globals.css";
+import { CircuitBackground } from "@/components/circuit-background";
 
 const inter = Inter({ subsets: ["latin"] });
 const fallbackFont = Inter({ subsets: ["latin"] });
@@ -21,7 +22,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <div className="min-h-screen bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] text-white relative">
           <Navbar />
-          <main className="relative z-10">{children}</main>
+          <main className="relative z-10">
+            <CircuitBackground />
+            {children}
+          </main>
         </div>
       </body>
     </html>
