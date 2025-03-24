@@ -80,9 +80,7 @@ export function Navbar() {
                 className="w-[180px] lg:w-[220px]"
               />
             </div>
-            <Button
-              className="hidden md:block rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90"
-            >
+            <Button className="hidden md:block rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90">
               Register
             </Button>
 
