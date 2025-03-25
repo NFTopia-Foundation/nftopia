@@ -1,8 +1,17 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
+# Ignore node_modules in all submodules
 /node_modules
-**/node_modules/
+node_modules/
+apps/*/node_modules/
+apps/*/.env/
+on-chain/node_modules/
+/.vercel
+/apps/*/.next
+/apps/*/dist
+
+
 /.pnp
 .pnp.js
 
@@ -11,6 +20,8 @@
 
 # next.js
 /.next/
+apps/*/.next/
+
 /out/
 
 # production
@@ -27,6 +38,7 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
 
 # vercel
 .vercel

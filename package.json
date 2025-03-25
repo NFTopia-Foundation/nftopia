@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "private": true,
-  "workspaces": ["apps/frontend", "apps/backend", "contracts"],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "pnpm --filter backend run start",
     "build": "pnpm run build -r", 
     "dev": "pnpm -r --parallel run dev",
     "lint": "pnpm run lint -r",
