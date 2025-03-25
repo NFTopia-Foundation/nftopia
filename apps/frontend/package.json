@@ -20,7 +20,9 @@
     "clsx": "^2.1.1",
     "eslint": "8.49.0",
     "eslint-config-next": "13.5.1",
+    "framer-motion": "^12.5.0",
     "gsap": "^3.12.7",
+    "localforage": "^1.10.0",
     "lucide-react": "^0.446.0",
     "next": "13.5.1",
     "postcss": "8.4.30",
@@ -30,6 +32,7 @@
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "5.2.2"
+    "typescript": "5.2.2",
+    "use-sound": "^5.0.0"
   }
 }
