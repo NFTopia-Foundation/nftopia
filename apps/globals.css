@@ -1,0 +1,489 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 24, 19, 89;
+  --background-end-rgb: 14, 12, 56;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+    to bottom,
+    rgb(var(--background-start-rgb)),
+    rgb(var(--background-end-rgb))
+  );
+  font-family: var(--font-inter), var(--font-fallback), system-ui, sans-serif;
+}
+
+/* Custom radial gradient utility */
+.bg-radial-gradient-to-center {
+  background-image: radial-gradient(
+    circle at center,
+    var(--tw-gradient-from),
+    var(--tw-gradient-to)
+  );
+}
+
+/* Genesis animations */
+@keyframes pulse-glow {
+  0% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(500px);
+  }
+}
+
+@keyframes sheen {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-10px) translateX(5px);
+  }
+  50% {
+    transform: translateY(5px) translateX(10px);
+  }
+  75% {
+    transform: translateY(10px) translateX(-5px);
+  }
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.animate-scan {
+  animation: scan 3s linear infinite;
+}
+
+.animate-sheen {
+  animation: sheen 8s linear infinite;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Vault animations */
+@keyframes spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes vault-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+}
+
+@keyframes data-flow {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.8);
+  }
+}
+
+/* Vault door rotation */
+@keyframes vault-unlock {
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(-5deg);
+  }
+  30% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(90deg);
+  }
+}
+
+/* Vault handle rotation */
+@keyframes handle-turn {
+  0% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(90deg);
+  }
+  40% {
+    transform: rotate(180deg);
+  }
+  60% {
+    transform: rotate(270deg);
+  }
+  80% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Metallic sheen effect */
+@keyframes metallic-sheen {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Apply genesis effects */
+.pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.spin-slow {
+  animation: spin-slow 10s linear infinite;
+}
+
+.vault-pulse {
+  animation: vault-pulse 3s ease-in-out infinite;
+}
+
+.data-flow {
+  animation: data-flow 2s ease-in-out infinite;
+}
+
+.vault-unlock {
+  animation: vault-unlock 4s ease-in-out forwards;
+}
+
+.handle-turn {
+  animation: handle-turn 3s ease-in-out forwards;
+}
+
+.metallic-sheen {
+  background: linear-gradient(
+    90deg,
+    rgba(180, 180, 180, 0.5) 0%,
+    rgba(220, 220, 220, 0.8) 25%,
+    rgba(220, 220, 220, 0.8) 50%,
+    rgba(180, 180, 180, 0.5) 75%,
+    rgba(180, 180, 180, 0.5) 100%
+  );
+  background-size: 200% 100%;
+  animation: metallic-sheen 3s linear infinite;
+}
+
+/* Realistic vault styles */
+.vault-door {
+  background: linear-gradient(145deg, #a0a0a0, #d0d0d0);
+  box-shadow:
+    inset 0 0 10px rgba(0, 0, 0, 0.5),
+    5px 5px 15px rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  position: relative;
+}
+
+.vault-handle {
+  background: linear-gradient(145deg, #707070, #909090);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+}
+
+.vault-bolt {
+  background: linear-gradient(145deg, #505050, #707070);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.vault-ring {
+  border: 2px solid #909090;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 5px rgba(0, 0, 0, 0.3),
+    0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+/* Enhanced scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(14, 5, 37, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 100, 255, 0.4);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 100, 255, 0.6);
+}
+
+/* Glass effect for cards */
+.glass-card {
+  background: rgba(26, 9, 66, 0.3);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 100, 255, 0.2);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 100, 255, 0.4);
+  box-shadow:
+    0 8px 32px rgba(255, 100, 255, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.07);
+  transform: translateY(-2px);
+}
+
+/* Genesis text effect */
+.genesis-text {
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 100, 255, 0.9)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Circuit board background container */
+.circuit-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+/* Button styles */
+.genesis-button {
+  background: linear-gradient(
+    to right,
+    rgba(255, 0, 255, 0.8),
+    rgba(180, 100, 255, 0.8)
+  );
+  color: white;
+  border-radius: 9999px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 4px 12px rgba(255, 0, 255, 0.3);
+}
+
+.genesis-button:hover {
+  background: linear-gradient(
+    to right,
+    rgba(255, 0, 255, 0.9),
+    rgba(180, 100, 255, 0.9)
+  );
+  box-shadow: 0 6px 16px rgba(255, 0, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.genesis-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(255, 0, 255, 0.3);
+}
+
+/* Card styles */
+.nft-card {
+  background: rgba(26, 9, 66, 0.4);
+  border-radius: 1rem;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 100, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.nft-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 100, 255, 0.3);
+  box-shadow: 0 10px 25px rgba(255, 0, 255, 0.2);
+}
+
+/* Stats box */
+.stats-box {
+  background: rgba(14, 5, 37, 0.6);
+  border: 1px solid rgba(255, 100, 255, 0.2);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  backdrop-filter: blur(8px);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(to right, #ff64ff, #b464ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Glow effect */
+.glow {
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+}
+
+.text-glow {
+  text-shadow: 0 0 10px rgba(255, 0, 255, 0.7);
+}
+
+/* Divider */
+.genesis-divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 100, 255, 0.5),
+    transparent
+  );
+  margin: 1.5rem 0;
+}
+
+/* Input styles */
+.genesis-input {
+  background: rgba(14, 5, 37, 0.6);
+  border: 1px solid rgba(255, 100, 255, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.genesis-input:focus {
+  outline: none;
+  border-color: rgba(255, 100, 255, 0.5);
+  box-shadow: 0 0 0 2px rgba(255, 100, 255, 0.2);
+}
+
+/* Badge */
+.genesis-badge {
+  background: linear-gradient(
+    to right,
+    rgba(255, 0, 255, 0.2),
+    rgba(180, 100, 255, 0.2)
+  );
+  color: white;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(255, 100, 255, 0.3);
+}
+
+/* Navbar */
+.genesis-navbar {
+  background: rgba(14, 5, 37, 0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 100, 255, 0.1);
+}
+
+/* Footer */
+.genesis-footer {
+  background: rgba(14, 5, 37, 0.8);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 100, 255, 0.1);
+}
+
+/* Dots pattern */
+.dots-pattern {
+  background-image: radial-gradient(
+    rgba(255, 100, 255, 0.2) 1px,
+    transparent 1px
+  );
+  background-size: 20px 20px;
+}
+
+/* Add this to your existing globals.css file */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
