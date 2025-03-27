@@ -1,9 +1,13 @@
-import Image from "next/image";
+import { ExploreCategories } from "@/components/explore-categories";
+import { MainHero } from "@/components/main-hero";
+import { TopSellers } from "@/components/top-sellers";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-       
+    <div className="relative z-10 max-w-7xl mx-auto px-4 py-8 space-y-16">
+      <MainHero />
+      <TopSellers />
+      <ExploreCategories />
     </div>
   );
 }
