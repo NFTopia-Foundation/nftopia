@@ -15,7 +15,7 @@ const nftItems: NFTItem[] = [
     name: "CyberPunk #01",
     image: "/nftopia-03.svg",
     price: "2.5 ETH",
-    desc: "By Anthony Gargasz"
+    desc: "By Anthony Gargasz",
   },
   {
     id: 2,
@@ -40,7 +40,6 @@ const nftItems: NFTItem[] = [
     price: "3.2 ETH",
   },
 
-
   {
     id: 5,
     name: "Neon Samurai",
@@ -52,19 +51,21 @@ const nftItems: NFTItem[] = [
 
 export default function Home() {
   return (
-    // <div className="flex max-w-6xl mx-auto  items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-    //   {nftItems.map(({ id, name, price, image, desc }) => (
-    //     <PopularThisWeek desc={desc} id={id} name={name} price={price} image={image} />
-    //   ))}
-    // </div>
-
     <div className="relative w-full overflow-hidden">
-  <div className="flex max-w-6xl mx-auto items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 animate-marquee whitespace-nowrap">
-    {nftItems.concat(nftItems).map(({ id, name, price, image, desc }, index) => (
-      <PopularThisWeek key={index} desc={desc} id={id} name={name} price={price} image={image} />
-    ))}
-  </div>
-</div>
-
+      <div className="flex max-w-6xl mx-auto items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 animate-marquee whitespace-nowrap">
+        {nftItems
+          .concat(nftItems)
+          .map(({ id, name, price, image, desc }, index) => (
+            <PopularThisWeek
+              key={index}
+              desc={desc}
+              id={id}
+              name={name}
+              price={price}
+              image={image}
+            />
+          ))}
+      </div>
+    </div>
   );
 }
