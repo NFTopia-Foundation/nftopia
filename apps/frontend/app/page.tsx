@@ -1,5 +1,9 @@
+import { ExploreCategories } from "@/components/explore-categories";
+import { MainHero } from "@/components/main-hero";
+import { TopSellers } from "@/components/top-sellers";
 import PopularThisWeek from "@/components/PopularThisWeek";
 import Image from "next/image";
+
 
 export type NFTItem = {
   id: number;
@@ -51,7 +55,8 @@ const nftItems: NFTItem[] = [
 
 export default function Home() {
   return (
-    <div className="relative w-full overflow-hidden">
+    <div className="relative z-10 max-w-7xl mx-auto px-4 py-8 space-y-16">
+      <MainHero />
       <div className="flex max-w-6xl mx-auto items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 animate-marquee whitespace-nowrap">
         {nftItems
           .concat(nftItems)
@@ -66,6 +71,8 @@ export default function Home() {
             />
           ))}
       </div>
+      <TopSellers />
+      <ExploreCategories />
     </div>
   );
 }
