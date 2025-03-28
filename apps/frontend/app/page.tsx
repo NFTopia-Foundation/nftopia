@@ -1,76 +1,13 @@
 import { ExploreCategories } from "@/components/explore-categories";
 import { MainHero } from "@/components/main-hero";
 import { TopSellers } from "@/components/top-sellers";
-import PopularThisWeek from "@/components/PopularThisWeek";
-import Image from "next/image";
-
-
-export type NFTItem = {
-  id: number;
-  name: string;
-  image: string;
-  price: string;
-  desc: string;
-};
-
-const nftItems: NFTItem[] = [
-  {
-    id: 1,
-    name: "CyberPunk #01",
-    image: "/nftopia-03.svg",
-    price: "2.5 ETH",
-    desc: "By Anthony Gargasz",
-  },
-  {
-    id: 2,
-    name: "Futuristic Sphere",
-    image: "/nftopia-03.svg",
-    desc: "By Anthony Gargasz",
-    price: "1.8 ETH",
-  },
-  {
-    id: 3,
-    name: "Neon Samurai",
-    image: "/nftopia-03.svg",
-    desc: "By Anthony Gargasz",
-    price: "3.2 ETH",
-  },
-
-  {
-    id: 4,
-    name: "Neon Samurai",
-    image: "/nftopia-03.svg",
-    desc: "By Anthony Gargasz",
-    price: "3.2 ETH",
-  },
-
-  {
-    id: 5,
-    name: "Neon Samurai",
-    image: "/nftopia-03.svg",
-    desc: "By Anthony Gargasz",
-    price: "3.2 ETH",
-  },
-];
+import PopularThisWeekMarqueeParent from "@/components/PopularThisWeekMarqueeParent";
 
 export default function Home() {
   return (
     <div className="relative z-10 max-w-7xl mx-auto px-4 py-8 space-y-16">
       <MainHero />
-      <div className="flex max-w-6xl mx-auto items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 animate-marquee whitespace-nowrap">
-        {nftItems
-          .concat(nftItems)
-          .map(({ id, name, price, image, desc }, index) => (
-            <PopularThisWeek
-              key={index}
-              desc={desc}
-              id={id}
-              name={name}
-              price={price}
-              image={image}
-            />
-          ))}
-      </div>
+      <PopularThisWeekMarqueeParent />
       <TopSellers />
       <ExploreCategories />
     </div>

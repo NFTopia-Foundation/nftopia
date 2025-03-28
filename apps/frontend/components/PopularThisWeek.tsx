@@ -1,6 +1,13 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { NFTItem } from "@/app/page";
+
+export interface NFTItem {
+  id: string;
+  image: string;
+  name: string;
+  price: string;
+  desc: string;
+}
 
 export default function PopularThisWeek({
   id,
