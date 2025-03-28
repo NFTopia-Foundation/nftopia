@@ -1,9 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Vault } from "@/components/vault";
+// import Image from "next/image";
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Vault } from "@/components/Vault";
 
 export function MainHero() {
   return (
