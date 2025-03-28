@@ -78,7 +78,7 @@ const Footer = () => {
 
       {/* Copyright Notice */}
       <p className="text-xs text-gray-400 mt-6 text-center">
-        © 2023 NFTopia, Inc. All rights reserved.
+        © {new Date().getFullYear()} NFTopia, Inc. All rights reserved.
       </p>
     </footer>
   );
