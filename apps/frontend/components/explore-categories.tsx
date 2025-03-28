@@ -114,17 +114,12 @@ export function ExploreCategories() {
                       className="col-span-3 relative overflow-hidden rounded-xl"
                       style={{ height: "140px" }}
                     >
-                      <Image
+                      {/* <Image
                         src={category.images[0]}
                         alt={`${category.name} main artwork`}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src =
-                            "https://via.placeholder.com/400x300?text=Category";
-                        }}
-                      />
+                      /> */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     </div>
 
@@ -135,17 +130,12 @@ export function ExploreCategories() {
                         className="relative overflow-hidden rounded-lg"
                         style={{ height: "70px" }}
                       >
-                        <Image
-                          src={image}
+                        {/* <Image
+                          src={image[0]}
                           alt={`${category.name} artwork ${index + 1}`}
                           fill
                           className="object-cover transition-transform duration-500 group-hover:scale-110"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src =
-                              "https://via.placeholder.com/200x150?text=Art";
-                          }}
-                        />
+                        /> */}
                       </div>
                     ))}
                   </div>
