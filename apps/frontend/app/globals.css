@@ -76,7 +76,28 @@
   }
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
   }
+
+/* Custom #181359 Color Scheme Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(24, 19, 89, 0.8); /* #181359 at 80% opacity */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(110, 96, 245, 0.4); /* Lighter indigo variant */
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(130, 120, 255, 0.6); /* Brighter indigo on hover */
+}
+
+
 }
 
 
