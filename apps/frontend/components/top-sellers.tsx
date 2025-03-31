@@ -11,7 +11,7 @@ interface Seller {
   highlight?: boolean;
 }
 
-export function TopSellers() {
+function TopSellers() {
   const sellers: Seller[] = [
     {
       id: "1",
@@ -146,3 +146,5 @@ export function TopSellers() {
     </section>
   );
 }
+
+export default TopSellers;

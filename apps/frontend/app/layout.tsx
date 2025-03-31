@@ -4,6 +4,7 @@ import { Navbar } from "@/components/navbar";
 import "./globals.css";
 import Footer from "@/components/Footer";
 import { CircuitBackground } from "@/components/circuit-background";
+import { WebVitals } from "@/components/web-vitals";
 
 const inter = Inter({ subsets: ["latin"] });
 const fallbackFont = Inter({ subsets: ["latin"] });
@@ -25,6 +26,7 @@ export default function RootLayout({
           <main className="relative z-10">
             <Navbar />
             <CircuitBackground />
+            <WebVitals/>
             {children}
             <Footer />
           </main>
