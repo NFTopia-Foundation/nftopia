@@ -53,9 +53,24 @@ export const PopularThisWeekMarqueeParent: React.FC = () => {
   const [hoveredCardId, setHoveredCardId] = useState<number | null>(null);
 
   return (
-    <div className="relative z-10 overflow-hidden">
+    <div className="relative z-10 flex flex-col gap-4 items-center overflow-hidden">
+       <div className="container flex flex-row justify-center items-center mx-auto px-4 relative z-10">
+        <div className="flex flex-col items-center">
+          <div className="inline-block relative">
+            <h2 className="text-4xl font-bold text-center text-white tracking-wider font-display">
+              Popular this week
+            </h2>
+            <div className="absolute -bottom-3 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+            <div className="absolute -bottom-5 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
+          </div>
+          <p className="text-gray-400 mt-4 text-center max-w-md">
+            Explore the most coveted digital masterpieces shaping the future of
+            art
+          </p>
+        </div>
+      </div>
       <div 
-        className={`flex max-w-6xl mx-auto items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 whitespace-nowrap 
+        className={`flex max-w-6xl mx-auto items-center h-md p-8 pb-20 gap-16 sm:p-20 whitespace-nowrap 
         ${hoveredCardId !== null ? 'animate-pause' : 'animate-marquee'}`}
       >
         {nftItems
