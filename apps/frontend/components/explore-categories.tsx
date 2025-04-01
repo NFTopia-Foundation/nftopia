@@ -10,7 +10,7 @@ interface Category {
   images: string[];
 }
 
-export function ExploreCategories() {
+function ExploreCategories() {
   const categories: Category[] = [
     {
       id: "abstract",
@@ -160,3 +160,5 @@ export function ExploreCategories() {
     </section>
   );
 }
+
+export default ExploreCategories;
