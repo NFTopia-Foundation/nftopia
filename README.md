@@ -7,7 +7,7 @@ The platform is built using modern web technologies, including **Next.js** for t
 ---
 
 ## Figma Link
-Find out Figma Link [here](https://www.figma.com/design/Cg75Fx3YzfP2KzyiYa0vLU/NFTopia?node-id=0-1&t=6ky2MmrZqKyqspAB-1), to guide you in coding the frontend.
+Find our Figma Link [here](https://www.figma.com/design/Cg75Fx3YzfP2KzyiYa0vLU/NFTopia?node-id=0-1&t=6ky2MmrZqKyqspAB-1), to guide you in coding the frontend.
 
 ---
 
