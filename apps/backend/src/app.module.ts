@@ -1,8 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { CsrfMiddleware } from './common/middleware/csrf.middleware';
 
 // Use this @Module for local Postgresql connection
 @Module({
@@ -21,10 +24,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       autoLoadEntities: true,
       synchronize: true, 
     }),
+    AuthModule,
+    UsersModule,
+    ConfigModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
+
+
 
 
 //Use below @Module for Remote Postgresql connection
@@ -49,4 +57,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 
 
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(CsrfMiddleware)
+      .forRoutes('*');
+  }
+}
