@@ -1,108 +1,197 @@
+// auth.controller.ts
 import {
     Controller,
     Post,
     Body,
     Res,
-    HttpStatus,
-    UseGuards,
-    Req,
+    HttpCode,
     Get,
-    BadRequestException,
+    Req,
+    UseGuards,
+    UnauthorizedException
   } from '@nestjs/common';
-  import { Response, Request } from 'express';
   import { AuthService } from './auth.service';
-  import { NonceRequestDto, WalletLoginDto } from './dtos/wallet-login.dto';
-  import { JwtAuthGuard } from './guards/jwt-auth.guard';
-  import { RefreshTokenGuard } from './guards/refresh-token.guard';
-  import { CsrfGuard } from './guards/csrf.guard';
-  import * as crypto from 'crypto'; // Import the Node.js crypto module
-  import { RequestWithUser } from '../users/interfaces/user.interface';
+  import { Response, Request } from 'express';
+  import { JwtAuthGuard } from './jwt.guard';
+  import type { CookieOptions } from 'express';
+  import { JwtService } from '@nestjs/jwt';
+  import { InjectRepository } from '@nestjs/typeorm';
+  import { Repository } from 'typeorm';
+  import { User } from '../users/entities/user.entity';
+
+
+
   
   @Controller('auth')
   export class AuthController {
-    constructor(private authService: AuthService) {}
-  
-    @Post('nonce')
-    async getNonce(@Body() nonceRequestDto: NonceRequestDto) {
-      const { address } = nonceRequestDto;
-      
-      if (!address) {
-        throw new BadRequestException('Wallet address is required');
+    constructor(
+        @InjectRepository(User)
+        private readonly userRepo: Repository<User>,
+        private readonly authService: AuthService,
+        private readonly jwtService: JwtService,
+    ) {}
+
+    private async generateTokens(user: User) {
+        const payload = { sub: user.id, walletAddress: user.walletAddress };
+        const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+        const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+        return { accessToken, refreshToken };
+      }
+
+      @Get('csrf-token')
+      getCsrfToken(@Req() req: Request, @Res() res: Response) {
+        const token = req.csrfToken();
+        res.json({ csrfToken: token });
       }
       
-      return this.authService.generateNonce(address);
+  
+    @Post('request-nonce')
+    @HttpCode(200)
+    requestNonce(@Body('walletAddress') walletAddress: string) {
+      const nonce = this.authService.generateNonce(walletAddress);
+      return { nonce };
     }
   
-    @Post('wallet-login')
-    async walletLogin(
-      @Body() walletLoginDto: WalletLoginDto,
-      @Res() res: Response,
+    @Post('verify-signature')
+    @HttpCode(200)
+    async verifySignature(
+      @Body('walletAddress') walletAddress: string,
+      @Body('signature') signature: string,
+      @Res({ passthrough: true }) res: Response,
     ) {
-      const { address, signature } = walletLoginDto;
-      
-      const { user, tokens } = await this.authService.authenticateWithWallet(
-        address,
-        signature,
-      );
-      
-      // Set cookies
-      this.authService.setCookies(res, tokens);
-      
-      return res.status(HttpStatus.OK).json({
-        message: 'Authentication successful',
-        user,
-        csrfToken: res.getHeader('Set-Cookie')?.toString().match(/csrf-token=([^;]+)/)?.[1],
-      });
-    }
-  
-    @UseGuards(RefreshTokenGuard, CsrfGuard)
-    @Post('refresh')
-    async refreshTokens(@Req() req: RequestWithUser, @Res() res: Response) {
-      const user = req.user;
-      const tokens = await this.authService.refreshTokens(
-        user.id,
-        user.address,
-        user.refreshToken,
-      );
-      
-      // Set new cookies
-      this.authService.setCookies(res, tokens);
-      
-      return res.status(HttpStatus.OK).json({
-        message: 'Tokens refreshed successfully',
-        csrfToken: res.getHeader('Set-Cookie')?.toString().match(/csrf-token=([^;]+)/)?.[1],
-      });
-    }
-  
-    @UseGuards(JwtAuthGuard, CsrfGuard)
-    @Post('logout')
-    async logout(@Req() req: RequestWithUser, @Res() res: Response) {
-      await this.authService.logout(req.user.id);
-      
-      // Clear cookies
-      this.authService.clearCookies(res);
-      
-      return res.status(HttpStatus.OK).json({
-        message: 'Logged out successfully',
-      });
-    }
-  
-    @UseGuards(JwtAuthGuard)
-    @Get('csrf-token')
-    async getCsrfToken(@Res() res: Response) {
-      // Generate new CSRF token
-      const csrfToken = crypto.randomBytes(64).toString('hex');
-      
-      // Set CSRF token
-      res.cookie('csrf-token', csrfToken, {
-        httpOnly: false,
+      const { accessToken, refreshToken, user } =
+        await this.authService.verifySignature(walletAddress, signature);
+
+      const cookieOptions: CookieOptions = {
+        httpOnly: true,
+        sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 15 * 60 * 1000, // 15 minutes
-      });
+      };
       
-      return res.status(HttpStatus.OK).json({
-        csrfToken,
+    
+      res.cookie('access_token', accessToken, {
+        ...cookieOptions,
+        maxAge: 15 * 60 * 1000, // 15 mins
       });
+    
+      res.cookie('refresh_token', refreshToken, {
+        ...cookieOptions,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+    
+      return { message: 'Authenticated', user };
+    }
+    
+    @Get('me')
+    @UseGuards(JwtAuthGuard)
+    getProfile(@Req() req: Request) {
+      return req['user'];
+    }
+
+    @Post('refresh')
+    @HttpCode(200)
+    async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+      const refreshToken = req.cookies['refresh_token'];
+      if (!refreshToken) throw new UnauthorizedException();
+    
+      try {
+        const payload = this.jwtService.verify(refreshToken, {
+          secret: process.env.JWT_REFRESH_SECRET,
+        });
+    
+        const user = await this.userRepo.findOne({ where: { id: payload.sub } });
+        if (!user) throw new UnauthorizedException();
+    
+        const tokens = await this.generateTokens(user);
+    
+        res.cookie('access_token', tokens.accessToken, {
+          httpOnly: true,
+          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 15 * 60 * 1000,
+        });
+    
+        res.cookie('refresh_token', tokens.refreshToken, {
+          httpOnly: true,
+          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production',
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+    
+        return { message: 'Refreshed successfully' };
+      } catch (err) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+    }
+    
+  
+    @Post('logout')
+    logout(@Res({ passthrough: true }) res: Response) {
+      res.clearCookie('jwt');
+      res.clearCookie('access_token');
+      res.clearCookie('refresh_token');
+      return { message: 'Logged out' };
     }
   }
+
+
+
+ 
+
+
+
+  //frontend usage 
+
+//   const provider = new ethers.providers.Web3Provider(window.ethereum);
+// const signer = provider.getSigner();
+// const walletAddress = await signer.getAddress();
+
+// const { data: nonceRes } = await axios.post('/auth/request-nonce', { walletAddress });
+// const message = `Sign this message to log in: ${nonceRes.nonce}`;
+// const signature = await signer.signMessage(message);
+
+// await axios.post('/auth/verify-signature', {
+//   walletAddress,
+//   signature,
+// }, { withCredentials: true });
+
+// // Later: get current user
+// await axios.get('/auth/me', { withCredentials: true });
+
+
+
+//frontend usage of csrf-token
+
+// function getCookie(name: string): string | null {
+//     const value = `; ${document.cookie}`;
+//     const parts = value.split(`; ${name}=`);
+//     if (parts.length === 2) {
+//       return parts.pop()?.split(';').shift() || null;
+//     }
+//     return null;
+//   }
+  
+// const csrfTokenFromBackend = getCookie("XSRF-TOKEN");
+
+// or by library
+
+// pnpm add js-cookie
+
+// import Cookies from 'js-cookie';
+
+// const csrfTokenFromBackend = Cookies.get('XSRF-TOKEN');
+
+
+// await fetch('/api/endpoint', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'X-CSRF-Token': csrfTokenFromBackend,
+//     },
+//     body: JSON.stringify(data),
+//   });
+  
+
+
+  
+  

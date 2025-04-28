@@ -1,0 +1,21 @@
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+import { Auction } from '../../auctions/entities/auction.entity';
+
+@Entity()
+export class Bid {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @ManyToOne(() => Auction, (auction) => auction.bids, { eager: false })
+  auction: Auction;
+
+  @ManyToOne(() => User, (user) => user.bids, { eager: false })
+  bidder: User;
+
+  @Column({ type: 'decimal', precision: 36, scale: 18 })
+  amount: number;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+}

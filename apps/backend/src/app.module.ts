@@ -1,42 +1,58 @@
-import { Module, NestModule, MiddlewareConsumer} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { CsrfMiddleware } from './common/middleware/csrf.middleware';
+import { CollectionsModule } from './collections/collections.module';
+import { NftsModule } from './nfts/nfts.module';
+import { User } from './users/entities/user.entity';
+import { Collection } from './collections/entities/collection.entity';
+import { NFT } from './nfts/entities/nft.entity';
+import { AuthModule } from './auth/auth.module';
+import { BidsModule } from './bids/bids.module';
+import { AuctionsModule } from './auctions/auctions.module';
+import { TransactionsModule } from './transactions/transactions.module';
+import { CategoriesModule } from './categories/categories.module';
 
-// Use this @Module for local Postgresql connection
+
+
+// Use this @Module for local PostgreSQL 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: '.env'
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT, 10) || 5432,
-      username: process.env.DB_USER || 'nftopia',
-      password: process.env.DB_PASSWORD || 'nftopia123',
-      database: process.env.DB_NAME || 'nftopiadb',
+      host: 'localhost',
+      port: 5432,
+      username: 'nftopia',
+      password: 'nftopia123', 
+      database: 'nftopiadb',
+      entities: [User, Collection, NFT],
+      migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      migrationsRun: true,
       autoLoadEntities: true,
-      synchronize: true, 
+      synchronize: true, // Keep false for production
+      logging: true, 
     }),
-    AuthModule,
     UsersModule,
-    ConfigModule,
+    CollectionsModule,
+    NftsModule,
+    AuthModule,
+    BidsModule,
+    AuctionsModule,
+    TransactionsModule,
+    CategoriesModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 
 
-
-
-//Use below @Module for Remote Postgresql connection
-
+// Use this @Module for Production PostgreSQL
 
 // @Module({
 //   imports: [
@@ -48,7 +64,7 @@ import { CsrfMiddleware } from './common/middleware/csrf.middleware';
 //       type: 'postgres',
 //       url: process.env.DATABASE_URL,
 //       autoLoadEntities: true,
-//       synchronize: true, 
+//       synchronize: false, 
 //     })
 //   ],
 //   controllers: [AppController],
@@ -57,10 +73,5 @@ import { CsrfMiddleware } from './common/middleware/csrf.middleware';
 
 
 
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(CsrfMiddleware)
-      .forRoutes('*');
-  }
-}
+
+export class AppModule {}

@@ -1,73 +1,54 @@
-import { Injectable } from '@nestjs/common';
-import { User } from './users.entity';
-import { v4 as uuidv4 } from 'uuid';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity'
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/create-user.dto';
+
+
 
 @Injectable()
 export class UsersService {
-  // In a real application, replace this with a database repository
-  private users: Map<string, User> = new Map();
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
 
-  async findByAddress(address: string): Promise<User | undefined> {
-    // Convert to lowercase for case-insensitive comparison
-    const lowerAddress = address.toLowerCase();
-    
-    // Find user by address
-    for (const user of this.users.values()) {
-      if (user.address.toLowerCase() === lowerAddress) {
-        return user;
-      }
-    }
-    
-    return undefined;
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const user = this.userRepository.create(createUserDto);
+    return this.userRepository.save(user);
   }
 
-  async findById(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async findAll(): Promise<User[]> {
+    return this.userRepository.find();
   }
 
-  async createUser(address: string): Promise<User> {
-    const id = uuidv4();
-    const now = new Date();
-    
-    const newUser: User = {
-      id,
-      address: address.toLowerCase(),
-      createdAt: now,
-      updatedAt: now,
-      lastLogin: now,
-    };
-    
-    this.users.set(id, newUser);
-    return newUser;
+  async findOne(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+    return user;
   }
 
-  async updateRefreshToken(userId: string, refreshToken: string | null): Promise<void> {
-    const user = this.users.get(userId);
-    
-    if (user) {
-      user.refreshToken = refreshToken;
-      user.updatedAt = new Date();
-      this.users.set(userId, user);
-    }
+  async findByWallet(walletAddress: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { walletAddress } });
+    if (!user) throw new NotFoundException(`User with wallet address ${walletAddress} not found`);
+    return user;
   }
 
-  async findByRefreshToken(refreshToken: string): Promise<User | undefined> {
-    for (const user of this.users.values()) {
-      if (user.refreshToken === refreshToken) {
-        return user;
-      }
-    }
-    
-    return undefined;
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    await this.userRepository.update(id, updateUserDto);
+    return this.findOne(id);
   }
 
-  async updateLastLogin(userId: string): Promise<void> {
-    const user = this.users.get(userId);
-    
-    if (user) {
-      user.lastLogin = new Date();
-      user.updatedAt = new Date();
-      this.users.set(userId, user);
-    }
+  async remove(id: string): Promise<void> {
+    await this.userRepository.delete(id);
+  }
+
+  async getTopSellers(): Promise<User[]> {
+    return this.userRepository.find({
+      where: { isArtist: true },
+      order: { createdAt: 'DESC' },
+      take: 10,
+    });
   }
 }
