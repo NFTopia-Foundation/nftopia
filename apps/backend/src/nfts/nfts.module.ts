@@ -7,12 +7,14 @@ import { NftsController } from './nfts.controller';
 import { UsersModule } from '../users/users.module';
 import { CollectionsModule } from '../collections/collections.module';
 import { Category } from 'src/categories/entities/category.entity';
-import { CategoriesModule } from 'src/categories/categories.module';
+import { CategoriesModule } from '../categories/categories.module';
+import { FirebaseModule } from '../firebase/firebase.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([NFT, Collection, Category]),
     UsersModule, 
+    FirebaseModule,
     CollectionsModule,
     CategoriesModule
   ],
