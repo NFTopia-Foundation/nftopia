@@ -18,10 +18,10 @@ export class NFT {
   description: string;
 
   @Column()
-  imageUrl: string; // CDN/Firebase image
+  imageUrl: string; 
 
   @Column({ nullable: true })
-  ipfsUrl: string; // NFT.Storage metadata URL
+  ipfsUrl: string; 
 
   @Column({ type: 'jsonb', nullable: true })
   metadata: Record<string, any>;
@@ -38,7 +38,7 @@ export class NFT {
   @ManyToOne(() => Collection, collection => collection.nfts)
   collection: Collection;
 
-  @ManyToOne(() => Category, (category) => category.nfts, { nullable: false }) // Many NFTs can belong to one Category
+  @ManyToOne(() => Category, (category) => category.nfts, { nullable: false })
   category: Category;
 
   @Column({ default: false })
