@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { SearchInput } from "@/components/ui/search-input";
+// import { SearchInput } from "@/components/ui/search-input";
+import { ModernSearchInput } from "./ui/modern-search-input";
 import {
   Menu,
   X,
@@ -75,7 +76,7 @@ export function Navbar() {
           {/* Right Side - Search & Register */}
           <div className="flex items-center gap-4">
             <div className="hidden md:block">
-              <SearchInput
+              <ModernSearchInput
                 placeholder="Search"
                 className="w-[180px] lg:w-[220px]"
               />
@@ -144,7 +145,7 @@ export function Navbar() {
 
           {/* Mobile Search */}
           <div className="mt-4">
-            <SearchInput placeholder="Search" />
+            <ModernSearchInput placeholder="Search" />
           </div>
 
           {/* Mobile Register Button */}
