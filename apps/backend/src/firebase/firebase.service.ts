@@ -8,7 +8,7 @@ export class FirebaseService {
   private bucket: Bucket;
 
   constructor(private firebaseConfig: FirebaseConfig) {
-    /* this.bucket = this.firebaseConfig.initFirebase(); */
+    this.bucket = this.firebaseConfig.initFirebase();
   }
 
   async uploadFile(file: Express.Multer.File): Promise<string> {
