@@ -1,7 +1,10 @@
 "use client";
 
+import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 interface Seller {
   id: string;
@@ -9,73 +12,217 @@ interface Seller {
   amount: string;
   avatar: string;
   highlight?: boolean;
+  bgColor?: string;
 }
 
-function TopSellers() {
+export function TopSellers() {
+  const pathname = usePathname();
+  const isMarketplacePage = pathname === "/marketplace";
+  const [showNavButtons, setShowNavButtons] = useState(false);
+
   const sellers: Seller[] = [
     {
       id: "1",
-      name: "Leighton Kramer",
-      amount: "276.4 STK",
+      name: isMarketplacePage ? "Crispyn Berry" : "Leighton Kramer",
+      amount: isMarketplacePage ? "24.5 STRK" : "276.4 STK",
       avatar: "/avatars/avatar-1.jpg",
       highlight: true,
+      bgColor: "bg-yellow-400",
     },
     {
       id: "2",
-      name: "Haylie Arcand",
-      amount: "146.8 STK",
+      name: isMarketplacePage ? "Samuel Rust" : "Haylie Arcand",
+      amount: isMarketplacePage ? "20.8 STRK" : "146.8 STK",
       avatar: "/avatars/avatar-2.jpg",
+      bgColor: "bg-teal-400",
     },
     {
       id: "3",
-      name: "Bowen Higgins",
-      amount: "98.2 STK",
+      name: isMarketplacePage ? "Tommy Alvarez" : "Bowen Higgins",
+      amount: isMarketplacePage ? "19.3 STRK" : "98.2 STK",
       avatar: "/avatars/avatar-3.jpg",
+      bgColor: "bg-purple-400",
     },
     {
       id: "4",
-      name: "Saige Fuentes",
-      amount: "94.7 STK",
+      name: isMarketplacePage ? "Wilbur Lane" : "Saige Fuentes",
+      amount: isMarketplacePage ? "18.7 STRK" : "94.7 STK",
       avatar: "/avatars/avatar-4.jpg",
+      bgColor: "bg-violet-400",
     },
     {
       id: "5",
-      name: "Sophie Maddox",
-      amount: "72.6 STK",
+      name: isMarketplacePage ? "Andy Huxford" : "Sophie Maddox",
+      amount: isMarketplacePage ? "18.2 STRK" : "72.6 STK",
       avatar: "/avatars/avatar-5.jpg",
+      bgColor: "bg-green-400",
     },
     {
       id: "6",
-      name: "Jeremy Burch",
-      amount: "70.3 STK",
+      name: isMarketplacePage ? "Blake Banks" : "Jeremy Burch",
+      amount: isMarketplacePage ? "16.9 STRK" : "70.3 STK",
       avatar: "/avatars/avatar-6.jpg",
+      bgColor: "bg-pink-300",
     },
     {
       id: "7",
-      name: "Amelia Griffin",
-      amount: "65.4 STK",
+      name: isMarketplacePage ? "Monroe Lucas" : "Amelia Griffin",
+      amount: isMarketplacePage ? "15.8 STRK" : "65.4 STK",
       avatar: "/avatars/avatar-7.jpg",
+      bgColor: "bg-rose-400",
     },
     {
       id: "8",
-      name: "Isabella Hart",
-      amount: "59.2 STK",
+      name: isMarketplacePage ? "Nash Romero" : "Isabella Hart",
+      amount: isMarketplacePage ? "14.4 STRK" : "59.2 STK",
       avatar: "/avatars/avatar-8.jpg",
+      bgColor: "bg-orange-400",
     },
     {
       id: "9",
-      name: "Diego Bentley",
-      amount: "50.7 STK",
+      name: isMarketplacePage ? "Harper Ritchie" : "Diego Bentley",
+      amount: isMarketplacePage ? "13.5 STRK" : "50.7 STK",
       avatar: "/avatars/avatar-9.jpg",
+      bgColor: "bg-fuchsia-400",
     },
     {
       id: "10",
-      name: "Daisy Lozano",
-      amount: "45.1 STK",
+      name: isMarketplacePage ? "Daisy Lozano" : "Daisy Lozano",
+      amount: isMarketplacePage ? "12.1 STRK" : "45.1 STK",
       avatar: "/avatars/avatar-10.jpg",
+      bgColor: "bg-emerald-400",
+    },
+    {
+      id: "11",
+      name: isMarketplacePage ? "Eliza Morgan" : "Eliza Morgan",
+      amount: isMarketplacePage ? "11.8 STRK" : "42.3 STK",
+      avatar: "/avatars/avatar-11.jpg",
+      bgColor: "bg-blue-400",
+    },
+    {
+      id: "12",
+      name: isMarketplacePage ? "Jasper Reed" : "Jasper Reed",
+      amount: isMarketplacePage ? "10.9 STRK" : "39.7 STK",
+      avatar: "/avatars/avatar-12.jpg",
+      bgColor: "bg-amber-400",
+    },
+    {
+      id: "13",
+      name: isMarketplacePage ? "Mila Chen" : "Mila Chen",
+      amount: isMarketplacePage ? "10.2 STRK" : "36.5 STK",
+      avatar: "/avatars/avatar-13.jpg",
+      bgColor: "bg-lime-400",
+    },
+    {
+      id: "14",
+      name: isMarketplacePage ? "Felix Dawson" : "Felix Dawson",
+      amount: isMarketplacePage ? "9.7 STRK" : "34.8 STK",
+      avatar: "/avatars/avatar-14.jpg",
+      bgColor: "bg-sky-400",
+    },
+    {
+      id: "15",
+      name: isMarketplacePage ? "Zoe Parker" : "Zoe Parker",
+      amount: isMarketplacePage ? "9.1 STRK" : "32.6 STK",
+      avatar: "/avatars/avatar-15.jpg",
+      bgColor: "bg-red-400",
     },
   ];
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Check if scrolling is possible
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const checkScrollable = () => {
+        const container = scrollContainerRef.current;
+        if (container) {
+          setShowNavButtons(container.scrollWidth > container.clientWidth);
+        }
+      };
+
+      checkScrollable();
+      window.addEventListener("resize", checkScrollable);
+
+      return () => {
+        window.removeEventListener("resize", checkScrollable);
+      };
+    }
+  }, []);
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollContainerRef.current) {
+      const { current } = scrollContainerRef;
+      // Adjust scroll amount to show approximately 3 new items
+      const scrollAmount = 320;
+
+      if (direction === "left") {
+        current.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+      } else {
+        current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      }
+    }
+  };
+
+  // Marketplace version (horizontal scrollable list)
+  if (isMarketplacePage) {
+    return (
+      <section className="py-12 relative">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Top Sellers</h2>
+          {showNavButtons && (
+            <div className="flex gap-2">
+              <button
+                onClick={() => scroll("left")}
+                className="bg-gray-800/50 hover:bg-gray-700/70 text-white p-2 rounded-full"
+                aria-label="Scroll left"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => scroll("right")}
+                className="bg-gray-800/50 hover:bg-gray-700/70 text-white p-2 rounded-full"
+                aria-label="Scroll right"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div
+          className="flex overflow-x-auto gap-5 pb-4 snap-x px-1 no-scrollbar"
+          ref={scrollContainerRef}
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {sellers.map((seller) => (
+            <div
+              key={seller.id}
+              className="flex flex-col items-center min-w-[100px] snap-start"
+            >
+              <div
+                className={`w-16 h-16 rounded-2xl ${seller.bgColor} mb-3 relative overflow-hidden flex items-center justify-center`}
+              >
+                <Image
+                  src="/nftopia-03.svg"
+                  alt={seller.name}
+                  width={40}
+                  height={40}
+                  className="opacity-80"
+                />
+              </div>
+              <h3 className="text-sm font-medium text-center whitespace-nowrap">
+                {seller.name}
+              </h3>
+              <p className="text-xs text-[#9398a8]">{seller.amount}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  // Original version (grid layout)
   return (
     <section className="py-20 overflow-hidden relative">
       {/* Background elements */}
@@ -146,5 +293,3 @@ function TopSellers() {
     </section>
   );
 }
-
-export default TopSellers;
