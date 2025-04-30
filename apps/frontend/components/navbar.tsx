@@ -1,18 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-// import { SearchInput } from "@/components/ui/search-input";
-import { ModernSearchInput } from "./ui/modern-search-input";
-import {
-  Menu,
-  X,
-  Compass,
-  ShoppingBag,
-  Users,
-  Lock,
-  Search,
-} from "lucide-react";
+import { ModernSearchInput } from "@/components/ui/modern-search-input";
+import { Menu, X, Compass, ShoppingBag, Users, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export function Navbar() {
@@ -37,11 +29,17 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4">
         <nav className="flex items-center justify-between h-16 md:h-20 relative">
           {/* Logo */}
-          <Link href="/" className="text-2xl font-bold">
-            NFTopia
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/nftopia-04.svg"
+              alt="NFTopia Logo"
+              width={120}
+              height={32}
+              className="h-8 w-auto"
+            />
           </Link>
 
-          {/* Center Nav Items - Absolutely centered on desktop */}
+          
           <div className="hidden md:flex items-center justify-center absolute left-1/2 transform -translate-x-1/2 space-x-8">
             <Link
               href="/explore"
@@ -73,6 +71,7 @@ export function Navbar() {
             </Link>
           </div>
 
+          {/* Rest of the navbar remains unchanged */}
           {/* Right Side - Search & Register */}
           <div className="flex items-center gap-4">
             <div className="hidden md:block">
@@ -85,7 +84,6 @@ export function Navbar() {
               Register
             </Button>
 
-            {/* Hamburger Menu Button */}
             <button
               className="md:hidden flex items-center justify-center p-2 rounded-full bg-gray-900/40 backdrop-blur-sm border border-gray-800/50"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
