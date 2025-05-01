@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn } from 'typeorm';
-import { User } from '../../users/entities/user.entity'; // Assuming you have a User entity
-import { NFT } from '../../nfts/entities/nft.entity'; // Import your NFT entity
+import { User } from '../../users/entities/user.entity'; 
+import { NFT } from '../../nfts/entities/nft.entity'; 
 
 @Entity()
 export class Collection {
