@@ -24,8 +24,8 @@ import { CategoriesModule } from './categories/categories.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.POSTGRES_HOST || 'localhosts',
-      port: Number(process.env.POSTGRES_PORT) || 5342,
+      host: process.env.POSTGRES_HOST || 'localhost',
+      port: Number(process.env.POSTGRES_PORT) || 5432,
       username: process.env.POSTGRES_USER || 'nftopia',
       password: process.env.POSTGRES_PASSWORD || 'nftopia123',
       database: process.env.POSTGRES_DB || 'nftopiadb',
