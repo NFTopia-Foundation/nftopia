@@ -7,13 +7,15 @@ export class FirebaseConfig {
   constructor(private configService: ConfigService) {}
 
   initFirebase() {
-    const base64 = this.configService.get<string>('FIREBASE_CREDENTIALS_BASE64');
+    const base64 = this.configService.get<string>(
+      'FIREBASE_CREDENTIALS_BASE64',
+    );
     const bucket = this.configService.get<string>('FIREBASE_STORAGE_BUCKET');
 
     if (!base64) throw new Error('Missing Firebase config');
 
     const serviceAccount = JSON.parse(
-      Buffer.from(base64, 'base64').toString('utf-8')
+      Buffer.from(base64, 'base64').toString('utf-8'),
     );
 
     admin.initializeApp({
