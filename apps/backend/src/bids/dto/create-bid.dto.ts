@@ -1,10 +1,21 @@
-import { IsUUID, IsNumber, Min } from 'class-validator';
+// bid/dto/create-bid.dto.ts
+import { IsUUID, IsNumber } from 'class-validator';
 
 export class CreateBidDto {
   @IsUUID()
   auctionId: string;
 
   @IsNumber()
-  @Min(0)
   amount: number;
 }
+
+
+// bid/dto/bid-response.dto.ts
+export class BidResponseDto {
+    id: string;
+    auctionId: string;
+    bidderId: string;
+    amount: number;
+    createdAt: string;
+  }
+  
