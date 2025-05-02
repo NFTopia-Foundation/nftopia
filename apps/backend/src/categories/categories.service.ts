@@ -1,37 +1,44 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+// src/categories/category.service.ts
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
-import { CreateCategoryDto,} from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CreateCategoryDto, UpdateCategoryDto, CategoryResponseDto } from './dto/create-category.dto';
+
+
 @Injectable()
-export class CategoryService {
+export class CategoriesService {
   constructor(
     @InjectRepository(Category)
-    private readonly categoryRepo: Repository<Category>,
+    private categoryRepository: Repository<Category>,
   ) {}
 
-  async create(dto: CreateCategoryDto) {
-    const category = this.categoryRepo.create(dto);
-    return await this.categoryRepo.save(category);
-  }
-
-  async update(id: string, dto: UpdateCategoryDto) {
-    const category = await this.categoryRepo.preload({ id: Number(id), ...dto });
-    if (!category) throw new NotFoundException('Category not found');
-    return this.categoryRepo.save(category);
-  }
-
-  async findAll() {
-    return this.categoryRepo.find({ relations: ['nfts'] });
-  }
-
-  async findOne(id: string) {
-    const category = await this.categoryRepo.findOne({
-      where: { id: Number(id) },
-      relations: ['nfts'],
-    });
-    if (!category) throw new NotFoundException('Category not found');
+  async create(createCategoryDto: CreateCategoryDto): Promise<CategoryResponseDto> {
+    const category = this.categoryRepository.create(createCategoryDto);
+    await this.categoryRepository.save(category);
     return category;
+  }
+
+  async update(id: number, updateCategoryDto: UpdateCategoryDto): Promise<CategoryResponseDto> {
+    const category = await this.categoryRepository.findOne({ where: { id } });
+    if (!category) {
+      throw new Error('Category not found');
+    }
+    Object.assign(category, updateCategoryDto);
+    await this.categoryRepository.save(category);
+    return category;
+  }
+
+  async findOne(id: number): Promise<CategoryResponseDto> {
+    const category = await this.categoryRepository.findOne({where: { id }, relations: ['nfts'] });
+    if (!category) {
+      throw new Error('Category not found');
+    }
+    return category;
+  }
+
+  async findAll(): Promise<CategoryResponseDto[]> {
+    const categories = await this.categoryRepository.find({ relations: ['nfts'] });
+    return categories;
   }
 }
