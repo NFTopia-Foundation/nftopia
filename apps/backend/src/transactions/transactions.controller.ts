@@ -1,7 +1,8 @@
-import { Controller, Post, Get, Body, UseGuards, Request } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Controller, Post, Get, Body, Param, Put, UseGuards } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
+import { JwtAuthGuard } from '../auth/jwt.guard';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { User } from '../auth/decorators/user.decorator';
 
 @Controller('transactions')
 @UseGuards(JwtAuthGuard)
@@ -9,19 +10,24 @@ export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @Post()
-  async createTransaction(@Request() req, @Body() createTransactionDto: CreateTransactionDto) {
-    const { nft, amount, transactionHash } = createTransactionDto;
-    return this.transactionsService.createTransaction(
-      req.user,
-      nft.owner,
-      nft,
-      amount,
-      transactionHash,
-    );
+  async createTransaction(
+    @Body() createTransactionDto: CreateTransactionDto,
+    @User('id') userId: string,
+  ) {
+    return this.transactionsService.createTransaction(createTransactionDto);
   }
 
   @Get()
-  async getUserTransactions(@Request() req) {
-    return this.transactionsService.getUserTransactions(req.user.id);
+  async getUserTransactions(@User('id') userId: string) {
+    return this.transactionsService.getUserTransactions(userId);
+  }
+
+  @Put(':id/status')
+  async updateTransactionStatus(
+    @Param('id') id: string,
+    @Body('status') status: 'completed' | 'failed',
+    @Body('transactionHash') transactionHash?: string,
+  ) {
+    return this.transactionsService.updateTransactionStatus(id, status, transactionHash);
   }
 }

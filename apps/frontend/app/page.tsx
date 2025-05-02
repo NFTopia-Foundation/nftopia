@@ -8,6 +8,7 @@ import 'react-loading-skeleton/dist/skeleton.css'
 import { useEffect, useRef, useState } from "react";
 import PopularThisWeekSkeleton from "@/components/Skeleton/PopluarThisWeekSkeleton";
 import PopularThisWeekMarqueeParent from "@/components/PopularThisWeekMarqueeParent";
+import PopularCollection from '@/components/PopularCollection';
 
 
 const PopularThisWeek = dynamic<{}>(
@@ -99,6 +100,8 @@ export default function Home() {
           </ErrorBoundary>
         }
       </div>
+
+      <PopularCollection />
 
     </div>
   );

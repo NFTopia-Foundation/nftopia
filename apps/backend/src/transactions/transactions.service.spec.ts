@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+<<<<<<< HEAD
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TransactionsService } from './transactions.service';
@@ -41,11 +42,25 @@ describe('TransactionsService', () => {
       getRepositoryToken(Transaction),
     );
     nftRepository = module.get<Repository<NFT>>(getRepositoryToken(NFT));
+=======
+import { TransactionsService } from './transactions.service';
+
+describe('TransactionsService', () => {
+  let service: TransactionsService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [TransactionsService],
+    }).compile();
+
+    service = module.get<TransactionsService>(TransactionsService);
+>>>>>>> upstream/main
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+<<<<<<< HEAD
 
   describe('createTransaction', () => {
     it('should create a new transaction and update NFT ownership', async () => {
@@ -115,4 +130,6 @@ describe('TransactionsService', () => {
       });
     });
   });
+=======
+>>>>>>> upstream/main
 });
