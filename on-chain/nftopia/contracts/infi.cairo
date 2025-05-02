@@ -1,97 +1,100 @@
-%lang starknet
+#[starknet::contract]
+mod Infi {
+    use starknet::ContractAddress;
+    use starknet::get_caller_address;
+    use starknet::get_contract_address;
 
-// Storage for token ownership mapping (token_id -> owner)
-@storage_var
-func token_owner(token_id: u256) -> (owner: felt) {
-}
+    #[starknet::storage]
+    struct Storage {
+        token_owner: LegacyMap<u256, ContractAddress>,
+        token_uri: LegacyMap<u256, felt252>,
+        token_collection: LegacyMap<u256, ContractAddress>
+    }
 
-// Storage for token metadata URIs (token_id -> ByteArray)
-@storage_var
-func token_uri(token_id: u256) -> (uri: felt) {
-}
+    #[starknet::event]
+    #[derive(Drop, starknet::Event)]
+    enum Event {
+        TokenMinted: TokenMinted,
+        TokenTransferred: TokenTransferred,
+        CollectionUpdated: CollectionUpdated
+    }
 
-// Storage for token collections (token_id -> ContractAddress)
-@storage_var
-func token_collection(token_id: u256) -> (collection: felt) {
-}
+    #[derive(Drop, starknet::Event)]
+    struct TokenMinted {
+        token_id: u256,
+        owner: ContractAddress,
+        uri: felt252,
+        creator: ContractAddress
+    }
 
-// Event for token minting
-@event
-func token_minted(token_id: u256, owner: felt, uri: felt, creator: felt) {
-}
+    #[derive(Drop, starknet::Event)]
+    struct TokenTransferred {
+        token_id: u256,
+        from: ContractAddress,
+        to: ContractAddress
+    }
 
-// Event for token transfer
-@event
-func token_transferred(token_id: u256, from: felt, to: felt) {
-}
+    #[derive(Drop, starknet::Event)]
+    struct CollectionUpdated {
+        token_id: u256,
+        old_collection: ContractAddress,
+        new_collection: ContractAddress
+    }
 
-// Event for collection update
-@event
-func collection_updated(token_id: u256, old_collection: felt, new_collection: felt) {
-}
+    #[starknet::external]
+    fn mint(ref self: ContractState, recipient: ContractAddress, token_id: u256, uri: felt252, creator: ContractAddress) {
+        // Check if token_id is already minted
+        let current_owner = self.token_owner.read(token_id);
+        assert(current_owner == ContractAddress::default(), 'Token already minted');
 
-// Function to mint a new token
-@external
-func mint(recipient: felt, token_id: u256, uri: felt, creator: felt) {
-    // Check if token_id is already minted
-    let (current_owner) = token_owner.read(token_id);
-    assert current_owner = 0, "Token already minted";
+        // Set token owner
+        self.token_owner.write(token_id, recipient);
 
-    // Set token owner
-    token_owner.write(token_id, recipient);
+        // Set token URI
+        self.token_uri.write(token_id, uri);
 
-    // Set token URI
-    token_uri.write(token_id, uri);
+        // Emit token_minted event
+        self.emit(TokenMinted { token_id, owner: recipient, uri, creator });
+    }
 
-    // Emit token_minted event
-    token_minted.emit(token_id, recipient, uri, creator);
-}
+    #[starknet::external]
+    fn transfer(ref self: ContractState, from: ContractAddress, to: ContractAddress, token_id: u256) {
+        // Check if sender is the owner
+        let current_owner = self.token_owner.read(token_id);
+        assert(current_owner == from, 'Not the owner');
 
-// Function to transfer a token
-@external
-func transfer(from: felt, to: felt, token_id: u256) {
-    // Check if sender is the owner
-    let (current_owner) = token_owner.read(token_id);
-    assert current_owner = from, "Not the owner";
+        // Update token owner
+        self.token_owner.write(token_id, to);
 
-    // Update token owner
-    token_owner.write(token_id, to);
+        // Emit token_transferred event
+        self.emit(TokenTransferred { token_id, from, to });
+    }
 
-    // Emit token_transferred event
-    token_transferred.emit(token_id, from, to);
-}
+    #[starknet::view]
+    fn owner_of(self: @ContractState, token_id: u256) -> ContractAddress {
+        self.token_owner.read(token_id)
+    }
 
-// Function to get the owner of a token
-@view
-func owner_of(token_id: u256) -> (owner: felt) {
-    let (owner) = token_owner.read(token_id);
-    return (owner,);
-}
+    #[starknet::view]
+    fn token_uri(self: @ContractState, token_id: u256) -> felt252 {
+        self.token_uri.read(token_id)
+    }
 
-// Function to get the URI of a token
-@view
-func token_uri(token_id: u256) -> (uri: felt) {
-    let (uri) = token_uri.read(token_id);
-    return (uri,);
-}
+    #[starknet::view]
+    fn get_collection(self: @ContractState, token_id: u256) -> ContractAddress {
+        self.token_collection.read(token_id)
+    }
 
-// Function to get the collection of a token
-@view
-func get_collection(token_id: u256) -> (collection: felt) {
-    let (collection) = token_collection.read(token_id);
-    return (collection,);
-}
+    #[starknet::external]
+    fn set_collection(ref self: ContractState, token_id: u256, collection: ContractAddress) {
+        // Check if sender is the owner
+        let current_owner = self.token_owner.read(token_id);
+        assert(current_owner == get_caller_address(), 'Not the owner');
 
-// Function to set the collection of a token
-@external
-func set_collection(token_id: u256, collection: felt) {
-    // Check if sender is the owner
-    let (current_owner) = token_owner.read(token_id);
-    assert current_owner = get_caller_address(), "Not the owner";
+        let old_collection = self.token_collection.read(token_id);
+        self.token_collection.write(token_id, collection);
 
-    let (old_collection) = token_collection.read(token_id);
-    token_collection.write(token_id, collection);
-
-    // Emit collection_updated event
-    collection_updated.emit(token_id, old_collection, collection);
+        // Emit collection_updated event
+        self.emit(CollectionUpdated { token_id, old_collection, new_collection: collection });
+    }
 } 
