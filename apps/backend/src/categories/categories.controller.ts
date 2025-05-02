@@ -1,31 +1,30 @@
-import {
-     Controller, Post, Body, Get, Param, Put
-   } from '@nestjs/common';
-import { CategoryService } from './categories.service';
-import {  UpdateCategoryDto } from './dto/update-category.dto';
-import { CreateCategoryDto } from './dto/create-category.dto';
-   @Controller('categories')
-   export class CategoryController {
-     constructor(private readonly service: CategoryService) {}
-   
-     @Post()
-     create(@Body() dto: CreateCategoryDto) {
-       return this.service.create(dto);
-     }
-   
-     @Put(':id')
-     update(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
-       return this.service.update(id, dto);
-     }
-   
-     @Get()
-     findAll() {
-       return this.service.findAll();
-     }
-   
-     @Get(':id')
-     findOne(@Param('id') id: string) {
-       return this.service.findOne(id);
-     }
-   }
-   
+// src/categories/category.controller.ts
+import { Controller, Post, Body, Get, Param, Put } from '@nestjs/common';
+import { CategoriesService } from './categories.service';
+import { CreateCategoryDto, UpdateCategoryDto, CategoryResponseDto } from './dto/create-category.dto';
+
+
+@Controller('categories')
+export class CategoriesController {
+  constructor(private readonly categoriesService: CategoriesService) {}
+
+  @Post()
+  async create(@Body() createCategoryDto: CreateCategoryDto): Promise<CategoryResponseDto> {
+    return this.categoriesService.create(createCategoryDto);
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: number, @Body() updateCategoryDto: UpdateCategoryDto): Promise<CategoryResponseDto> {
+    return this.categoriesService.update(id, updateCategoryDto);
+  }
+
+  @Get()
+  async findAll(): Promise<CategoryResponseDto[]> {
+    return this.categoriesService.findAll();
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: number): Promise<CategoryResponseDto> {
+    return this.categoriesService.findOne(id);
+  }
+}
