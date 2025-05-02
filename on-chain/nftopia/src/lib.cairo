@@ -23,3 +23,7 @@ mod contracts {
     pub mod collection_factory;
     pub mod nft_contract;
 }
+
+pub mod transaction {
+    use crate::modules::transaction::*;
+}
