@@ -30,3 +30,6 @@ mod HelloStarknet {
         }
     }
 }
+
+// Export the transaction module
+mod transaction;
