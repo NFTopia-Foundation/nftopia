@@ -1,132 +1,110 @@
 /// Module for handling NFT transaction recording and querying
 /// Includes purchase history tracking, price recording, and ownership status management
 
-use starknet::{ContractAddress, get_caller_address};
-use core::array::ArrayTrait;
-
 /// Event emitted when an NFT transaction is recorded
 #[derive(Drop, starknet::Event)]
 pub struct TransactionRecorded {
-    pub buyer: ContractAddress,
+    pub buyer: starknet::ContractAddress,
     pub token_id: u256,
     pub amount: u256,
 }
 
 /// Interface for the Transaction Module
+use starknet::ContractAddress;
+
 #[starknet::interface]
 pub trait ITransactionModule<TContractState> {
-    /// Record a new transaction for an NFT
-    /// 
-    /// # Arguments
-    /// 
-    /// * `token_id` - The ID of the NFT being transacted
-    /// * `amount` - The price/amount of the transaction
     fn record_transaction(ref self: TContractState, token_id: u256, amount: u256);
-
-    /// Get the purchase history for a user
-    /// 
-    /// # Arguments
-    /// 
-    /// * `user` - The address of the user to get purchase history for
-    /// 
-    /// # Returns
-    /// 
-    /// * Array of token IDs purchased by the user
-    fn get_user_purchases(self: @TContractState, user: ContractAddress) -> Array<u256>;
-
-    /// Get the price of a token
-    /// 
-    /// # Arguments
-    /// 
-    /// * `token_id` - The ID of the NFT
-    /// 
-    /// # Returns
-    /// 
-    /// * The price/amount of the token's transaction
+    fn has_user_purchased(self: @TContractState, user: ContractAddress, token_id: u256) -> bool;
     fn get_token_price(self: @TContractState, token_id: u256) -> u256;
-
-    /// Check if a token has been sold
-    /// 
-    /// # Arguments
-    /// 
-    /// * `token_id` - The ID of the NFT
-    /// 
-    /// # Returns
-    /// 
-    /// * Boolean indicating if the token has been sold
     fn is_token_sold(self: @TContractState, token_id: u256) -> bool;
 }
 
 /// Implementation of the Transaction Module
 #[starknet::contract]
 #[feature("deprecated_legacy_map")]
-mod TransactionModule {
-    use starknet::{ContractAddress, get_caller_address};
-    use core::array::ArrayTrait;
-    use super::{TransactionRecorded, ITransactionModule};
+pub mod TransactionModule {
+    use starknet::storage::StorageMapWriteAccess;
+use starknet::storage::StorageMapReadAccess;
+use starknet::{ContractAddress, get_caller_address};
+    use core::num::traits::Zero;
+    use core::traits::Into;
+    use core::traits::TryInto;
 
-    #[allow(starknet::invalid_storage_member_types)]
-    #[storage]
-    struct Storage {
-        // Map of user address to their purchased token IDs
-        purchases: LegacyMap<ContractAddress, Array<u256>>,
-        // Map of token ID to its transaction amount/price
-        transaction_amounts: LegacyMap<u256, u256>,
-        // Map of token ID to its sold status
-        sold_flags: LegacyMap<u256, bool>
+    #[derive(Drop, starknet::Event)]
+    struct TransactionRecorded {
+        buyer: ContractAddress,
+        token_id: u256,
+        amount: u256
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
-        TransactionRecorded: TransactionRecorded
+        TransactionRecorded: super::TransactionRecorded
     }
 
-    #[constructor]
-    fn constructor(ref self: ContractState) {
-        // Initialize contract if needed
+    #[storage]
+    struct Storage {
+        user_purchases: LegacyMap<(felt252, felt252), felt252>,
+        token_prices: LegacyMap<felt252, felt252>,
+        token_sold_status: LegacyMap<felt252, felt252>
+    }
+
+    #[generate_trait]
+    impl InternalImpl of InternalTrait {
+        fn get_purchase_key(user: ContractAddress, token_id: u256) -> (felt252, felt252) {
+            let user_felt: felt252 = user.into();
+            let token_felt: felt252 = token_id.try_into().unwrap();
+            (user_felt, token_felt)
+        }
     }
 
     #[abi(embed_v0)]
     impl TransactionModuleImpl of super::ITransactionModule<ContractState> {
         fn record_transaction(ref self: ContractState, token_id: u256, amount: u256) {
-            // Verify amount is not zero
-            assert(amount > 0, 'Amount must be greater than 0');
-            
-            // Get caller address for verification
-            let caller = get_caller_address();
-            
+            // Validate amount
+            assert(!amount.is_zero(), 'Amount must be greater than 0');
+
             // Check if token is already sold
-            let is_sold = self.sold_flags.read(token_id);
+            let is_sold = self.is_token_sold(token_id);
             assert(!is_sold, 'Token already sold');
-            
+
             // Record the transaction
-            self.sold_flags.write(token_id, true);
-            self.transaction_amounts.write(token_id, amount);
-            
-            // Update user's purchase history
-            let mut user_purchases = self.purchases.read(caller);
-            user_purchases.append(token_id);
-            self.purchases.write(caller, user_purchases);
-            
+            let caller = get_caller_address();
+
+            // Mark token as sold
+            let token_felt: felt252 = token_id.try_into().unwrap();
+            self.token_sold_status.write(token_felt, 1);
+
+            // Record price
+            let amount_felt: felt252 = amount.try_into().unwrap();
+            self.token_prices.write(token_felt, amount_felt);
+
+            // Record purchase for user
+            let purchase_key = InternalImpl::get_purchase_key(caller, token_id);
+            self.user_purchases.write(purchase_key, 1);
+
             // Emit event
-            self.emit(TransactionRecorded { 
-                buyer: caller, 
-                token_id: token_id, 
-                amount: amount 
-            });
+            self.emit(Event::TransactionRecorded(super::TransactionRecorded { buyer: caller, token_id, amount }));
         }
 
-        fn get_user_purchases(self: @ContractState, user: ContractAddress) -> Array<u256> {
-            self.purchases.read(user)
+        fn has_user_purchased(self: @ContractState, user: ContractAddress, token_id: u256) -> bool {
+            let purchase_key = InternalImpl::get_purchase_key(user, token_id);
+            let purchase_value = self.user_purchases.read(purchase_key);
+            purchase_value == 1
         }
 
         fn get_token_price(self: @ContractState, token_id: u256) -> u256 {
-            self.transaction_amounts.read(token_id)
+            let token_felt: felt252 = token_id.try_into().unwrap();
+            let price_felt = self.token_prices.read(token_felt);
+            price_felt.into()
         }
 
         fn is_token_sold(self: @ContractState, token_id: u256) -> bool {
-            self.sold_flags.read(token_id)
+            let token_felt: felt252 = token_id.try_into().unwrap();
+            let sold_status = self.token_sold_status.read(token_felt);
+            sold_status == 1
         }
     }
 }
