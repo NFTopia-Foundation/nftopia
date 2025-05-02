@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { NFT } from '../../nfts/entities/nft.entity';
 import { Collection } from '../../collections/entities/collection.entity';
 import { Auction } from '../../auctions/entities/auction.entity';
@@ -42,6 +42,9 @@ export class User {
   @OneToMany(() => Transaction, (tx) => tx.seller)
   sales: Transaction[];
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

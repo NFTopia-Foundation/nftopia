@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity'; 
 import { NFT } from '../../nfts/entities/nft.entity'; 
 
@@ -24,4 +24,8 @@ export class Collection {
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
+
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
