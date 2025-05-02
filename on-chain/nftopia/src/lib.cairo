@@ -25,5 +25,5 @@ mod contracts {
 }
 
 pub mod transaction {
-    use crate::transaction::*;
+    use crate::modules::transaction::*;
 }
