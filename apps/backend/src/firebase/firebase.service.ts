@@ -5,13 +5,12 @@ import { Bucket } from '@google-cloud/storage';
 
 @Injectable()
 export class FirebaseService {
-
   private bucket: Bucket;
 
   constructor(private firebaseConfig: FirebaseConfig) {
     this.bucket = this.firebaseConfig.initFirebase();
   }
-  
+
   async uploadFile(file: Express.Multer.File): Promise<string> {
     const fileName = `${uuidv4()}-${file.originalname}`;
     const fileUpload = this.bucket.file(fileName);

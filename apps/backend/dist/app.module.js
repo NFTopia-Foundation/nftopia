@@ -31,15 +31,15 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
-                envFilePath: '.env'
+                envFilePath: '.env',
             }),
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'postgres',
-                host: 'localhost',
-                port: 5432,
-                username: 'nftopia',
-                password: 'nftopia123',
-                database: 'nftopiadb',
+                host: process.env.POSTGRES_HOST || 'localhost',
+                port: Number(process.env.POSTGRES_PORT) || 5432,
+                username: process.env.POSTGRES_USER || 'nftopia',
+                password: process.env.POSTGRES_PASSWORD || 'nftopia123',
+                database: process.env.POSTGRES_DB || 'nftopiadb',
                 entities: [user_entity_1.User, collection_entity_1.Collection, nft_entity_1.NFT],
                 migrations: [__dirname + '/migrations/*{.ts,.js}'],
                 migrationsRun: true,
@@ -54,7 +54,7 @@ exports.AppModule = AppModule = __decorate([
             bids_module_1.BidsModule,
             auctions_module_1.AuctionsModule,
             transactions_module_1.TransactionsModule,
-            categories_module_1.CategoriesModule
+            categories_module_1.CategoriesModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

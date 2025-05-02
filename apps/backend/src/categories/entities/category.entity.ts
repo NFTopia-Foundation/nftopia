@@ -1,5 +1,5 @@
 // src/categories/category.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { NFT } from '../../nfts/entities/nft.entity'; // Assuming you have an NFT entity
 import { Exclude } from 'class-transformer';
 
@@ -17,4 +17,10 @@ export class Category {
   @OneToMany(() => NFT, (nft) => nft.category) // Assuming each NFT belongs to a category
   @Exclude() // You can exclude the NFTs field when transforming category
   nfts: NFT[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
