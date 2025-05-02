@@ -31,5 +31,6 @@ mod HelloStarknet {
     }
 }
 
-// Export the transaction module
-pub mod transaction;
+pub mod transaction {
+    use crate::transaction::*;
+}
