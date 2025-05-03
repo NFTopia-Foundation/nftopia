@@ -14,6 +14,8 @@ import { BidsModule } from './bids/bids.module';
 import { AuctionsModule } from './auctions/auctions.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { CategoriesModule } from './categories/categories.module';
+import { StatsModule } from './stats/stats.module';
+
 
 // Use this @Module for local PostgreSQL
 @Module({
@@ -44,6 +46,7 @@ import { CategoriesModule } from './categories/categories.module';
     AuctionsModule,
     TransactionsModule,
     CategoriesModule,
+    StatsModule
   ],
   controllers: [AppController],
   providers: [AppService],

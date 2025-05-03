@@ -23,6 +23,7 @@ const bids_module_1 = require("./bids/bids.module");
 const auctions_module_1 = require("./auctions/auctions.module");
 const transactions_module_1 = require("./transactions/transactions.module");
 const categories_module_1 = require("./categories/categories.module");
+const stats_module_1 = require("./stats/stats.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -55,6 +56,7 @@ exports.AppModule = AppModule = __decorate([
             auctions_module_1.AuctionsModule,
             transactions_module_1.TransactionsModule,
             categories_module_1.CategoriesModule,
+            stats_module_1.StatsModule
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
