@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { NFT } from '../../nfts/entities/nft.entity';
 import { Bid } from '../../bids/entities/bid.entity';
@@ -28,7 +28,4 @@ export class Auction {
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }
