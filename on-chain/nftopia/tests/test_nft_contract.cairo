@@ -59,7 +59,7 @@ fn test_mint() {
 }
 
 #[test]
-#[should_panic(expected = "Token already exists")]
+#[should_panic(expected: "Token already exists")]
 fn test_mint_duplicate_token() {
     // Deploy the contract
     let contract_address = deploy_contract("NftContract");
@@ -77,7 +77,7 @@ fn test_mint_duplicate_token() {
 }
 
 #[test]
-#[should_panic(expected = "Mint to zero address")]
+#[should_panic(expected: "Mint to zero address")]
 fn test_mint_to_zero_address() {
     // Deploy the contract
     let contract_address = deploy_contract("NftContract");
@@ -85,7 +85,7 @@ fn test_mint_to_zero_address() {
     
     // Create test data
     let zero_address = contract_address_const::<0x0>();
-    let owner = contract_address_const::<0x123>();
+    // let owner = contract_address_const::<0x123>();
     let uri = create_test_uri();
     
     // Try to mint to zero address (should fail)
@@ -191,7 +191,7 @@ fn test_set_approval_for_all() {
 }
 
 #[test]
-#[should_panic(expected = "Self approval")]
+#[should_panic(expected: "Self approval")]
 fn test_self_approval_for_all() {
     // Deploy the contract
     let contract_address = deploy_contract("NftContract");
@@ -205,7 +205,7 @@ fn test_self_approval_for_all() {
 }
 
 #[test]
-#[should_panic(expected = "Token does not exist")]
+#[should_panic(expected: "Token does not exist")]
 fn test_get_nonexistent_token() {
     // Deploy the contract
     let contract_address = deploy_contract("NftContract");
