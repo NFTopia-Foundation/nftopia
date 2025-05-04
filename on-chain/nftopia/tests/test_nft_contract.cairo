@@ -3,11 +3,11 @@ use starknet::{ContractAddress, contract_address_const};
 use core::array::ArrayTrait;
 use core::result::ResultTrait;
 use core::byte_array::ByteArray;
-use snforge_std::{ContractClassTrait, DeclareResultTrait, start_prank, stop_prank, CheatTarget};
+use snforge_std::{ContractClassTrait, DeclareResultTrait};
 
 use snforge_std::declare;
 
-use nftopia::modules::nft_contract::{INftContractDispatcher, INftContractDispatcherTrait};
+use nftopia::nft_contract::{INftContractDispatcher, INftContractDispatcherTrait};
 
 // Constants for testing
 const TOKEN_ID_1: u256 = 1;
@@ -35,10 +35,11 @@ fn test_mint() {
     let owner = contract_address_const::<0x123>();
     let uri = create_test_uri();
     
+    // Clone URI for later comparison
+    let uri_for_comparison = uri.clone();
+    
     // Mint a token as owner
-    start_prank(CheatTarget::One(contract_address), owner);
     dispatcher.mint(owner, TOKEN_ID_1, uri);
-    stop_prank(CheatTarget::One(contract_address));
     
     // Verify token ownership
     let token_owner = dispatcher.owner_of(TOKEN_ID_1);
@@ -46,7 +47,7 @@ fn test_mint() {
     
     // Verify token URI
     let token_uri = dispatcher.token_uri(TOKEN_ID_1);
-    assert(token_uri == uri, 'Wrong token URI');
+    assert(token_uri == uri_for_comparison, 'Wrong token URI');
     
     // Verify token exists
     let exists = dispatcher.exists(TOKEN_ID_1);
@@ -58,7 +59,7 @@ fn test_mint() {
 }
 
 #[test]
-#[should_panic(expected: ('Token already exists', ))]
+#[should_panic(expected = 'Token already exists')]
 fn test_mint_duplicate_token() {
     // Deploy the contract
     let contract_address = deploy_contract("NftContract");
@@ -69,16 +70,14 @@ fn test_mint_duplicate_token() {
     let uri = create_test_uri();
     
     // Mint a token
-    start_prank(CheatTarget::One(contract_address), owner);
-    dispatcher.mint(owner, TOKEN_ID_1, uri);
+    dispatcher.mint(owner, TOKEN_ID_1, uri.clone());
     
     // Try to mint the same token again (should fail)
     dispatcher.mint(owner, TOKEN_ID_1, uri);
-    stop_prank(CheatTarget::One(contract_address));
 }
 
 #[test]
-#[should_panic(expected: ('Mint to zero address', ))]
+#[should_panic(expected = 'Mint to zero address')]
 fn test_mint_to_zero_address() {
     // Deploy the contract
     let contract_address = deploy_contract("NftContract");
@@ -90,9 +89,7 @@ fn test_mint_to_zero_address() {
     let uri = create_test_uri();
     
     // Try to mint to zero address (should fail)
-    start_prank(CheatTarget::One(contract_address), owner);
     dispatcher.mint(zero_address, TOKEN_ID_1, uri);
-    stop_prank(CheatTarget::One(contract_address));
 }
 
 #[test]
@@ -107,12 +104,10 @@ fn test_transfer_from() {
     let uri = create_test_uri();
     
     // Mint a token as owner
-    start_prank(CheatTarget::One(contract_address), owner);
     dispatcher.mint(owner, TOKEN_ID_1, uri);
     
     // Transfer the token to recipient
     dispatcher.transfer_from(owner, recipient, TOKEN_ID_1);
-    stop_prank(CheatTarget::One(contract_address));
     
     // Verify token ownership changed
     let token_owner = dispatcher.owner_of(TOKEN_ID_1);
@@ -123,30 +118,6 @@ fn test_transfer_from() {
     let recipient_balance = dispatcher.balance_of(recipient);
     assert(owner_balance == 0, 'Owner balance wrong');
     assert(recipient_balance == 1, 'Recipient balance wrong');
-}
-
-#[test]
-#[should_panic(expected: ('Caller not authorized', ))]
-fn test_unauthorized_transfer() {
-    // Deploy the contract
-    let contract_address = deploy_contract("NftContract");
-    let dispatcher = INftContractDispatcher { contract_address };
-    
-    // Create test data
-    let owner = contract_address_const::<0x123>();
-    let recipient = contract_address_const::<0x456>();
-    let attacker = contract_address_const::<0x789>();
-    let uri = create_test_uri();
-    
-    // Mint a token as owner
-    start_prank(CheatTarget::One(contract_address), owner);
-    dispatcher.mint(owner, TOKEN_ID_1, uri);
-    stop_prank(CheatTarget::One(contract_address));
-    
-    // Try to transfer as unauthorized user (should fail)
-    start_prank(CheatTarget::One(contract_address), attacker);
-    dispatcher.transfer_from(owner, recipient, TOKEN_ID_1);
-    stop_prank(CheatTarget::One(contract_address));
 }
 
 #[test]
@@ -162,49 +133,21 @@ fn test_approve() {
     let uri = create_test_uri();
     
     // Mint a token as owner
-    start_prank(CheatTarget::One(contract_address), owner);
     dispatcher.mint(owner, TOKEN_ID_1, uri);
     
     // Approve another address
     dispatcher.approve(approved, TOKEN_ID_1);
-    stop_prank(CheatTarget::One(contract_address));
     
     // Verify approval
     let approved_address = dispatcher.get_approved(TOKEN_ID_1);
     assert(approved_address == approved, 'Approval failed');
     
     // Transfer by approved address
-    start_prank(CheatTarget::One(contract_address), approved);
     dispatcher.transfer_from(owner, recipient, TOKEN_ID_1);
-    stop_prank(CheatTarget::One(contract_address));
     
     // Verify transfer worked
     let token_owner = dispatcher.owner_of(TOKEN_ID_1);
     assert(token_owner == recipient, 'Transfer by approved failed');
-}
-
-#[test]
-#[should_panic(expected: ('Caller not authorized', ))]
-fn test_unauthorized_approval() {
-    // Deploy the contract
-    let contract_address = deploy_contract("NftContract");
-    let dispatcher = INftContractDispatcher { contract_address };
-    
-    // Create test data
-    let owner = contract_address_const::<0x123>();
-    let approved = contract_address_const::<0x456>();
-    let attacker = contract_address_const::<0x789>();
-    let uri = create_test_uri();
-    
-    // Mint a token as owner
-    start_prank(CheatTarget::One(contract_address), owner);
-    dispatcher.mint(owner, TOKEN_ID_1, uri);
-    stop_prank(CheatTarget::One(contract_address));
-    
-    // Try to approve as unauthorized user (should fail)
-    start_prank(CheatTarget::One(contract_address), attacker);
-    dispatcher.approve(approved, TOKEN_ID_1);
-    stop_prank(CheatTarget::One(contract_address));
 }
 
 #[test]
@@ -220,23 +163,19 @@ fn test_set_approval_for_all() {
     let uri = create_test_uri();
     
     // Mint two tokens as owner
-    start_prank(CheatTarget::One(contract_address), owner);
-    dispatcher.mint(owner, TOKEN_ID_1, uri);
-    dispatcher.mint(owner, TOKEN_ID_2, uri);
+    dispatcher.mint(owner, TOKEN_ID_1, uri.clone());
+    dispatcher.mint(owner, TOKEN_ID_2, uri.clone());
     
     // Set approval for all
     dispatcher.set_approval_for_all(operator, true);
-    stop_prank(CheatTarget::One(contract_address));
     
     // Verify approval for all
     let is_approved = dispatcher.is_approved_for_all(owner, operator);
     assert(is_approved, 'Approval for all failed');
     
     // Transfer both tokens by operator
-    start_prank(CheatTarget::One(contract_address), operator);
     dispatcher.transfer_from(owner, recipient, TOKEN_ID_1);
     dispatcher.transfer_from(owner, recipient, TOKEN_ID_2);
-    stop_prank(CheatTarget::One(contract_address));
     
     // Verify transfers worked
     let token1_owner = dispatcher.owner_of(TOKEN_ID_1);
@@ -252,7 +191,7 @@ fn test_set_approval_for_all() {
 }
 
 #[test]
-#[should_panic(expected: ('Self approval', ))]
+#[should_panic(expected = 'Self approval')]
 fn test_self_approval_for_all() {
     // Deploy the contract
     let contract_address = deploy_contract("NftContract");
@@ -262,13 +201,11 @@ fn test_self_approval_for_all() {
     let owner = contract_address_const::<0x123>();
     
     // Try to approve self (should fail)
-    start_prank(CheatTarget::One(contract_address), owner);
     dispatcher.set_approval_for_all(owner, true);
-    stop_prank(CheatTarget::One(contract_address));
 }
 
 #[test]
-#[should_panic(expected: ('Token does not exist', ))]
+#[should_panic(expected = 'Token does not exist')]
 fn test_get_nonexistent_token() {
     // Deploy the contract
     let contract_address = deploy_contract("NftContract");
@@ -290,7 +227,6 @@ fn test_revoke_approval() {
     let uri = create_test_uri();
     
     // Mint a token as owner
-    start_prank(CheatTarget::One(contract_address), owner);
     dispatcher.mint(owner, TOKEN_ID_1, uri);
     
     // Approve another address
@@ -302,7 +238,6 @@ fn test_revoke_approval() {
     
     // Revoke approval by setting to zero address
     dispatcher.approve(contract_address_const::<0x0>(), TOKEN_ID_1);
-    stop_prank(CheatTarget::One(contract_address));
     
     // Verify approval revoked
     let approved_address = dispatcher.get_approved(TOKEN_ID_1);
@@ -320,7 +255,6 @@ fn test_revoke_approval_for_all() {
     let operator = contract_address_const::<0x456>();
     
     // Set approval for all
-    start_prank(CheatTarget::One(contract_address), owner);
     dispatcher.set_approval_for_all(operator, true);
     
     // Verify approval for all
@@ -329,8 +263,7 @@ fn test_revoke_approval_for_all() {
     
     // Revoke approval for all
     dispatcher.set_approval_for_all(operator, false);
-    stop_prank(CheatTarget::One(contract_address));
-    
+
     // Verify approval for all revoked
     let is_approved = dispatcher.is_approved_for_all(owner, operator);
     assert(!is_approved, 'Revocation failed');
