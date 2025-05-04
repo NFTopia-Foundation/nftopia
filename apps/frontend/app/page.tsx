@@ -20,8 +20,8 @@ const PopularThisWeek = dynamic<{}>(
 );
 
 // Repeat similar patterns for TopSellers and ExploreCategories
-const TopSellers = dynamic<{}>(
-  () => import('@/components/top-sellers'),
+const TopSellers = dynamic(
+  () => import('@/components/top-sellers').then(mod => mod.TopSellers),
   {
     loading: () => <TopSellersSkeleton/>,
     ssr: false
