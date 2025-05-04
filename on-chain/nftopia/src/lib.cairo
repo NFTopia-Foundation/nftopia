@@ -2,6 +2,7 @@ mod modules{
     pub mod logic;
     pub mod access_control;
     pub mod view;
+    pub mod nft_contract;
     pub mod transaction;
 }
 mod storage {
@@ -10,6 +11,7 @@ mod storage {
 }
 mod events {
     pub mod events;
+    pub mod nft_events;
     pub mod transaction_events;
 }
 mod interfaces {
@@ -26,4 +28,8 @@ mod contracts {
 
 pub mod transaction {
     use crate::modules::transaction::*;
+}
+
+pub mod nft_contract {
+    use crate::modules::nft_contract::*;
 }
