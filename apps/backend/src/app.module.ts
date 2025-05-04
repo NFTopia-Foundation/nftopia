@@ -65,7 +65,16 @@ import { StatsModule } from './stats/stats.module';
 //       url: process.env.DATABASE_URL,
 //       autoLoadEntities: true,
 //       synchronize: false,
-//     })
+//     }),
+// UsersModule,
+// CollectionsModule,
+// NftsModule,
+// AuthModule,
+// BidsModule,
+// AuctionsModule,
+// TransactionsModule,
+// CategoriesModule,
+// StatsModule
 //   ],
 //   controllers: [AppController],
 //   providers: [AppService],
