@@ -11,6 +11,12 @@ on-chain/node_modules/
 /apps/*/.next
 /apps/*/dist
 
+/on-chain/nftopia/target/
+/on-chain/nftopia/target/dev/
+# Ignore build artifacts
+/on-chain/**/target/
+
+
 
 /.pnp
 .pnp.js
