@@ -30,7 +30,7 @@ async function bootstrap() {
     new ResponseInterceptor(),
     new LoggingInterceptor(),
     new ErrorInterceptor(),
-    new TimeoutInterceptor(configService),
+    new TimeoutInterceptor(),
   );
 
   app.enableCors({

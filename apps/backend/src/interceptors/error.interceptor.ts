@@ -1,65 +1,40 @@
-import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
-  CallHandler,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
-import { Observable, throwError } from 'rxjs';
+// src/interceptors/error.interceptor.ts
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler, HttpException, HttpStatus } from '@nestjs/common';
+import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ErrorInterceptor implements NestInterceptor {
-  private readonly logger = new Logger('ErrorInterceptor');
-  private readonly isProduction = process.env.NODE_ENV === 'production';
-
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
-      catchError((error) => {
-        const errorId = uuidv4();
-        let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-        let message = 'Internal server error';
-        let stack: string | undefined;
+      catchError((err) => {
+        // Log the error for debugging purposes
+        console.error('Error caught in interceptor:', err);
 
-        // Determine if it's a known HTTP exception
-        if (error instanceof HttpException) {
-          statusCode = error.getStatus();
-          const response = error.getResponse();
-          message =
-            typeof response === 'object' && response['message']
-              ? response['message']
-              : response.toString();
-        }
+        // If the error is an instance of HttpException, extract the original status code
+        if (err instanceof HttpException) {
+          const statusCode = err.getStatus();  // Get the original status code
+          const message = err.message || 'An error occurred';  // Extract the error message
 
-        // Log the error with its unique ID for correlation
-        this.logger.error(`Error ${errorId}: ${error.message}`, error.stack);
-
-        // In development, include the stack trace
-        if (!this.isProduction) {
-          stack = error.stack;
-        }
-
-        const errorResponse = {
-          data: null,
-          meta: {
-            timestamp: new Date().toISOString(),
-            requestId: errorId,
-            success: false,
-          },
-          error: {
+          // Throw the same status code and message
+          throw new HttpException(
+            {
+              statusCode: statusCode,
+              message: message,
+            },
             statusCode,
-            message: Array.isArray(message) ? message : [message],
-            stack: stack,
+          );
+        }
+
+        // For any other errors (non-HttpExceptions), default to a 500 Internal Server Error
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+            message: 'Something went wrong, please try again later.',
+            error: err.message || 'Internal Server Error',
           },
-        };
-
-        // Set the response status code
-        context.switchToHttp().getResponse().status(statusCode);
-
-        return throwError(() => errorResponse);
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }),
     );
   }

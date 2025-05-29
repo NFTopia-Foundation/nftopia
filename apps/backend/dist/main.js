@@ -20,7 +20,7 @@ async function bootstrap() {
             sameSite: 'lax',
         },
     }));
-    app.useGlobalInterceptors(new interceptors_1.ResponseInterceptor(), new interceptors_1.LoggingInterceptor(), new interceptors_1.ErrorInterceptor(), new interceptors_1.TimeoutInterceptor(configService));
+    app.useGlobalInterceptors(new interceptors_1.ResponseInterceptor(), new interceptors_1.LoggingInterceptor(), new interceptors_1.ErrorInterceptor(), new interceptors_1.TimeoutInterceptor());
     app.enableCors({
         origin: ['http://localhost:5000'],
         credentials: true,
