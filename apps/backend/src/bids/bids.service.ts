@@ -9,6 +9,7 @@ import { BidResponseDto } from './dto/bid-response.dto';
 
 @Injectable()
 export class BidsService {
+    placeBid: any;
     constructor(
         @InjectRepository(Bid)
         private bidRepository: Repository<Bid>,
