@@ -18,5 +18,9 @@
   "packageManager": "pnpm@10.6.4",
   "devDependencies": {
     "file-type": "16.5.4"
+  },
+  "dependencies": {
+    "@nestjs/websockets": "^11.1.2",
+    "socket.io": "^4.8.1"
   }
 }
