@@ -15,9 +15,8 @@ import { AuctionsModule } from './auctions/auctions.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { CategoriesModule } from './categories/categories.module';
 import { StatsModule } from './stats/stats.module';
+import { StarknetModule } from './starknet/starknet.module';
 
-
-// Use this @Module for local PostgreSQL
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -35,7 +34,7 @@ import { StatsModule } from './stats/stats.module';
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       migrationsRun: true,
       autoLoadEntities: true,
-      synchronize: true, // Keep false for production
+      synchronize: true,
       logging: true,
     }),
     UsersModule,
@@ -46,7 +45,8 @@ import { StatsModule } from './stats/stats.module';
     AuctionsModule,
     TransactionsModule,
     CategoriesModule,
-    StatsModule
+    StatsModule,
+    StarknetModule,
   ],
   controllers: [AppController],
   providers: [AppService],
