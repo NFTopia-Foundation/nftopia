@@ -1,3 +1,4 @@
+// Added Joi in package.json
 import * as Joi from 'joi';
 
 export const starknetValidationSchema = Joi.object({
