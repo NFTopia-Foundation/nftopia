@@ -40,6 +40,7 @@
     "ethers": "^6.13.7",
     "firebase-admin": "^13.3.0",
     "helmet": "^8.1.0",
+    "joi": "^17.13.3",
     "nft.storage": "^7.2.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
