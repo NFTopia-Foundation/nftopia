@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ModernSearchInput } from "@/components/ui/modern-search-input";
 import { Menu, X, Compass, ShoppingBag, Users, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
+import ConnectWallet from "./ConnectWallet";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -80,9 +81,8 @@ export function Navbar() {
                 className="w-[180px] lg:w-[220px]"
               />
             </div>
-            <Button className="hidden md:block rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90">
-              Register
-            </Button>
+            
+              <ConnectWallet />
 
             <button
               className="md:hidden flex items-center justify-center p-2 rounded-full bg-gray-900/40 backdrop-blur-sm border border-gray-800/50"
@@ -153,6 +153,7 @@ export function Navbar() {
           >
             Register
           </Button>
+          
         </div>
       </div>
     </header>
