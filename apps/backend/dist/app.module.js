@@ -24,6 +24,8 @@ const auctions_module_1 = require("./auctions/auctions.module");
 const transactions_module_1 = require("./transactions/transactions.module");
 const categories_module_1 = require("./categories/categories.module");
 const stats_module_1 = require("./stats/stats.module");
+const starknet_module_1 = require("./starknet/starknet.module");
+const redis_module_1 = require("./redis/redis.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -56,7 +58,9 @@ exports.AppModule = AppModule = __decorate([
             auctions_module_1.AuctionsModule,
             transactions_module_1.TransactionsModule,
             categories_module_1.CategoriesModule,
-            stats_module_1.StatsModule
+            stats_module_1.StatsModule,
+            starknet_module_1.StarknetModule,
+            redis_module_1.RedisModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
