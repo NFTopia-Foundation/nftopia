@@ -7,6 +7,7 @@ import {
   LoggingInterceptor,
   ErrorInterceptor,
   TimeoutInterceptor,
+  TransformInterceptor,
 } from './interceptors';
 import { ConfigService } from '@nestjs/config';
 import { RedisIoAdapter } from './redis/redis.adapter';
@@ -35,6 +36,7 @@ async function bootstrap() {
     new LoggingInterceptor(),
     new ErrorInterceptor(),
     new TimeoutInterceptor(),
+    new TransformInterceptor(),
   );
 
   try {

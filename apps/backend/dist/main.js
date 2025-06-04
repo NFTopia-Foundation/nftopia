@@ -22,7 +22,7 @@ async function bootstrap() {
             sameSite: 'lax',
         },
     }));
-    app.useGlobalInterceptors(new interceptors_1.ResponseInterceptor(), new interceptors_1.LoggingInterceptor(), new interceptors_1.ErrorInterceptor(), new interceptors_1.TimeoutInterceptor());
+    app.useGlobalInterceptors(new interceptors_1.ResponseInterceptor(), new interceptors_1.LoggingInterceptor(), new interceptors_1.ErrorInterceptor(), new interceptors_1.TimeoutInterceptor(), new interceptors_1.TransformInterceptor());
     try {
         await redisAdapter.connectToRedis();
         app.useWebSocketAdapter(redisAdapter);
