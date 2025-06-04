@@ -9,10 +9,14 @@ import {
   TimeoutInterceptor,
 } from './interceptors';
 import { ConfigService } from '@nestjs/config';
+import { RedisIoAdapter } from './redis/redis.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+
+  const redisAdapter = new RedisIoAdapter(app);
+
 
   app.use(cookieParser());
 
@@ -32,6 +36,15 @@ async function bootstrap() {
     new ErrorInterceptor(),
     new TimeoutInterceptor(),
   );
+
+  try {
+    await redisAdapter.connectToRedis();
+    app.useWebSocketAdapter(redisAdapter);
+    console.log('Redis adapter status:', redisAdapter.getStatus());
+  } catch (error) {
+    console.error('Redis adapter failed:', error.message);
+    console.log('Falling back to in-memory adapter');
+  }
 
   app.enableCors({
     origin: ['http://localhost:5000'], // or use your deployed frontend URL

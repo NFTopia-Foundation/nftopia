@@ -16,6 +16,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { CategoriesModule } from './categories/categories.module';
 import { StatsModule } from './stats/stats.module';
 import { StarknetModule } from './starknet/starknet.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { StarknetModule } from './starknet/starknet.module';
     CategoriesModule,
     StatsModule,
     StarknetModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
