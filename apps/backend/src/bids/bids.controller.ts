@@ -1,50 +1,34 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request, HttpStatus, HttpCode } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Req, UseGuards } from '@nestjs/common';
 import { BidsService } from './bids.service';
-import { CreateBidDto } from './dto/create-bid.dto';
-import { BidResponseDto } from './dto/bid-response.dto';
 import { JwtAuthGuard } from '../auth/jwt.guard';
+import { RequestWithUser } from '../types/RequestWithUser';
+import { UUIDPipe } from '../utils/uuid-pipe';
 
 @Controller('bids')
 export class BidsController {
-    constructor(private readonly bidsService: BidsService) { }
+  constructor(private readonly bidsService: BidsService) {}
 
-    @Post(':auctionId')
-    @UseGuards(JwtAuthGuard)
-    @HttpCode(HttpStatus.CREATED)
-    async createBid(
-        @Param('auctionId') auctionId: string,
-        @Body() createBidDto: CreateBidDto,
-        @Request() req,
-    ): Promise<BidResponseDto> {
-        // Ensure auctionId in the DTO matches the one in the URL
-        createBidDto.auctionId = auctionId;
-        return this.bidsService.createBid(createBidDto, req.user.id);
-    }
+  @UseGuards(JwtAuthGuard)
+  @Post(':auctionId')
+  async placeBid(
+    @Param('auctionId', UUIDPipe) auctionId: string,
+    @Body('amount') amount: number,
+    @Req() req: RequestWithUser,
+  ) {
+    const userId = req.user.sub;
+    const bid = await this.bidsService.placeBid(userId, auctionId, amount);
+    return { message: 'Bid placed', bid };
+  }
 
-    @Get('auction/:auctionId')
-    async getBidsByAuction(
-        @Param('auctionId') auctionId: string,
-    ): Promise<BidResponseDto[]> {
-        return this.bidsService.getBidsByAuction(auctionId);
-    }
+  @Get('auction/:auctionId')
+  async getBids(@Param('auctionId', UUIDPipe) auctionId: string) {
+    const bids = await this.bidsService.getBidsForAuction(auctionId);
+    return { bids };
+  }
 
-    @Get('highest/:auctionId')
-    async getHighestBid(
-        @Param('auctionId') auctionId: string,
-    ): Promise<BidResponseDto | null> {
-        const highestBid = await this.bidsService.getHighestBid(auctionId);
-
-        if (!highestBid) {
-            return null;
-        }
-
-        // Map the Bid entity to BidResponseDto
-        return {
-            id: highestBid.id,
-            auctionId: highestBid.auction.id,
-            bidderId: highestBid.bidder.id,
-            amount: highestBid.amount,
-            createdAt: highestBid.createdAt,
-        };
-    }
+  @Get('highest/:auctionId')
+  async getHighestBid(@Param('auctionId', UUIDPipe) auctionId: string) {
+    const highest = await this.bidsService.getHighestBid(auctionId);
+    return { highest };
+  }
 }

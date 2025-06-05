@@ -1,83 +1,82 @@
-/* eslint-disable prettier/prettier */
-import {
-  WebSocketGateway,
-  SubscribeMessage,
-  OnGatewayInit,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  MessageBody,
-  ConnectedSocket,
-} from '@nestjs/websockets';
+// src/events/events.gateway.ts
+import { WebSocketGateway, WebSocketServer, OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
-import { Socket, Server } from 'socket.io';
 import { EventsService } from './events.service';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { BidsService } from '../bids/bids.service';
 
-@WebSocketGateway({ cors: true })
-export class EventsGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+@WebSocketGateway({
+  cors: { origin: '*' },
+  namespace: '/events',
+  credentials: true
+})
+@Injectable()
+export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+  
+  @WebSocketServer()
+  server: Server;
+
+  private readonly logger = new Logger(EventsGateway.name);
+
   constructor(
-    private readonly eventsService: EventsService,
+    @Inject()
     private readonly jwtService: JwtService,
+    @Inject()
+    private readonly eventsService: EventsService,
+
+    @Inject()
+    private readonly bidsService: BidsService
   ) {}
 
-  afterInit(server: Server) {
-    this.eventsService.setServer(server);
+  afterInit() {
+    this.eventsService.setServer(this.server);
+    this.logger.log('WebSocket Gateway initialized');
   }
 
   async handleConnection(client: Socket) {
-    const token = client.handshake.auth.token;
     try {
-      const payload = this.jwtService.verify(token);
-      client.data.user = payload;
-    } catch {
+      const authToken = client.handshake.headers.authorization?.split(' ')[1];
+      if (!authToken) {
+        client.disconnect();
+        return;
+      }
+
+      const payload = this.jwtService.verify(authToken);
+      client.data.userId = payload.sub;
+      this.logger.log(`Client connected: ${client.id}, User: ${payload.sub}`);
+    } catch (error) {
+      this.logger.error('Connection error:', error.message);
       client.disconnect();
     }
   }
 
-  handleDisconnect() {}
+  handleDisconnect(client: Socket) {
+    this.logger.log(`Client disconnected: ${client.id}`);
+  }
 
   @SubscribeMessage('join_auction')
-  async handleJoinAuction(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() auctionId: string,
-  ) {
-    await client.join(`auction_${auctionId}`);
-    const state = await this.eventsService.getAuctionState(auctionId);
-    client.emit('auction_state', state);
-  }
-
-  @SubscribeMessage('bid_history')
-  async handleBidHistory(
-    @MessageBody() auctionId: string,
-    @ConnectedSocket() client: Socket,
-  ) {
-    const history = await this.eventsService.getBidHistory(auctionId);
-    client.emit('bid_history', history);
-  }
-
-  @SubscribeMessage('place_bid')
-  async handlePlaceBid(
-    @MessageBody() payload: { auctionId: string; amount: number },
-    @ConnectedSocket() client: Socket,
-  ) {
-    const { user } = client.data;
-    try {
-      const bid = await this.eventsService.placeBid(
-        user.id,
-        payload.auctionId,
-        payload.amount,
-      );
-      this.eventsService.server
-        .to(`auction_${payload.auctionId}`)
-        .emit('new_bid', bid);
-    } catch (error) {
-      client.emit('bid_error', { message: error.message });
-    }
+  async handleJoinAuction(client: Socket, auctionId: string) {
+    client.join(`auction_${auctionId}`);
+    this.logger.log(`User ${client.data.userId} joined auction ${auctionId}`);
+    await this.eventsService.emitAuctionState(client, auctionId);
   }
 
   @SubscribeMessage('watch_active_auctions')
-  async handleWatchActiveAuctions(@ConnectedSocket() client: Socket) {
-    await this.eventsService.startBroadcastingActiveAuctions(client);
+  async handleWatchActiveAuctions(client: Socket) {
+    await this.eventsService.emitActiveAuctionsUpdate(client);
   }
+
+  @SubscribeMessage('place_bid')
+async handlePlaceBid(client: Socket, data: { auctionId: string; amount: number; }) {
+  const bidderId = client.data.userId;
+  const bid = await this.bidsService.placeBid(bidderId, data.auctionId, data.amount);
+  this.eventsService.emitNewBid({
+    auctionId: data.auctionId,
+    bidId: bid.id,
+    amount: bid.amount,
+    bidderId,
+  });
+}
+
 }
