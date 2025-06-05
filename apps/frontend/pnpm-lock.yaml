@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@argent/get-starknet':
+        specifier: ^6.4.7
+        version: 6.4.7(@trpc/client@10.45.2(@trpc/server@10.45.2))(@trpc/server@10.45.2)(starknet@6.24.1)(zod@3.25.50)
       '@radix-ui/react-icons':
         specifier: ^1.3.2
         version: 1.3.2(react@18.2.0)
@@ -110,6 +113,22 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
+
+  '@argent/get-starknet@6.4.7':
+    resolution: {integrity: sha512-OcNIyS8nFl436hVkhfmQvwx4Ny41nWgoDVzMF29MrkGW/OtWXyGLcTvrYGsuZj0EBDvdSxQ5I5Y58FFTBP4KaQ==}
+    peerDependencies:
+      starknet: 5.18.0
+
+  '@argent/web-sdk@6.4.1':
+    resolution: {integrity: sha512-QDWmxlv0KhJKE6vqyQ1nWhcM3eRXyz0b0poA1u4r/205gnJcD8sy+EvuAAmav4mUdkmHvReEnqSXevDZ2iriuA==}
+    peerDependencies:
+      starknet: 5.12.0
+
+  '@argent/x-window@6.4.0':
+    resolution: {integrity: sha512-fGFUWCrtnH8OJl+OnvUh/EdCdru8cfnftOls6XgzqwZLqhNC7PMQnKEP3WR+xL+C6pzja1K2hlK84qSap+WMYA==}
+    peerDependencies:
+      starknet: ^4.21.0
+      zod: ^3.20.6
 
   '@emnapi/core@1.4.0':
     resolution: {integrity: sha512-H+N/FqT07NmLmt6OFFtDfwe8PNygprzBikrEMyQfgqSmT0vzE515Pz7R8izwB9q/zsH/MA64AKoul3sA6/CzVg==}
@@ -2656,6 +2675,37 @@ snapshots:
   '@adraffy/ens-normalize@1.11.0': {}
 
   '@alloc/quick-lru@5.2.0': {}
+
+  '@argent/get-starknet@6.4.7(@trpc/client@10.45.2(@trpc/server@10.45.2))(@trpc/server@10.45.2)(starknet@6.24.1)(zod@3.25.50)':
+    dependencies:
+      '@argent/web-sdk': 6.4.1(@trpc/client@10.45.2(@trpc/server@10.45.2))(@trpc/server@10.45.2)(starknet@6.24.1)(zod@3.25.50)
+      '@argent/x-window': 6.4.0(starknet@6.24.1)(zod@3.25.50)
+      bowser: 2.11.0
+      get-starknet-core: 3.3.5(starknet@6.24.1)
+      lodash-es: 4.17.21
+      starknet: 6.24.1
+      svelte-forms: 2.3.1
+    transitivePeerDependencies:
+      - '@trpc/client'
+      - '@trpc/server'
+      - zod
+
+  '@argent/web-sdk@6.4.1(@trpc/client@10.45.2(@trpc/server@10.45.2))(@trpc/server@10.45.2)(starknet@6.24.1)(zod@3.25.50)':
+    dependencies:
+      '@argent/x-window': 6.4.0(starknet@6.24.1)(zod@3.25.50)
+      get-starknet-core: 3.3.5(starknet@6.24.1)
+      lodash-es: 4.17.21
+      starknet: 6.24.1
+      trpc-browser: 1.4.4(@trpc/client@10.45.2(@trpc/server@10.45.2))(@trpc/server@10.45.2)
+    transitivePeerDependencies:
+      - '@trpc/client'
+      - '@trpc/server'
+      - zod
+
+  '@argent/x-window@6.4.0(starknet@6.24.1)(zod@3.25.50)':
+    dependencies:
+      starknet: 6.24.1
+      zod: 3.25.50
 
   '@emnapi/core@1.4.0':
     dependencies:

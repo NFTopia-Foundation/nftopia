@@ -26,6 +26,7 @@ const categories_module_1 = require("./categories/categories.module");
 const stats_module_1 = require("./stats/stats.module");
 const starknet_module_1 = require("./starknet/starknet.module");
 const redis_module_1 = require("./redis/redis.module");
+const events_module_1 = require("./events/events.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -61,6 +62,7 @@ exports.AppModule = AppModule = __decorate([
             stats_module_1.StatsModule,
             starknet_module_1.StarknetModule,
             redis_module_1.RedisModule,
+            events_module_1.EventsModule
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
