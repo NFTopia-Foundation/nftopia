@@ -6,7 +6,7 @@ account_path = "~/.starkli-accounts/my-oz-account.json"
 keystore_path = "~/.starkli-wallets/my-keystore.json"
 network = "sepolia"
 fee_token = "strk"
-contract_class_path = "/home/seyi/Documents/deployment_example/target/dev/deployment_example_HelloStarknet.contract_class.json"
+contract_class_path = "/home/seyi/Documents/nftopia/nftopia/on-chain/abi/nftopia_CollectionFactory.contract_class.json"
 
 # === Get password securely ===
 keystore_password = getpass("Enter keystore password: ")
@@ -66,5 +66,5 @@ if deploy_proc.returncode != 0:
 
 print("✅ Deploy successful:\n", deploy_proc.stdout)
 
-# class hash: 0x020b7bca19d3c12d1e846a2a2e625df14b570056325905eaf06e76dd4e362e84
-# deploy address: 0x0399520dc7c9b4d8ea0d54d69a69f33fbe4a5e2d75e26a11fe790065e752e206
+# class hash: 0x03e3fa5c4d032cbed3d2f8e36768c4c1ef384331f3c9aabad7463662e6d19a1b
+# deploy address: 0x04cec950e6de7ec09fd09278fda5b55d434079b5058c6c1ea3c41e5289443b71
