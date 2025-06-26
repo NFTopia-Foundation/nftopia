@@ -12,7 +12,6 @@ export default function RegisterPage() {
   const router = useRouter();
   const [walletAddress, setWalletAddress] = useState("");
   const [username, setUsername] = useState("");
-  const [isArtist, setIsArtist] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -58,6 +57,16 @@ export default function RegisterPage() {
       const { csrfToken } = await csrfRes.json();
 
       // Step 2: Make the POST request with CSRF token in headers
+      // Only send walletAddress and username as per CreateUserDto
+      const requestBody: { walletAddress: string; username?: string } = {
+        walletAddress,
+      };
+
+      // Only include username if it's not empty
+      if (username.trim()) {
+        requestBody.username = username.trim();
+      }
+
       const response = await fetch(`${API_CONFIG.baseUrl}/users`, {
         method: "POST",
         credentials: "include",
@@ -65,21 +74,26 @@ export default function RegisterPage() {
           "Content-Type": "application/json",
           "X-CSRF-Token": csrfToken,
         },
-        body: JSON.stringify({
-          walletAddress,
-          username,
-          isArtist,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
-        throw new Error("Registration failed");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Registration failed");
       }
 
-      router.push("/profile");
+      const userData = await response.json();
+      console.log("Registration successful:", userData);
+
+      // Redirect to login or dashboard after successful registration
+      router.push("/auth/login");
     } catch (err) {
       console.error(err);
-      setError("Registration failed. Please try again.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Registration failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -113,6 +127,7 @@ export default function RegisterPage() {
                   value={walletAddress}
                   readOnly
                   className="w-full bg-gray-800/50 border border-purple-500/20 rounded-lg px-4 py-3 text-sm"
+                  placeholder="Connect your wallet to see address"
                 />
               </div>
 
@@ -126,23 +141,8 @@ export default function RegisterPage() {
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full bg-gray-800/50 border border-purple-500/20 rounded-lg px-4 py-3 text-sm"
                   placeholder="coolcollector123"
+                  maxLength={50}
                 />
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isArtist"
-                  checked={isArtist}
-                  onChange={(e) => setIsArtist(e.target.checked)}
-                  className="h-4 w-4 rounded border-purple-500/30 bg-gray-800/50 text-purple-500 focus:ring-purple-500"
-                />
-                <label
-                  htmlFor="isArtist"
-                  className="ml-2 text-sm text-gray-300"
-                >
-                  I'm an artist/creator
-                </label>
               </div>
 
               <div className="space-y-4">
@@ -151,7 +151,11 @@ export default function RegisterPage() {
                   disabled={loading}
                   className="w-full py-3 px-4 rounded-lg font-medium transition bg-gradient-to-r from-[#4e3bff] to-[#9747ff] hover:opacity-90"
                 >
-                  {walletAddress ? "Wallet Connected" : "Connect Wallet"}
+                  {loading && !walletAddress
+                    ? "Connecting..."
+                    : walletAddress
+                    ? "✓ Wallet Connected"
+                    : "Connect Wallet"}
                 </Button>
 
                 <Button
@@ -163,7 +167,9 @@ export default function RegisterPage() {
                       : "bg-gradient-to-r from-[#4e3bff] to-[#9747ff] hover:opacity-90"
                   }`}
                 >
-                  {loading ? "Processing..." : "Complete Registration"}
+                  {loading && walletAddress
+                    ? "Creating Account..."
+                    : "Complete Registration"}
                 </Button>
               </div>
             </div>
