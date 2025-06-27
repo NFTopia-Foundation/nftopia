@@ -40,4 +40,4 @@ const LoginBox = () => {
   );
 };
 
-export default Login;
+export default LoginBox;
