@@ -2,4 +2,5 @@ packages:
   - "apps/frontend"
   - "apps/backend"
   - "on-chain"
-  - "nftopia-analytics"
+  - "nftopia_analytics"
+  - "nftopia-notification-service"
