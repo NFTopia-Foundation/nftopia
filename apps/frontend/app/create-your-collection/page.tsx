@@ -40,6 +40,7 @@ export default function CreateYourCollection(): JSX.Element {
   const [success, setSuccess] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
+  const [backendAvailable, setBackendAvailable] = useState(true)
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
@@ -94,6 +95,7 @@ export default function CreateYourCollection(): JSX.Element {
     const response = await fetch(`${API_CONFIG.baseUrl}/upload/image`, {
       method: "POST",
       body: formData,
+      signal: AbortSignal.timeout(30000), // 30 second timeout for uploads
     })
 
     if (!response.ok) {
@@ -124,16 +126,37 @@ export default function CreateYourCollection(): JSX.Element {
       setErrors((prev) => ({ ...prev, bannerImage: undefined }))
     }
 
-    // Upload to Firebase via backend
+    // Check if backend is available before attempting upload
     try {
+      const healthCheck = await fetch(`${API_CONFIG.baseUrl}/health`, {
+        method: "GET",
+        signal: AbortSignal.timeout(5000),
+      }).catch(() => null)
+
+      if (!healthCheck || !healthCheck.ok) {
+        setBackendAvailable(false)
+        setErrors((prev) => ({
+          ...prev,
+          bannerImage: "Backend server is not available. Please ensure the server is running on port 9000.",
+        }))
+        return
+      }
+
+      setBackendAvailable(true)
+
+      // Upload to Firebase via backend
       setIsUploadingImage(true)
       const imageUrl = await uploadImageToFirebase(file)
       setUploadedImageUrl(imageUrl)
     } catch (error) {
       console.error("Error uploading image:", error)
+      setBackendAvailable(false)
       setErrors((prev) => ({
         ...prev,
-        bannerImage: error instanceof Error ? error.message : "Failed to upload image",
+        bannerImage:
+          error instanceof Error
+            ? error.message
+            : "Failed to upload image. Please check if the backend server is running.",
       }))
     } finally {
       setIsUploadingImage(false)
@@ -153,6 +176,11 @@ export default function CreateYourCollection(): JSX.Element {
       return
     }
 
+    if (!backendAvailable) {
+      setErrors({ general: "Backend server is not available. Please ensure the server is running on port 9000." })
+      return
+    }
+
     setIsLoading(true)
     setErrors({})
 
@@ -169,6 +197,7 @@ export default function CreateYourCollection(): JSX.Element {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(10000), // 10 second timeout
       })
 
       if (!response.ok) {
@@ -195,9 +224,16 @@ export default function CreateYourCollection(): JSX.Element {
       }, 2000)
     } catch (error) {
       console.error("Error creating collection:", error)
-      setErrors({
-        general: error instanceof Error ? error.message : "Failed to create collection. Please try again.",
-      })
+      if (error instanceof Error && error.name === "AbortError") {
+        setErrors({ general: "Request timed out. Please check your connection and try again." })
+      } else {
+        setErrors({
+          general:
+            error instanceof Error
+              ? error.message
+              : "Failed to create collection. Please ensure the backend server is running.",
+        })
+      }
     } finally {
       setIsLoading(false)
     }
@@ -226,6 +262,15 @@ export default function CreateYourCollection(): JSX.Element {
           <h1 className="text-4xl font-bold text-white mb-4">Create Your Collection</h1>
           <p className="text-gray-300 text-lg">Showcase your NFTs in a beautiful collection</p>
         </div>
+
+        {!backendAvailable && (
+          <Alert className="mb-6 border-yellow-500/50 bg-yellow-500/10">
+            <AlertCircle className="h-4 w-4 text-yellow-400" />
+            <AlertDescription className="text-yellow-200">
+              Backend server is not available. Please ensure the server is running on port 9000.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Card className="bg-gray-900/40 border-gray-700/30 backdrop-blur-sm">
           <CardHeader>
@@ -296,9 +341,11 @@ export default function CreateYourCollection(): JSX.Element {
                       errors.bannerImage
                         ? "border-red-500/50 bg-red-500/5"
                         : "border-gray-600/50 bg-gray-800/20 hover:bg-gray-800/30",
-                      isUploadingImage && "pointer-events-none opacity-75",
+                      (isUploadingImage || !backendAvailable) && "pointer-events-none opacity-75",
                     )}
-                    onClick={() => !isUploadingImage && document.getElementById("banner-upload")?.click()}
+                    onClick={() =>
+                      backendAvailable && !isUploadingImage && document.getElementById("banner-upload")?.click()
+                    }
                   >
                     <input
                       id="banner-upload"
@@ -306,7 +353,7 @@ export default function CreateYourCollection(): JSX.Element {
                       accept="image/*"
                       onChange={handleImageChange}
                       className="hidden"
-                      disabled={isUploadingImage}
+                      disabled={isUploadingImage || !backendAvailable}
                     />
 
                     {isUploadingImage ? (
@@ -331,14 +378,18 @@ export default function CreateYourCollection(): JSX.Element {
                             </div>
                           )}
                         </div>
-                        <p className="text-gray-300 text-sm">Click to change image</p>
+                        <p className="text-gray-300 text-sm">
+                          {backendAvailable ? "Click to change image" : "Backend unavailable"}
+                        </p>
                       </div>
                     ) : (
                       <div className="space-y-4">
                         <Upload className="w-12 h-12 text-gray-400 mx-auto" />
                         <div>
                           <p className="text-white font-medium">Upload Banner Image</p>
-                          <p className="text-gray-400 text-sm">PNG, JPG, or WebP. Max 10MB.</p>
+                          <p className="text-gray-400 text-sm">
+                            {backendAvailable ? "PNG, JPG, or WebP. Max 10MB." : "Backend server required for upload"}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -352,7 +403,7 @@ export default function CreateYourCollection(): JSX.Element {
               <div className="pt-6">
                 <Button
                   type="submit"
-                  disabled={isLoading || isUploadingImage || !uploadedImageUrl}
+                  disabled={isLoading || isUploadingImage || !uploadedImageUrl || !backendAvailable}
                   className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 hover:scale-[1.02] disabled:scale-100 disabled:opacity-50"
                 >
                   {isLoading ? (
@@ -362,6 +413,8 @@ export default function CreateYourCollection(): JSX.Element {
                     </>
                   ) : isUploadingImage ? (
                     "Uploading Image..."
+                  ) : !backendAvailable ? (
+                    "Backend Unavailable"
                   ) : (
                     "Create Collection"
                   )}
