@@ -21,7 +21,7 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
     <StarknetConfig
       chains={chains}
       provider={publicProvider()}
-      connectors={connectors}
+      connectors={connectors as any}
       autoConnect
     >
       {children}
