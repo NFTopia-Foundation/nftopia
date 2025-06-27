@@ -10,7 +10,10 @@ import { StarknetProvider } from "@/components/StarknetProvider"; // We'll creat
 import { AuthProvider } from "@/lib/auth-context";
 import { usePathname } from "next/navigation";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+})
 
 export default function RootLayout({
   children,
