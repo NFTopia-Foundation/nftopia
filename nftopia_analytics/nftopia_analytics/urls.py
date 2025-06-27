@@ -16,7 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from marketplace.views import GasMintingView, GasSalesView, GasPredictionsView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/gas/minting', GasMintingView.as_view(), name='gas-minting'),
+    path('api/gas/sales', GasSalesView.as_view(), name='gas-sales'),
+    path('api/gas/predictions', GasPredictionsView.as_view(), name='gas-predictions'),
 ]
