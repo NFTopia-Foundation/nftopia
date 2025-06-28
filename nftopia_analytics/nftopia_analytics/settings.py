@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    # Third-party apps
+    'rest_framework',
+    
     # NFTopia apps
     'users',
     'sales',
@@ -83,12 +86,29 @@ WSGI_APPLICATION = 'nftopia_analytics.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# TimescaleDB PostgreSQL Configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('TIMESCALE_DB_NAME', 'nftopia_analytics'),
+        'USER': os.getenv('TIMESCALE_DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('TIMESCALE_DB_PASSWORD', 'postgres'),
+        'HOST': os.getenv('TIMESCALE_DB_HOST', 'localhost'),
+        'PORT': os.getenv('TIMESCALE_DB_PORT', '5432'),
+        'OPTIONS': {
+            'options': '-c default_transaction_isolation=serializable'
+        },
     }
 }
+
+# Fallback to SQLite for development if PostgreSQL is not available
+if os.getenv('USE_SQLITE', 'false').lower() == 'true':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -138,3 +158,24 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Analytics settings
 ANALYTICS_TRACK_ANONYMOUS_USERS = True
 ANALYTICS_GEO_IP_ENABLED = False  # Set to True to enable geographic tracking
+
+# TimescaleDB Configuration
+TIMESCALEDB_SETTINGS = {
+    'CHUNK_TIME_INTERVAL': {
+        'nft_mints': '1 day',
+        'nft_sales': '1 day', 
+        'nft_transfers': '1 day',
+        'gas_metrics': '1 day',
+        'page_views': '1 day',
+        'user_sessions': '7 days',
+    },
+    'RETENTION_POLICIES': {
+        'raw_events': '90 days',
+        'aggregates': '1 year',
+    },
+    'COMPRESSION': {
+        'enabled': True,
+        'compress_after': '7 days',
+        'compression_level': 1,
+    }
+}
