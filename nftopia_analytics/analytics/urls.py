@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, heatmap
 
 app_name = 'analytics'
 
@@ -15,4 +15,8 @@ urlpatterns = [
     path('api/wallet-data/', views.api_wallet_data, name='api_wallet_data'),
     path('api/user-segments/', views.api_user_segments, name='api_user_segments'),
     path('api/track-wallet/', views.track_wallet_connection, name='track_wallet_connection'),
+    
+    # Heatmap endpoint
+    path('api/analytics/heatmap/volume', heatmap.volume, name='volume'),
+    path('api/analytics/heatmap/collections', heatmap.collections, name='collections')
 ]
