@@ -52,7 +52,7 @@ describe('BidsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('createBid', () => {
+  describe('placeBid', () => {
     it('should create a bid successfully', async () => {
       // Arrange
       const userId = 'user-123';
@@ -85,7 +85,7 @@ describe('BidsService', () => {
       jest.spyOn(service, 'getHighestBid').mockResolvedValue(null);
 
       // Act
-      const result = await service.createBid(createBidDto, userId);
+      const result = await service.placeBid(createBidDto, userId);
 
       // Assert
       expect(result).toEqual({
@@ -112,7 +112,7 @@ describe('BidsService', () => {
       auctionRepository.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.createBid(createBidDto, userId)).rejects.toThrow(NotFoundException);
+      await expect(service.placeBid(createBidDto, userId)).rejects.toThrow(NotFoundException);
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
@@ -127,7 +127,7 @@ describe('BidsService', () => {
       userRepository.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.createBid(createBidDto, userId)).rejects.toThrow(UnauthorizedException);
+      await expect(service.placeBid(createBidDto, userId)).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw BadRequestException if auction has ended', async () => {
@@ -146,7 +146,7 @@ describe('BidsService', () => {
       userRepository.findOne.mockResolvedValue(mockUser);
 
       // Act & Assert
-      await expect(service.createBid(createBidDto, userId)).rejects.toThrow(BadRequestException);
+      await expect(service.placeBid(createBidDto, userId)).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException if bid amount is less than highest bid', async () => {
@@ -177,7 +177,7 @@ describe('BidsService', () => {
       jest.spyOn(service, 'getHighestBid').mockResolvedValue(mockHighestBid as Bid);
 
       // Act & Assert
-      await expect(service.createBid(createBidDto, userId)).rejects.toThrow(BadRequestException);
+      await expect(service.placeBid(createBidDto, userId)).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -207,7 +207,7 @@ describe('BidsService', () => {
       bidRepository.find.mockResolvedValue(mockBids);
 
       // Act
-      const result = await service.getBidsByAuction(auctionId);
+      const result = await service.getBidsForAuction(auctionId);
 
       // Assert
       expect(result).toHaveLength(2);
@@ -221,7 +221,7 @@ describe('BidsService', () => {
       auctionRepository.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.getBidsByAuction(auctionId)).rejects.toThrow(NotFoundException);
+      await expect(service.getBidsForAuction(auctionId)).rejects.toThrow(NotFoundException);
     });
   });
 
