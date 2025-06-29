@@ -11,8 +11,12 @@ import {
 } from './interceptors';
 import { ConfigService } from '@nestjs/config';
 import { RedisIoAdapter } from './redis/redis.adapter';
+import { connectWithRetry } from './utils/mongoConnection'; // ⬅️ import retry logic
 
 async function bootstrap() {
+
+  await connectWithRetry();
+  
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 

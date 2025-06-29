@@ -11,8 +11,8 @@ describe('BidsController', () => {
 
   beforeEach(async () => {
     const mockBidsService = {
-      createBid: jest.fn(),
-      getBidsByAuction: jest.fn(),
+      placeBid: jest.fn(),
+      getBidsForAuction: jest.fn(),
       getHighestBid: jest.fn(),
     };
 
