@@ -253,4 +253,50 @@ describe('SMS Rate Limiting', () => {
       expect(response.body.status).toBe('unhealthy');
     });
   });
+
+  describe('SMS Template Personalization', () => {
+    const smsServiceInstance = new smsService();
+
+    it('should render a Handlebars template with variables and helpers', () => {
+      const template = '[NFTopia] Outbid on {{nft.name}} ({{formatEth oldBid}} → {{formatEth newBid}}). {{truncateTx txHash}}';
+      const data = {
+        nft: { name: 'Cool NFT #123', id: '0xabc123' },
+        oldBid: 1.23456,
+        newBid: 2.34567,
+        txHash: '0x1234567890abcdef',
+      };
+      const result = (smsServiceInstance as any).formatMessage(template, data);
+      expect(result).toContain('Outbid on Cool NFT #123 (1.23 ETH → 2.35 ETH). 0x1234...cdef');
+    });
+
+    it('should truncate message to 160 chars for GSM-7', () => {
+      const template = '[NFTopia] {{longText}}';
+      const data = { longText: 'a'.repeat(200) };
+      const result = (smsServiceInstance as any).formatMessage(template, data);
+      expect(result.length).toBeLessThanOrEqual(160);
+      expect(result.endsWith('…')).toBe(true);
+    });
+
+    it('should truncate message to 70 chars for UCS-2', () => {
+      const template = '[NFTopia] {{longText}}';
+      const data = { longText: '😀'.repeat(100) };
+      const result = (smsServiceInstance as any).formatMessage(template, data);
+      expect(result.length).toBeLessThanOrEqual(70);
+      expect(result.endsWith('…')).toBe(true);
+    });
+
+    it('should use blockExplorer helper', () => {
+      const template = 'View: {{blockExplorer nft.id}}';
+      const data = { nft: { id: '0xabc123' } };
+      const result = (smsServiceInstance as any).formatMessage(template, data);
+      expect(result).toContain('https://etherscan.io/token/0xabc123');
+    });
+
+    it('should use the correct locale template if available', () => {
+      const templateObj = { en: 'Hello {{name}}', es: 'Hola {{name}}' };
+      const data = { name: 'Juan' };
+      const result = (smsServiceInstance as any).formatMessage(templateObj['es'], data, 'es');
+      expect(result).toBe('Hola Juan');
+    });
+  });
 }); 
