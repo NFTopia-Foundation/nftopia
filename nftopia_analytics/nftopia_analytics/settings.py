@@ -209,3 +209,36 @@ TIMESCALEDB_SETTINGS = {
         'compression_level': 1,
     }
 }
+
+# Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'auth_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'auth.log',
+            'formatter': 'verbose'
+        },
+        'auth_errors': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': 'auth_errors.log',
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'authentication': {
+            'handlers': ['auth_file', 'auth_errors'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
