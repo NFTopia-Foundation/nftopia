@@ -1,4 +1,4 @@
-mod modules{
+mod modules {
     pub mod logic;
     pub mod access_control;
     pub mod view;
