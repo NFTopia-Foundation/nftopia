@@ -7,11 +7,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-
-
-
-
-
 // upload function
 export const uploadFile = (
   file: File,
