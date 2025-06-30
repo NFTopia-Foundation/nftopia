@@ -11,7 +11,7 @@ export interface SendSMSRequest {
   to: string;
   userId: string;
   notificationType: NotificationType;
-  message?: string;
+  message: string;
   dynamicData?: Record<string, any>;
 }
 

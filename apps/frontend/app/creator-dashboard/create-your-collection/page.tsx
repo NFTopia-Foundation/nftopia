@@ -12,7 +12,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Upload, AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
 import { API_CONFIG } from "@/lib/config"
 import { cn } from "@/lib/utils"
-import { useCollections, useToast } from "@/lib/stores"
 import type { JSX } from "react"
 
 interface CreateCollectionForm {
@@ -30,15 +29,13 @@ interface FormErrors {
 
 export default function CreateYourCollection(): JSX.Element {
   const router = useRouter()
-  const { createCollection, loading } = useCollections()
-  const { showSuccess, showError } = useToast()
-  
   const [form, setForm] = useState<CreateCollectionForm>({
     name: "",
     description: "",
     bannerImage: null,
   })
   const [errors, setErrors] = useState<FormErrors>({})
+  const [isLoading, setIsLoading] = useState(false)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [success, setSuccess] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -184,22 +181,33 @@ export default function CreateYourCollection(): JSX.Element {
       return
     }
 
+    setIsLoading(true)
     setErrors({})
 
     try {
-      const collectionData = {
+      const payload = {
         name: form.name.trim(),
         description: form.description.trim(),
-        bannerImage: uploadedImageUrl || undefined,
-        nftCount: 0,
-        floorPrice: 0,
-        totalVolume: 0,
+        bannerImageUrl: uploadedImageUrl,
       }
 
-      await createCollection(collectionData)
+      const response = await fetch(`${API_CONFIG.baseUrl}/collections`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(10000), // 10 second timeout
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
 
       setSuccess(true)
-      showSuccess("Collection created successfully!")
 
       // Reset form
       setForm({
@@ -212,13 +220,22 @@ export default function CreateYourCollection(): JSX.Element {
 
       // Redirect after success
       setTimeout(() => {
-        router.push("/auth/logged-in")
+        router.push("/marketplace")
       }, 2000)
     } catch (error) {
       console.error("Error creating collection:", error)
-      const errorMessage = error instanceof Error ? error.message : "Failed to create collection"
-      setErrors({ general: errorMessage })
-      showError(errorMessage)
+      if (error instanceof Error && error.name === "AbortError") {
+        setErrors({ general: "Request timed out. Please check your connection and try again." })
+      } else {
+        setErrors({
+          general:
+            error instanceof Error
+              ? error.message
+              : "Failed to create collection. Please ensure the backend server is running.",
+        })
+      }
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -386,10 +403,10 @@ export default function CreateYourCollection(): JSX.Element {
               <div className="pt-6">
                 <Button
                   type="submit"
-                  disabled={loading.creating || isUploadingImage || !uploadedImageUrl || !backendAvailable}
+                  disabled={isLoading || isUploadingImage || !uploadedImageUrl || !backendAvailable}
                   className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 hover:scale-[1.02] disabled:scale-100 disabled:opacity-50"
                 >
-                  {loading.creating ? (
+                  {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Creating Collection...

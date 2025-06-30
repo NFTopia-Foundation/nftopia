@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/lib/stores";
+import { useAuth } from "@/lib/auth-context";
 import { useState } from "react";
 import { connect } from "@argent/get-starknet";
 import { Button } from "@/components/ui/button";

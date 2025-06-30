@@ -2,9 +2,9 @@ import { z } from 'zod';
 import { SMSConfig, SMSRateLimitConfig } from '../types/sms';
 
 const smsConfigSchema = z.object({
-  TWILIO_ACCOUNT_SID: z.string().min(1, 'Twilio Account SID is required'),
-  TWILIO_AUTH_TOKEN: z.string().min(1, 'Twilio Auth Token is required'),
-  TWILIO_FROM_NUMBER: z.string().min(1, 'Twilio From Number is required'),
+  TWILIO_ACCOUNT_SID: z.string().optional().default(''),
+  TWILIO_AUTH_TOKEN: z.string().optional().default(''),
+  TWILIO_FROM_NUMBER: z.string().optional().default(''),
   REDIS_URL: z.string().default('redis://localhost:6379'),
   REDIS_PREFIX: z.string().default('nftopia:sms'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -21,9 +21,9 @@ const rateLimits: SMSRateLimitConfig = {
 };
 
 export const smsConfig: SMSConfig = {
-  accountSid: env.TWILIO_ACCOUNT_SID,
-  authToken: env.TWILIO_AUTH_TOKEN,
-  fromNumber: env.TWILIO_FROM_NUMBER,
+  accountSid: env.TWILIO_ACCOUNT_SID || '',
+  authToken: env.TWILIO_AUTH_TOKEN || '',
+  fromNumber: env.TWILIO_FROM_NUMBER || '',
   rateLimits,
   redis: {
     url: env.REDIS_URL,
@@ -32,18 +32,10 @@ export const smsConfig: SMSConfig = {
 };
 
 export const smsTemplates = {
-  bidAlert: {
-    en: '[NFTopia] Outbid on {{nft.name}} ({{formatEth oldBid}} → {{formatEth newBid}}). {{truncateTx txHash}}',
-  },
-  marketing: {
-    en: '[NFTopia] {{announcementTitle}}: {{announcementContent}}',
-  },
-  '2fa': {
-    en: '[NFTopia] Your code: {{code}}. Expires in {{minutes}}m.',
-  },
-  nftPurchase: {
-    en: '[NFTopia] Purchased {{nft.name}} for {{formatEth price}}. View: {{blockExplorer nft.id}}',
-  },
+  bidAlert: 'New bid of {bidAmount} on {nftName}. Current highest: {currentHighestBid}. Auction ends: {auctionEndDate}',
+  marketing: '{announcementTitle}: {announcementContent}',
+  '2fa': 'Your NFTopia verification code is: {code}. Valid for 10 minutes.',
+  nftPurchase: 'NFT Purchase Confirmed! You bought {nftName} for {purchasePrice}. Transaction: {transactionHash}',
 };
 
 export const smsSettings = {

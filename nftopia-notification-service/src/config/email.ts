@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const emailConfigSchema = z.object({
-  SENDGRID_API_KEY: z.string().min(1, 'SendGrid API key is required'),
+  SENDGRID_API_KEY: z.string().optional().default(''),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   SENDGRID_WEBHOOK_SECRET: z.string().optional(),
 });
@@ -9,7 +9,7 @@ const emailConfigSchema = z.object({
 const env = emailConfigSchema.parse(process.env);
 
 export const sendGridConfig = {
-  apiKey: env.SENDGRID_API_KEY,
+  apiKey: env.SENDGRID_API_KEY || '',
   templates: {
     nftPurchase: process.env.SENDGRID_NFT_PURCHASE_TEMPLATE || 'd-123abc',
     bidAlert: process.env.SENDGRID_BID_ALERT_TEMPLATE || 'd-456def', 

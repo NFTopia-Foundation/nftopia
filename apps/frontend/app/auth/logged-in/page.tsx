@@ -1,24 +1,22 @@
 "use client"
 
-import { useEffect } from "react"
+import { useState, useEffect } from "react"
 import { Grid3X3, DollarSign, Eye, Users } from "lucide-react"
 import { StatCard } from "./components/card-stat"
 import { QuickActions } from "./components/quick-actions"
 import { DashboardHeader } from "./components/dashboard-header"
 import { CollectionsSection } from "./components/collections-section"
-import { mockStats } from "./data/mock-data"
-import { useCollections, useAuth } from "@/lib/stores"
+import { mockStats, mockCollections } from "./data/mock-data"
 
 export default function CreatorDashboard() {
-  const { userCollections, loading, fetchUserCollections } = useCollections()
-  const { isAuthenticated } = useAuth()
+  const [isLoading, setIsLoading] = useState(false)
 
-  // Fetch user collections when component mounts
+  // Simulate loading state
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchUserCollections()
-    }
-  }, [isAuthenticated, fetchUserCollections])
+    setIsLoading(true)
+    const timer = setTimeout(() => setIsLoading(false), 1500)
+    return () => clearTimeout(timer)
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970]">
@@ -33,17 +31,17 @@ export default function CreatorDashboard() {
             label="NFTs Created"
             value={mockStats.nftsCreated}
             change={12}
-            isLoading={loading.userCollections}
+            isLoading={isLoading}
           />
           <StatCard
             icon={DollarSign as React.ComponentType}
             label="Total Sales"
             value={mockStats.totalSales}
             change={8}
-            isLoading={loading.userCollections}
+            isLoading={isLoading}
           />
-          <StatCard icon={Eye as React.ComponentType} label="Total Views" value={mockStats.totalViews} change={-3} isLoading={loading.userCollections} />
-          <StatCard icon={Users as React.ComponentType} label="Followers" value={mockStats.followers} change={15} isLoading={loading.userCollections} />
+          <StatCard icon={Eye as React.ComponentType} label="Total Views" value={mockStats.totalViews} change={-3} isLoading={isLoading} />
+          <StatCard icon={Users as React.ComponentType} label="Followers" value={mockStats.followers} change={15} isLoading={isLoading} />
         </div>
 
         {/* Quick Actions */}
@@ -52,7 +50,7 @@ export default function CreatorDashboard() {
         </div>
 
         {/* Collections Grid */}
-        <CollectionsSection collections={userCollections} isLoading={loading.userCollections} />
+        <CollectionsSection collections={mockCollections} isLoading={isLoading} />
       </div>
     </div>
   )
