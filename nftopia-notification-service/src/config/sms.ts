@@ -32,10 +32,18 @@ export const smsConfig: SMSConfig = {
 };
 
 export const smsTemplates = {
-  bidAlert: 'New bid of {bidAmount} on {nftName}. Current highest: {currentHighestBid}. Auction ends: {auctionEndDate}',
-  marketing: '{announcementTitle}: {announcementContent}',
-  '2fa': 'Your NFTopia verification code is: {code}. Valid for 10 minutes.',
-  nftPurchase: 'NFT Purchase Confirmed! You bought {nftName} for {purchasePrice}. Transaction: {transactionHash}',
+  bidAlert: {
+    en: '[NFTopia] Outbid on {{nft.name}} ({{formatEth oldBid}} → {{formatEth newBid}}). {{truncateTx txHash}}',
+  },
+  marketing: {
+    en: '[NFTopia] {{announcementTitle}}: {{announcementContent}}',
+  },
+  '2fa': {
+    en: '[NFTopia] Your code: {{code}}. Expires in {{minutes}}m.',
+  },
+  nftPurchase: {
+    en: '[NFTopia] Purchased {{nft.name}} for {{formatEth price}}. View: {{blockExplorer nft.id}}',
+  },
 };
 
 export const smsSettings = {

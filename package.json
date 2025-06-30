@@ -17,10 +17,12 @@
   "license": "ISC",
   "packageManager": "pnpm@10.6.4",
   "devDependencies": {
+    "@types/node": "^24.0.7",
     "file-type": "16.5.4"
   },
   "dependencies": {
     "@nestjs/websockets": "^11.1.2",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "zod": "^3.25.67"
   }
 }
