@@ -4,20 +4,36 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.db.models import Count, Avg, Q
 from datetime import timedelta
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 from .models import UserSession, RetentionCohort, WalletConnection, UserBehaviorMetrics, PageView
 from .utils import (
     calculate_retention_cohorts, get_wallet_analytics, 
     get_session_analytics, get_user_segmentation
 )
 
-
 def is_staff_user(user):
     """Check if user is staff"""
     return user.is_staff
 
+# Combined decorator for JWT and staff check
+def jwt_staff_required(view_func):
+    """
+    Decorator that combines JWT authentication and staff permission check
+    Returns:
+        401 Unauthorized for invalid/missing JWT
+        403 Forbidden for non-staff users
+    """
+    @api_view(['GET'])
+    @permission_classes([IsAuthenticated])
+    @user_passes_test(is_staff_user)
+    def wrapped_view(request, *args, **kwargs):
+        return view_func(request, *args, **kwargs)
+    return wrapped_view
 
-@login_required
-@user_passes_test(is_staff_user)
+@jwt_staff_required
 def analytics_dashboard(request):
     """Main analytics dashboard view"""
     # Get recent analytics data
@@ -39,9 +55,7 @@ def analytics_dashboard(request):
     
     return render(request, 'analytics/dashboard.html', context)
 
-
-@login_required
-@user_passes_test(is_staff_user)
+@jwt_staff_required
 def retention_analysis(request):
     """Retention analysis view"""
     period_type = request.GET.get('period', 'weekly')
@@ -74,9 +88,7 @@ def retention_analysis(request):
     
     return render(request, 'analytics/retention.html', context)
 
-
-@login_required
-@user_passes_test(is_staff_user)
+@jwt_staff_required
 def wallet_trends(request):
     """Wallet trends analysis view"""
     wallet_data = get_wallet_analytics()
@@ -103,9 +115,7 @@ def wallet_trends(request):
     
     return render(request, 'analytics/wallet_trends.html', context)
 
-
-@login_required
-@user_passes_test(is_staff_user)
+@jwt_staff_required
 def user_behavior(request):
     """User behavior analysis view"""
     user_segments = get_user_segmentation()
@@ -130,60 +140,58 @@ def user_behavior(request):
     
     return render(request, 'analytics/user_behavior.html', context)
 
-
 # API endpoints for AJAX requests
-@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 @user_passes_test(is_staff_user)
 def api_session_data(request):
     """API endpoint for session data"""
     days = int(request.GET.get('days', 30))
     data = get_session_analytics(days)
-    return JsonResponse(data)
+    return Response(data)
 
-
-@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 @user_passes_test(is_staff_user)
 def api_wallet_data(request):
     """API endpoint for wallet data"""
     data = get_wallet_analytics()
-    return JsonResponse(data)
+    return Response(data)
 
-
-@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 @user_passes_test(is_staff_user)
 def api_user_segments(request):
     """API endpoint for user segmentation data"""
     data = get_user_segmentation()
-    return JsonResponse(data)
+    return Response(data)
 
-
+@api_view(['POST'])
 def track_wallet_connection(request):
     """API endpoint to track wallet connections"""
-    if request.method == 'POST':
-        try:
-            import json
-            data = json.loads(request.body)
+    try:
+        if request.user.is_authenticated:
+            WalletConnection.objects.create(
+                user=request.user,
+                wallet_provider=request.data.get('provider', 'other'),
+                wallet_address=request.data.get('address', ''),
+                connection_status=request.data.get('status', 'failed'),
+                error_message=request.data.get('error', ''),
+                ip_address=request.META.get('REMOTE_ADDR', ''),
+                user_agent=request.META.get('HTTP_USER_AGENT', '')
+            )
             
-            if request.user.is_authenticated:
-                WalletConnection.objects.create(
-                    user=request.user,
-                    wallet_provider=data.get('provider', 'other'),
-                    wallet_address=data.get('address', ''),
-                    connection_status=data.get('status', 'failed'),
-                    error_message=data.get('error', ''),
-                    ip_address=request.META.get('REMOTE_ADDR', ''),
-                    user_agent=request.META.get('HTTP_USER_AGENT', '')
-                )
-                
-                # Update user behavior metrics
-                if hasattr(request.user, 'behavior_metrics'):
-                    request.user.behavior_metrics.update_metrics()
-                
-                return JsonResponse({'status': 'success'})
-            else:
-                return JsonResponse({'status': 'error', 'message': 'User not authenticated'})
-                
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
-    
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+            # Update user behavior metrics
+            if hasattr(request.user, 'behavior_metrics'):
+                request.user.behavior_metrics.update_metrics()
+            
+            return Response({'status': 'success'})
+        return Response(
+            {'status': 'error', 'message': 'User not authenticated'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    except Exception as e:
+        return Response(
+            {'status': 'error', 'message': str(e)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
