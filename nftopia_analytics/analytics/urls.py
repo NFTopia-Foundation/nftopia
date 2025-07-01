@@ -21,4 +21,9 @@ urlpatterns = [
     # Heatmap endpoint
     path("api/analytics/heatmap/volume", heatmap.volume, name="volume"),
     path("api/analytics/heatmap/collections", heatmap.collections, name="collections"),
+
+    # New DRF analytics endpoints
+    path("api/analytics/minting/", views.MintingAnalyticsView.as_view(), name="minting_analytics"),
+    path("api/analytics/sales/", views.SalesAnalyticsView.as_view(), name="sales_analytics"),
+    path("api/analytics/users/", views.UserAnalyticsView.as_view(), name="user_analytics"),
 ]
