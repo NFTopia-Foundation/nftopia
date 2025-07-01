@@ -1,101 +1,102 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 
-dotenv.config();
+class Database {
+  private static instance: Database;
+  private readonly uri: string;
+  private readonly options: mongoose.ConnectOptions;
+  private isConnected: boolean = false;
 
-// Database configuration
-export const dbConfig = {
-  uri: process.env.MONGO_URI || 'mongodb://localhost:27017/nftopia-notifications',
-  options: {
-    maxPoolSize: 10,
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-  }
-};
+  private constructor() {
+    if (!process.env.MONGO_URI) {
+      throw new Error('MONGO_URI environment variable is not defined');
+    }
 
-// Retry configuration
-export const retryOptions = {
-  maxRetries: 5,
-  retryDelay: 1000, // 1 second
-  backoffMultiplier: 2,
-};
-
-// Connect to MongoDB with retry logic
-export const connectWithRetry = async (): Promise<void> => {
-  // In development mode, try to connect but don't fail if MongoDB is not available
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🔍 Development mode: Attempting MongoDB connection...');
+    this.uri = process.env.MONGO_URI;
+    this.options = {
+      maxPoolSize: 10,
+      minPoolSize: 2,
+      socketTimeoutMS: 30000,
+      serverSelectionTimeoutMS: 5000,
+      heartbeatFrequencyMS: 10000,
+      retryWrites: true,
+      retryReads: true,
+    };
   }
 
-  let attempt = 1;
-  
-  while (attempt <= retryOptions.maxRetries) {
-    try {
-      console.log(`MongoDB connection attempt ${attempt} of ${retryOptions.maxRetries}`);
-      
-      await mongoose.connect(dbConfig.uri, dbConfig.options);
-      
-      console.log('✅ MongoDB connected successfully');
+  public static getInstance(): Database {
+    if (!Database.instance) {
+      Database.instance = new Database();
+    }
+    return Database.instance;
+  }
+
+  public async connect(): Promise<void> {
+    if (this.isConnected) {
+      console.log('MongoDB already connected');
       return;
-    } catch (error: any) {
-      const errorCode = error.code || 'UNKNOWN';
-      const errorMessage = error.message || 'Unknown error';
-      
-      console.error(`Connection attempt ${attempt} failed [${errorCode}]: ${errorMessage}`);
-      
-      if (attempt === retryOptions.maxRetries) {
-        if (process.env.NODE_ENV === 'development') {
-          console.error('⚠️  Development mode: MongoDB connection failed');
-          console.error('   The notification schema is ready but database operations will fail.');
-          console.error('   To enable database features:');
-          console.error('   1. Start MongoDB: docker run -d --name mongodb-nftopia -p 27017:27017 mongo:latest');
-          console.error('   2. Or use MongoDB Atlas (cloud database)');
-          return;
-        } else {
-          console.error('Retry limit reached. MongoDB connection failed. Exiting...');
-          process.exit(1);
-        }
-      }
-      
-      // Calculate delay with exponential backoff
-      const delay = retryOptions.retryDelay * Math.pow(retryOptions.backoffMultiplier, attempt - 1);
-      console.log(`Retrying in ${delay}ms...`);
-      
-      await new Promise(resolve => setTimeout(resolve, delay));
-      attempt++;
+    }
+
+    try {
+      await mongoose.connect(this.uri, this.options);
+      this.isConnected = true;
+      console.log('MongoDB connected successfully');
+
+      mongoose.connection.on('connected', () => {
+        console.log('MongoDB connection re-established');
+        this.isConnected = true;
+      });
+
+      mongoose.connection.on('disconnected', () => {
+        console.warn('MongoDB disconnected');
+        this.isConnected = false;
+      });
+
+      mongoose.connection.on('error', (error) => {
+        console.error('MongoDB connection error:', error);
+      });
+
+    } catch (error) {
+      console.error('Failed to connect to MongoDB:', error);
+      throw error;
     }
   }
-};
 
-// Disconnect from MongoDB
-export const disconnect = async (): Promise<void> => {
-  try {
-    if (mongoose.connection.readyState !== 0) {
+  public async disconnect(): Promise<void> {
+    if (!this.isConnected) {
+      console.log('MongoDB already disconnected');
+      return;
+    }
+
+    try {
       await mongoose.disconnect();
+      this.isConnected = false;
       console.log('MongoDB disconnected successfully');
+    } catch (error) {
+      console.error('Error disconnecting from MongoDB:', error);
+      throw error;
     }
-  } catch (error) {
-    console.error('Error disconnecting from MongoDB:', error);
   }
-};
 
-// Health check function
-export const checkDatabaseHealth = (): boolean => {
-  const state = mongoose.connection.readyState;
-  return state === 1; // 1 = connected
-};
+  public getConnection(): mongoose.Connection {
+    if (!this.isConnected) {
+      throw new Error('Database not connected');
+    }
+    return mongoose.connection;
+  }
 
-// Graceful shutdown handler
-export const setupGracefulShutdown = (): void => {
-  process.on('SIGINT', async () => {
-    console.log('Received SIGINT. Closing database connection...');
-    await disconnect();
-    process.exit(0);
-  });
+  public setupGracefulShutdown(): void {
+    process.on('SIGINT', async () => {
+      console.log('SIGINT received - closing MongoDB connection');
+      await this.disconnect();
+      process.exit(0);
+    });
 
-  process.on('SIGTERM', async () => {
-    console.log('Received SIGTERM. Closing database connection...');
-    await disconnect();
-    process.exit(0);
-  });
-}; 
+    process.on('SIGTERM', async () => {
+      console.log('SIGTERM received - closing MongoDB connection');
+      await this.disconnect();
+      process.exit(0);
+    });
+  }
+}
+
+export const database = Database.getInstance();

@@ -1,4 +1,9 @@
+
+import { Schema, model } from 'mongoose';
+import { INotificationDocument, INotificationModel } from '../types/notification.types';
 import mongoose, { Document, Schema, Model } from 'mongoose';
+
+const NotificationSchema = new Schema<INotificationDocument, INotificationModel>(
 
 // TypeScript interfaces for type safety
 export interface INotificationMetadata {
@@ -52,10 +57,49 @@ const notificationSchema = new Schema<INotification>(
         },
         message: 'User ID cannot be empty'
       }
+
     },
     type: {
       type: String,
       required: [true, 'Notification type is required'],
+
+      enum: ['email', 'sms', 'push', 'in-app']
+    },
+    status: {
+      type: String,
+      required: [true, 'Status is required'],
+      enum: ['pending', 'sent', 'failed'],
+      default: 'pending'
+    },
+    content: {
+      type: String,
+      required: [true, 'Content is required']
+    },
+    recipient: {
+      type: String,
+      required: [true, 'Recipient is required']
+    },
+    metadata: {
+      type: Schema.Types.Mixed,
+      default: {}
+    }
+  },
+  {
+    timestamps: true,
+    versionKey: false
+  }
+);
+
+// Pre-save hook
+NotificationSchema.pre<INotificationDocument>('save', function(next) {
+  // Add any pre-save logic here
+  next();
+});
+
+export const Notification = model<INotificationDocument, INotificationModel>(
+  'Notification',
+  NotificationSchema
+);
       enum: {
         values: ['mint', 'bid', 'sale', 'auction', 'admin'],
         message: 'Notification type must be one of: mint, bid, sale, auction, admin'
