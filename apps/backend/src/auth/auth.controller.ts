@@ -1,4 +1,3 @@
-// auth.controller.ts
 import {
   Controller,
   Post,
@@ -9,6 +8,7 @@ import {
   Req,
   UseGuards,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response, Request } from 'express';
@@ -48,35 +48,75 @@ export class AuthController {
     return { nonce };
   }
 
-  @Post('verify-signature')
-  @HttpCode(200)
-  async verifySignature(
-    @Body('walletAddress') walletAddress: string,
-    @Body('signature') signature: string,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const { accessToken, refreshToken, user } =
-      await this.authService.verifySignature(walletAddress, signature);
 
-    const cookieOptions: CookieOptions = {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    };
+@Post('verify-signature')
+@HttpCode(200)
+async verifySignature(
+  @Body('walletAddress') walletAddress: string,
+  @Body('signature') signature: [string, string],
+  @Body('nonce') nonce: string,
+  @Body('walletType') walletType: 'argentx' | 'braavos',
+  @Res({ passthrough: true }) res: Response,
+) {
 
-    res.cookie('access_token', accessToken, {
-      ...cookieOptions,
-      maxAge: 15 * 60 * 1000, // 15 mins
-    });
 
-    res.cookie('refresh_token', refreshToken, {
-      ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
-    return { message: 'Authenticated', user };
+  console.log(walletAddress);
+  console.log(signature);
+  console.log(nonce);
+  console.log(walletType);
+  // Validate request format
+  if (!walletAddress || typeof walletAddress !== 'string') {
+    throw new BadRequestException('walletAddress must be a non-empty string');
   }
 
+  if (
+    !Array.isArray(signature) ||
+    signature.length !== 2 ||
+    !signature.every((val) => typeof val === 'string')
+  ) {
+    throw new BadRequestException('signature must be a [string, string] array');
+  }
+
+  if (!nonce || typeof nonce !== 'string') {
+    throw new BadRequestException('nonce must be a string');
+  }
+
+  if (!['argentx', 'braavos'].includes(walletType)) {
+    throw new BadRequestException('walletType must be "argentx" or "braavos"');
+  }
+
+  const { accessToken, refreshToken, user } =
+    await this.authService.verifySignature(
+      walletAddress,
+      signature,
+      nonce,
+      walletType,
+    );
+
+  const cookieOptions: CookieOptions = {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  };
+
+  res.cookie('access_token', accessToken, {
+    ...cookieOptions,
+    maxAge: 15 * 60 * 1000, // 15 minutes
+  });
+
+  res.cookie('refresh_token', refreshToken, {
+    ...cookieOptions,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
+  res.cookie('auth-user', user, {
+    ...cookieOptions,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
+  return { message: 'Authenticated', user: user };
+}
+  
   @Get('me')
   @UseGuards(JwtAuthGuard)
   getProfile(@Req() req: Request) {

@@ -1,16 +1,22 @@
 // auth.service.ts
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
-import { verifyMessage } from 'ethers';
+import {
+  verifyRawMessageSignature,
+  verifyTypedDataSignature,
+} from '../utils/verify-starknet-signature';
+import { UsersService } from '../users/users.service';
+
+
+
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User) private userRepo: Repository<User>,
     private jwtService: JwtService,
+    private readonly usersService: UsersService
+
   ) {}
 
   private nonces = new Map<string, string>();
@@ -37,24 +43,65 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async verifySignature(walletAddress: string, signature: string) {
-    const nonce = this.nonces.get(walletAddress.toLowerCase());
-    if (!nonce) throw new Error('Nonce not found');
+  async verifySignature(
+    walletAddress: string,
+    signature: [string, string],
+    nonce: string,
+    walletType: 'argentx' | 'braavos'
+  ) {
+    const normalizedAddress = walletAddress.toLowerCase();
+    const storedNonce = this.nonces.get(normalizedAddress);
 
-    const message = `Sign this message to log in: ${nonce}`;
-    const recovered = verifyMessage(message, signature);
-
-    if (recovered.toLowerCase() !== walletAddress.toLowerCase()) {
-      throw new Error('Invalid signature');
+    if (!storedNonce || storedNonce !== nonce) {
+      throw new UnauthorizedException('Nonce mismatch or expired');
     }
 
-    let user = await this.userRepo.findOne({ where: { walletAddress } });
-    if (!user) {
-      user = this.userRepo.create({ walletAddress });
-      await this.userRepo.save(user);
+    let isValid = false;
+
+    try {
+      if (walletType === 'argentx') {
+        const typedData = {
+          types: {
+            StarkNetDomain: [
+              { name: 'name', type: 'felt' },
+              { name: 'version', type: 'felt' },
+              { name: 'chainId', type: 'felt' },
+            ],
+            Message: [{ name: 'nonce', type: 'felt' }],
+          },
+          primaryType: 'Message',
+          domain: {
+            name: 'NFTopia',
+            version: '1',
+            chainId: 'SN_SEPOLIA',
+          },
+          message: { nonce },
+        };
+
+        isValid = verifyTypedDataSignature(walletAddress, typedData, signature);
+        console.log(isValid);
+      } else if (walletType === 'braavos') {
+        isValid = verifyRawMessageSignature(walletAddress, signature, nonce);
+        console.log(isValid)
+      } else {
+        throw new UnauthorizedException('Unsupported wallet type');
+      }
+    } catch (error) {
+      console.error('[verifySignature] Signature verification failed:', error);
+      isValid = false;
     }
 
-    const tokens = await this.generateTokens(user);
-    return { ...tokens, user };
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid signature');
+    }
+
+    // Optionally remove the nonce to prevent reuse
+    this.nonces.delete(normalizedAddress);
+
+    const fetchedUser = await this.usersService.findOrCreateByWallet(walletAddress);
+    console.log(fetchedUser);
+    const tokens = await this.generateTokens(fetchedUser);
+
+    return { user: fetchedUser, ...tokens };
   }
 }
