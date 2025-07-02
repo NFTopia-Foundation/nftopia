@@ -18,6 +18,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
+import { RequestWithUser } from '../types/RequestWithUser';
 
 @Controller('auth')
 export class AuthController {
@@ -45,6 +46,8 @@ export class AuthController {
   @HttpCode(200)
   requestNonce(@Body('walletAddress') walletAddress: string) {
     const nonce = this.authService.generateNonce(walletAddress);
+    console.log(`walletAddres: ${walletAddress}`);
+    console.log(`nonce: ${nonce}`)
     return { nonce };
   }
 
@@ -117,11 +120,14 @@ async verifySignature(
   return { message: 'Authenticated', user: user };
 }
   
+
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  getProfile(@Req() req: Request) {
+  getProfile(@Req() req: RequestWithUser) {
+    console.log(req['user']);
     return req['user'];
   }
+
 
   @Post('refresh')
   @HttpCode(200)
@@ -170,51 +176,3 @@ async verifySignature(
     return { message: 'Logged out' };
   }
 }
-
-//frontend usage
-
-//   const provider = new ethers.providers.Web3Provider(window.ethereum);
-// const signer = provider.getSigner();
-// const walletAddress = await signer.getAddress();
-
-// const { data: nonceRes } = await axios.post('/auth/request-nonce', { walletAddress });
-// const message = `Sign this message to log in: ${nonceRes.nonce}`;
-// const signature = await signer.signMessage(message);
-
-// await axios.post('/auth/verify-signature', {
-//   walletAddress,
-//   signature,
-// }, { withCredentials: true });
-
-// // Later: get current user
-// await axios.get('/auth/me', { withCredentials: true });
-
-//frontend usage of csrf-token
-
-// function getCookie(name: string): string | null {
-//     const value = `; ${document.cookie}`;
-//     const parts = value.split(`; ${name}=`);
-//     if (parts.length === 2) {
-//       return parts.pop()?.split(';').shift() || null;
-//     }
-//     return null;
-//   }
-
-// const csrfTokenFromBackend = getCookie("XSRF-TOKEN");
-
-// or by library
-
-// pnpm add js-cookie
-
-// import Cookies from 'js-cookie';
-
-// const csrfTokenFromBackend = Cookies.get('XSRF-TOKEN');
-
-// await fetch('/api/endpoint', {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       'X-CSRF-Token': csrfTokenFromBackend,
-//     },
-//     body: JSON.stringify(data),
-//   });
