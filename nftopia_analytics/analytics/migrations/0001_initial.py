@@ -17,153 +17,302 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='RetentionCohort',
+            name="RetentionCohort",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('cohort_date', models.DateField()),
-                ('period_type', models.CharField(choices=[('daily', 'Daily'), ('weekly', 'Weekly'), ('monthly', 'Monthly')], max_length=10)),
-                ('total_users', models.IntegerField(default=0)),
-                ('period_number', models.IntegerField()),
-                ('retained_users', models.IntegerField(default=0)),
-                ('retention_rate', models.DecimalField(decimal_places=2, default=0.0, max_digits=5)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("cohort_date", models.DateField()),
+                (
+                    "period_type",
+                    models.CharField(
+                        choices=[
+                            ("daily", "Daily"),
+                            ("weekly", "Weekly"),
+                            ("monthly", "Monthly"),
+                        ],
+                        max_length=10,
+                    ),
+                ),
+                ("total_users", models.IntegerField(default=0)),
+                ("period_number", models.IntegerField()),
+                ("retained_users", models.IntegerField(default=0)),
+                (
+                    "retention_rate",
+                    models.DecimalField(decimal_places=2, default=0.0, max_digits=5),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'ordering': ['-cohort_date', 'period_number'],
+                "ordering": ["-cohort_date", "period_number"],
             },
         ),
         migrations.CreateModel(
-            name='UserBehaviorMetrics',
+            name="UserBehaviorMetrics",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('first_login', models.DateTimeField()),
-                ('last_login', models.DateTimeField()),
-                ('total_sessions', models.IntegerField(default=0)),
-                ('total_session_time', models.DurationField(default=datetime.timedelta(0))),
-                ('average_session_duration', models.DurationField(default=datetime.timedelta(0))),
-                ('days_since_first_login', models.IntegerField(default=0)),
-                ('is_returning_user', models.BooleanField(default=False)),
-                ('preferred_wallet', models.CharField(blank=True, max_length=20)),
-                ('successful_wallet_connections', models.IntegerField(default=0)),
-                ('failed_wallet_connections', models.IntegerField(default=0)),
-                ('last_updated', models.DateTimeField(auto_now=True)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='behavior_metrics', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("first_login", models.DateTimeField()),
+                ("last_login", models.DateTimeField()),
+                ("total_sessions", models.IntegerField(default=0)),
+                (
+                    "total_session_time",
+                    models.DurationField(default=datetime.timedelta(0)),
+                ),
+                (
+                    "average_session_duration",
+                    models.DurationField(default=datetime.timedelta(0)),
+                ),
+                ("days_since_first_login", models.IntegerField(default=0)),
+                ("is_returning_user", models.BooleanField(default=False)),
+                ("preferred_wallet", models.CharField(blank=True, max_length=20)),
+                ("successful_wallet_connections", models.IntegerField(default=0)),
+                ("failed_wallet_connections", models.IntegerField(default=0)),
+                ("last_updated", models.DateTimeField(auto_now=True)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="behavior_metrics",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-last_login'],
+                "ordering": ["-last_login"],
             },
         ),
         migrations.CreateModel(
-            name='UserSession',
+            name="UserSession",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)),
-                ('login_at', models.DateTimeField(auto_now_add=True)),
-                ('logout_at', models.DateTimeField(blank=True, null=True)),
-                ('ip_address', models.GenericIPAddressField()),
-                ('user_agent', models.TextField(blank=True)),
-                ('geographic_region', models.CharField(blank=True, max_length=100)),
-                ('session_duration', models.DurationField(blank=True, null=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sessions', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, editable=False, primary_key=True
+                    ),
+                ),
+                ("login_at", models.DateTimeField(auto_now_add=True)),
+                ("logout_at", models.DateTimeField(blank=True, null=True)),
+                ("ip_address", models.GenericIPAddressField()),
+                ("user_agent", models.TextField(blank=True)),
+                ("geographic_region", models.CharField(blank=True, max_length=100)),
+                ("session_duration", models.DurationField(blank=True, null=True)),
+                ("is_active", models.BooleanField(default=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sessions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-login_at'],
+                "ordering": ["-login_at"],
             },
         ),
         migrations.CreateModel(
-            name='WalletConnection',
+            name="WalletConnection",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('wallet_provider', models.CharField(choices=[('metamask', 'MetaMask'), ('coinbase', 'Coinbase Wallet'), ('walletconnect', 'WalletConnect'), ('phantom', 'Phantom'), ('trust', 'Trust Wallet'), ('other', 'Other')], max_length=20)),
-                ('wallet_address', models.CharField(blank=True, max_length=42)),
-                ('connection_status', models.CharField(choices=[('success', 'Success'), ('failed', 'Failed'), ('cancelled', 'Cancelled')], max_length=10)),
-                ('attempted_at', models.DateTimeField(auto_now_add=True)),
-                ('error_message', models.TextField(blank=True)),
-                ('ip_address', models.GenericIPAddressField()),
-                ('user_agent', models.TextField(blank=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='wallet_connections', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "wallet_provider",
+                    models.CharField(
+                        choices=[
+                            ("metamask", "MetaMask"),
+                            ("coinbase", "Coinbase Wallet"),
+                            ("walletconnect", "WalletConnect"),
+                            ("phantom", "Phantom"),
+                            ("trust", "Trust Wallet"),
+                            ("other", "Other"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("wallet_address", models.CharField(blank=True, max_length=42)),
+                (
+                    "connection_status",
+                    models.CharField(
+                        choices=[
+                            ("success", "Success"),
+                            ("failed", "Failed"),
+                            ("cancelled", "Cancelled"),
+                        ],
+                        max_length=10,
+                    ),
+                ),
+                ("attempted_at", models.DateTimeField(auto_now_add=True)),
+                ("error_message", models.TextField(blank=True)),
+                ("ip_address", models.GenericIPAddressField()),
+                ("user_agent", models.TextField(blank=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="wallet_connections",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-attempted_at'],
+                "ordering": ["-attempted_at"],
             },
         ),
         migrations.CreateModel(
-            name='PageView',
+            name="PageView",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('path', models.CharField(max_length=255)),
-                ('method', models.CharField(default='GET', max_length=10)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('response_time', models.FloatField(blank=True, null=True)),
-                ('status_code', models.IntegerField(default=200)),
-                ('referrer', models.URLField(blank=True)),
-                ('ip_address', models.GenericIPAddressField()),
-                ('user_agent', models.TextField(blank=True)),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='page_views', to=settings.AUTH_USER_MODEL)),
-                ('session', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='page_views', to='analytics.usersession')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("path", models.CharField(max_length=255)),
+                ("method", models.CharField(default="GET", max_length=10)),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                ("response_time", models.FloatField(blank=True, null=True)),
+                ("status_code", models.IntegerField(default=200)),
+                ("referrer", models.URLField(blank=True)),
+                ("ip_address", models.GenericIPAddressField()),
+                ("user_agent", models.TextField(blank=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="page_views",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "session",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="page_views",
+                        to="analytics.usersession",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-timestamp'],
+                "ordering": ["-timestamp"],
             },
         ),
         migrations.AddIndex(
-            model_name='retentioncohort',
-            index=models.Index(fields=['cohort_date', 'period_type'], name='analytics_r_cohort__8b5c8e_idx'),
+            model_name="retentioncohort",
+            index=models.Index(
+                fields=["cohort_date", "period_type"],
+                name="analytics_r_cohort__8b5c8e_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='retentioncohort',
-            index=models.Index(fields=['period_type', 'period_number'], name='analytics_r_period__c8a9f1_idx'),
+            model_name="retentioncohort",
+            index=models.Index(
+                fields=["period_type", "period_number"],
+                name="analytics_r_period__c8a9f1_idx",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='retentioncohort',
-            unique_together={('cohort_date', 'period_type', 'period_number')},
+            name="retentioncohort",
+            unique_together={("cohort_date", "period_type", "period_number")},
         ),
         migrations.AddIndex(
-            model_name='userbehaviormetrics',
-            index=models.Index(fields=['first_login'], name='analytics_u_first_l_4c8b2a_idx'),
+            model_name="userbehaviormetrics",
+            index=models.Index(
+                fields=["first_login"], name="analytics_u_first_l_4c8b2a_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='userbehaviormetrics',
-            index=models.Index(fields=['last_login'], name='analytics_u_last_lo_8f9e3d_idx'),
+            model_name="userbehaviormetrics",
+            index=models.Index(
+                fields=["last_login"], name="analytics_u_last_lo_8f9e3d_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='userbehaviormetrics',
-            index=models.Index(fields=['is_returning_user'], name='analytics_u_is_retu_7a2b4c_idx'),
+            model_name="userbehaviormetrics",
+            index=models.Index(
+                fields=["is_returning_user"], name="analytics_u_is_retu_7a2b4c_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='usersession',
-            index=models.Index(fields=['user', 'login_at'], name='analytics_u_user_id_5d8f2a_idx'),
+            model_name="usersession",
+            index=models.Index(
+                fields=["user", "login_at"], name="analytics_u_user_id_5d8f2a_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='usersession',
-            index=models.Index(fields=['login_at'], name='analytics_u_login_a_9c4e1b_idx'),
+            model_name="usersession",
+            index=models.Index(
+                fields=["login_at"], name="analytics_u_login_a_9c4e1b_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='usersession',
-            index=models.Index(fields=['is_active'], name='analytics_u_is_acti_3f7a8d_idx'),
+            model_name="usersession",
+            index=models.Index(
+                fields=["is_active"], name="analytics_u_is_acti_3f7a8d_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='walletconnection',
-            index=models.Index(fields=['user', 'attempted_at'], name='analytics_w_user_id_2b9f4e_idx'),
+            model_name="walletconnection",
+            index=models.Index(
+                fields=["user", "attempted_at"], name="analytics_w_user_id_2b9f4e_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='walletconnection',
-            index=models.Index(fields=['wallet_provider', 'connection_status'], name='analytics_w_wallet__6c8a3f_idx'),
+            model_name="walletconnection",
+            index=models.Index(
+                fields=["wallet_provider", "connection_status"],
+                name="analytics_w_wallet__6c8a3f_idx",
+            ),
         ),
         migrations.AddIndex(
-            model_name='walletconnection',
-            index=models.Index(fields=['attempted_at'], name='analytics_w_attempt_1d5e7b_idx'),
+            model_name="walletconnection",
+            index=models.Index(
+                fields=["attempted_at"], name="analytics_w_attempt_1d5e7b_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='pageview',
-            index=models.Index(fields=['user', 'timestamp'], name='analytics_p_user_id_4f2a9c_idx'),
+            model_name="pageview",
+            index=models.Index(
+                fields=["user", "timestamp"], name="analytics_p_user_id_4f2a9c_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='pageview',
-            index=models.Index(fields=['path', 'timestamp'], name='analytics_p_path_8e3b1d_idx'),
+            model_name="pageview",
+            index=models.Index(
+                fields=["path", "timestamp"], name="analytics_p_path_8e3b1d_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='pageview',
-            index=models.Index(fields=['timestamp'], name='analytics_p_timesta_7a4f2e_idx'),
+            model_name="pageview",
+            index=models.Index(
+                fields=["timestamp"], name="analytics_p_timesta_7a4f2e_idx"
+            ),
         ),
     ]

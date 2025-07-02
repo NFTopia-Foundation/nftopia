@@ -11,8 +11,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+
 # from dotenv import load_dotenv
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,65 +24,92 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-your-secret-key-here')
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-your-secret-key-here")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# JWT Configuration
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": os.getenv("JWT_SECRET_KEY"),
+    "VERIFYING_KEY": None,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
+}
+
+# DRF Configuration
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+}
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
     # Third-party apps
-    'rest_framework',
-    
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     # NFTopia apps
-    'users',
-    'sales',
-    'minting',
-    'marketplace',
-    'analytics',  # New analytics app
+    "users",
+    "sales",
+    "minting",
+    "marketplace",
+    "analytics",  # New analytics app
+    "authentication",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'analytics.middleware.AnalyticsMiddleware',  # Add analytics middleware
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "analytics.middleware.AnalyticsMiddleware",  # Add analytics middleware
 ]
 
-ROOT_URLCONF = 'nftopia_analytics.urls'
+ROOT_URLCONF = "nftopia_analytics.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'nftopia_analytics.wsgi.application'
+WSGI_APPLICATION = "nftopia_analytics.wsgi.application"
 
 
 # Database
@@ -88,25 +117,23 @@ WSGI_APPLICATION = 'nftopia_analytics.wsgi.application'
 
 # TimescaleDB PostgreSQL Configuration
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('TIMESCALE_DB_NAME', 'nftopia_analytics'),
-        'USER': os.getenv('TIMESCALE_DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('TIMESCALE_DB_PASSWORD', 'postgres'),
-        'HOST': os.getenv('TIMESCALE_DB_HOST', 'localhost'),
-        'PORT': os.getenv('TIMESCALE_DB_PORT', '5432'),
-        'OPTIONS': {
-            'options': '-c default_transaction_isolation=serializable'
-        },
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("TIMESCALE_DB_NAME", "nftopia_analytics"),
+        "USER": os.getenv("TIMESCALE_DB_USER", "postgres"),
+        "PASSWORD": os.getenv("TIMESCALE_DB_PASSWORD", "postgres"),
+        "HOST": os.getenv("TIMESCALE_DB_HOST", "localhost"),
+        "PORT": os.getenv("TIMESCALE_DB_PORT", "5432"),
+        "OPTIONS": {"options": "-c default_transaction_isolation=serializable"},
     }
 }
 
 # Fallback to SQLite for development if PostgreSQL is not available
-if os.getenv('USE_SQLITE', 'false').lower() == 'true':
+if os.getenv("USE_SQLITE", "false").lower() == "true":
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
@@ -116,16 +143,16 @@ if os.getenv('USE_SQLITE', 'false').lower() == 'true':
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -133,9 +160,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -145,15 +172,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    BASE_DIR / "static",
 ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Analytics settings
 ANALYTICS_TRACK_ANONYMOUS_USERS = True
@@ -161,21 +188,54 @@ ANALYTICS_GEO_IP_ENABLED = False  # Set to True to enable geographic tracking
 
 # TimescaleDB Configuration
 TIMESCALEDB_SETTINGS = {
-    'CHUNK_TIME_INTERVAL': {
-        'nft_mints': '1 day',
-        'nft_sales': '1 day', 
-        'nft_transfers': '1 day',
-        'gas_metrics': '1 day',
-        'page_views': '1 day',
-        'user_sessions': '7 days',
+    "CHUNK_TIME_INTERVAL": {
+        "nft_mints": "1 day",
+        "nft_sales": "1 day",
+        "nft_transfers": "1 day",
+        "gas_metrics": "1 day",
+        "page_views": "1 day",
+        "user_sessions": "7 days",
     },
-    'RETENTION_POLICIES': {
-        'raw_events': '90 days',
-        'aggregates': '1 year',
+    "RETENTION_POLICIES": {
+        "raw_events": "90 days",
+        "aggregates": "1 year",
     },
-    'COMPRESSION': {
-        'enabled': True,
-        'compress_after': '7 days',
-        'compression_level': 1,
-    }
+    "COMPRESSION": {
+        "enabled": True,
+        "compress_after": "7 days",
+        "compression_level": 1,
+    },
+}
+
+# Logging Configuration
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "auth_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": "auth.log",
+            "formatter": "verbose",
+        },
+        "auth_errors": {
+            "level": "WARNING",
+            "class": "logging.FileHandler",
+            "filename": "auth_errors.log",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "authentication": {
+            "handlers": ["auth_file", "auth_errors"],
+            "level": "INFO",
+            "propagate": True,
+        },
+    },
 }

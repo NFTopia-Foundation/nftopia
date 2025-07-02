@@ -12,8 +12,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { RedisIoAdapter } from './redis/redis.adapter';
 
-async function bootstrap() {
+
+async function bootstrap() {  
+  
   const app = await NestFactory.create(AppModule);
+
   const configService = app.get(ConfigService);
 
   const redisAdapter = new RedisIoAdapter(app);
