@@ -1,6 +1,3 @@
-use starknet::contract_address::ContractAddress;
-use starknet::get_caller_address;
-
 // Swap status enum
 #[derive(Drop, starknet::Store, Copy)]
 enum SwapStatus {
@@ -16,9 +13,9 @@ enum SwapStatus {
 // Storage for the escrow contract
 #[starknet::contract]
 mod EscrowStorage {
-    use super::SwapStatus;
     use starknet::contract_address::ContractAddress;
-    use starknet::get_caller_address;
+    use starknet::storage::{ Map };
+
 
     #[storage]
     struct Storage {
@@ -26,7 +23,7 @@ mod EscrowStorage {
         next_swap_id: u256,
         
         // User data
-        user_swaps: LegacyMap<ContractAddress, Array<u256>>,
+        user_swaps: Map<ContractAddress, Array<u256>>,
         active_swaps: Array<u256>,
         
         // Contract state
@@ -43,8 +40,8 @@ mod EscrowStorage {
         emergency_stop: bool,
         
         // Rate limiting
-        user_swap_count: LegacyMap<ContractAddress, u32>,
-        last_swap_time: LegacyMap<ContractAddress, u64>,
+        user_swap_count: Map<ContractAddress, u32>,
+        last_swap_time: Map<ContractAddress, u64>,
         
         // Fees and economics
         platform_fee: u256,
