@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
 import uuid
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from apps.cache.redis_utils import invalidate_analytics_cache
 
 
 class UserSession(models.Model):
@@ -233,3 +236,17 @@ class PageView(models.Model):
     def __str__(self):
         user_str = self.user.username if self.user else "Anonymous"
         return f"{user_str} - {self.path} ({self.timestamp.strftime('%Y-%m-%d %H:%M')})"
+
+
+# Cache Invalidation Signals
+@receiver(post_save, sender=UserSession)
+@receiver(post_delete, sender=UserSession)
+@receiver(post_save, sender=WalletConnection)
+@receiver(post_delete, sender=WalletConnection)
+@receiver(post_save, sender=PageView)
+@receiver(post_delete, sender=PageView)
+def invalidate_analytics_cache_signal(sender, instance, **kwargs):
+    """
+    Signal handler to invalidate analytics cache when relevant models change
+    """
+    invalidate_analytics_cache()

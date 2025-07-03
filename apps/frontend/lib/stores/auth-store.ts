@@ -4,6 +4,7 @@ import { immer } from 'zustand/middleware/immer';
 import { AuthStore, User } from './types';
 import { API_CONFIG } from '../config';
 import { getCookie } from '../CSRFTOKEN';
+import { NextRouter } from 'next/router';
 
 const initialState = {
   user: null,
@@ -62,7 +63,10 @@ export const useAuthStore = create<AuthStore>()(
             throw new Error('Failed to request nonce');
           }
 
-          const { nonce } = await res.json();
+          const result = await res.json();
+
+          const nonce = result.data.data.nonce;
+          console.log(nonce);
           return nonce;
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Failed to request nonce';
@@ -72,14 +76,14 @@ export const useAuthStore = create<AuthStore>()(
           throw error;
         }
       },
-
-      verifySignature: async (walletAddress: string, signature: string): Promise<void> => {
+      verifySignature: async (
+        walletAddress: string,
+        signature: [string, string],
+        nonce: string,
+        walletType: 'argentx' | 'braavos'
+      ) => {
+        set({ loading: true });
         try {
-          set((state) => {
-            state.loading = true;
-            state.error = null;
-          });
-
           const csrfToken = await getCookie();
           const res = await fetch(`${API_CONFIG.baseUrl}/auth/verify-signature`, {
             method: 'POST',
@@ -88,25 +92,34 @@ export const useAuthStore = create<AuthStore>()(
               'Content-Type': 'application/json',
               'X-CSRF-Token': csrfToken,
             },
-            body: JSON.stringify({ walletAddress, signature }),
+            body: JSON.stringify({
+              walletAddress,
+              signature,
+              nonce,
+              walletType,
+            }),
           });
 
           if (!res.ok) {
-            throw new Error('Verification failed');
+            const errorData = await res.json();
+            throw new Error(errorData.message || 'Verification failed');
           }
 
-          const { user } = await res.json();
-          set((state) => {
-            state.user = user;
-            state.isAuthenticated = true;
-            state.loading = false;
+          const result = await res.json();
+
+          let user = result.data.data;
+
+          console.log(user);
+          localStorage.setItem('auth-user', JSON.stringify({ data: user }));
+          set({
+            user,
+            isAuthenticated: true,
+            loading: false,
+            error: null,
           });
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Verification failed';
-          set((state) => {
-            state.error = errorMessage;
-            state.loading = false;
-          });
+          const message = error instanceof Error ? error.message : 'Verification failed';
+          set({ error: message, loading: false });
           throw error;
         }
       },
@@ -155,45 +168,45 @@ export const useAuthStore = create<AuthStore>()(
   )
 );
 
-// Initialize auth state (equivalent to the useEffect in auth-context)
-export const initializeAuth = async () => {
+
+export const initializeAuth = async (router?: NextRouter) => {
   const { setUser, setLoading, setError } = useAuthStore.getState();
 
   try {
     setLoading(true);
     setError(null);
 
-    const csrfRes = await fetch(`${API_CONFIG.baseUrl}/auth/csrf-token`, {
+    const csrfToken = await getCookie();
+    
+    const res = await fetch(`${API_CONFIG.baseUrl}/auth/me`, {
+      method: 'GET',
       credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken,
+      },
     });
 
-    if (!csrfRes.ok) {
-      console.error('Failed to fetch CSRF token');
-      setLoading(false);
-      return;
-    }
+    const result = await res.json();
 
-    const { csrfToken } = await csrfRes.json();
+  
 
-    try {
-      const res = await fetch(`${API_CONFIG.baseUrl}/auth/me`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
-        },
-      });
+    if (res.ok) {
+      const userData = result.data?.data; // Adjust based on your actual response structure
+      setUser(userData);
 
-      if (res.ok) {
-        const userData = await res.json();
-        setUser(userData);
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
+      let currLocation = window.location.href;
+
+      if (currLocation === "http://localhost:5000/auth/login" && userData) window.location.href = "http://localhost:5000/creator-dashboard";
+      
+  
+    } else {
+      setUser(null);
     }
   } catch (error) {
     console.error('Error in auth check:', error);
     setError('Authentication initialization failed');
+    setUser(null);
   } finally {
     setLoading(false);
   }
@@ -223,3 +236,5 @@ export const useAuth = () => {
     clearError,
   };
 }; 
+
+

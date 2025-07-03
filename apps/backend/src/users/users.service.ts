@@ -35,6 +35,19 @@ export class UsersService {
     return user;
   }
 
+  async findOrCreateByWallet(walletAddress: string): Promise<User> {
+    try {
+      return await this.findByWallet(walletAddress);
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        const newUser = this.userRepository.create({ walletAddress });
+        return this.userRepository.save(newUser);
+      }
+      throw err; // rethrow unexpected errors
+    }
+  }
+  
+
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     await this.userRepository.update(id, updateUserDto);
     return this.findOne(id);

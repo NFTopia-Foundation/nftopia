@@ -41,6 +41,13 @@ pub trait INftContract<TContractState> {
     fn set_approval_for_all(ref self: TContractState, operator: ContractAddress, approved: bool);
 }
 
+
+#[starknet::interface]
+trait INFTEstimator<TContractState> {
+    fn estimate_transfer_gas(self: @TContractState, token_id: felt252) -> u128;
+    fn estimate_approve_gas(self: @TContractState, token_id: felt252) -> u128;
+}
+
 /// Implementation of the NFT Contract Module
 #[starknet::contract]
 pub mod NftContract {

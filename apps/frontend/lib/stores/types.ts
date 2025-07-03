@@ -1,6 +1,6 @@
 // Auth Store Types
 export interface User {
-  id: string;
+  sub: string;
   walletAddress: string;
   isArtist?: boolean;
   username?: string;
@@ -28,7 +28,26 @@ export interface AuthActions {
   clearError: () => void;
 }
 
-export type AuthStore = AuthState & AuthActions;
+// export type AuthStore = AuthState & AuthActions;
+
+export type AuthStore = {
+  user: User | null;
+  loading: boolean;
+  isAuthenticated: boolean;
+  error: string | null;
+  setUser: (user: User | null) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  clearError: () => void;
+  requestNonce: (walletAddress: string) => Promise<string>;
+  verifySignature: (
+    walletAddress: string,
+    signature: [string, string], // Changed from string to [string, string]
+    nonce: string,
+    walletType: 'argentx' | 'braavos'
+  ) => Promise<void>;
+  logout: () => Promise<void>;
+};
 
 // Collection Store Types
 export interface Collection {

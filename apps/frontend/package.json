@@ -26,6 +26,7 @@
     "eslint-config-next": "13.5.1",
     "firebase": "^11.9.1",
     "framer-motion": "^12.5.0",
+    "get-starknet": "^3.3.3",
     "get-starknet-core": "^3.3.5",
     "gsap": "^3.12.7",
     "immer": "^10.1.1",
