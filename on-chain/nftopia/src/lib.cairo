@@ -4,6 +4,7 @@ mod modules {
     pub mod view;
     pub mod nft_contract;
     pub mod transaction;
+    pub mod royalty_contract;
 }
 mod storage {
     pub mod storage;
@@ -32,4 +33,9 @@ pub mod transaction {
 
 pub mod nft_contract {
     use crate::modules::nft_contract::*;
+}
+
+mod gas_estimation {
+    pub mod core;
+    pub mod interfaces;
 }
