@@ -26,4 +26,5 @@ urlpatterns = [
     path("api/gas/sales/", GasSalesView.as_view(), name="gas-sales"),
     path("api/gas/predictions/", GasPredictionsView.as_view(), name="gas-predictions"),
     path("api/auth/", include("authentication.urls")),
+    path('cache/clear/', include('apps.cache.urls')),
 ]

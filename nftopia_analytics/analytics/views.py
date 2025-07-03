@@ -234,6 +234,7 @@ from .utils import (
     get_session_analytics,
     get_user_segmentation,
 )
+from apps.cache.redis_utils import cache_response
 
 
 def is_staff_user(user):
@@ -383,6 +384,7 @@ def user_behavior(request):
 
 
 # API endpoints for AJAX requests
+@cache_response(timeout=3600)  # 1 hour cache
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 @user_passes_test(is_staff_user)
@@ -393,6 +395,7 @@ def api_session_data(request):
     return Response(data)
 
 
+@cache_response(timeout=3600)  # 1 hour cache
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 @user_passes_test(is_staff_user)
@@ -402,6 +405,7 @@ def api_wallet_data(request):
     return Response(data)
 
 
+@cache_response(timeout=3600)  # 1 hour cache
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 @user_passes_test(is_staff_user)

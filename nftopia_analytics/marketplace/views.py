@@ -10,9 +10,9 @@ from django.http import HttpResponse
 import csv
 from django.db.models import Avg, Min, Max
 import requests
+from apps.cache.redis_utils import check_redis_health  # Add this import
 
 # Utility to fetch live ETH price from CoinGecko
-
 def get_live_eth_price():
     try:
         response = requests.get(
@@ -43,8 +43,22 @@ def calculate_metrics(qs, eth_price_usd=None):
         'eth_price_usd': eth_price_usd,
     }
 
-# Create your views here.
+def health_check(request):
+    """Health check endpoint with Redis status"""
+    # Add cache health to existing health check
+    cache_status = check_redis_health()
+    
+    # Return response including Redis status
+    return Response({
+        'status': 'ok',
+        'services': {
+            'database': 'ok',  # Assuming DB is always ok if we got here
+            'redis': 'ok' if cache_status else 'unavailable',
+            'coingecko_api': 'ok' if get_live_eth_price() != 3500 else 'unavailable'
+        }
+    })
 
+# Create your views here.
 class GasMintingView(APIView):
     def get(self, request):
         days = int(request.GET.get('days', 7))
@@ -129,3 +143,4 @@ class GasPredictionsView(APIView):
             for i in range(7)
         ]
         return Response({'predictions': predictions, 'eth_price_usd': eth_price_usd})
+    
