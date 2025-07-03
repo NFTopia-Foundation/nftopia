@@ -168,47 +168,6 @@ export const useAuthStore = create<AuthStore>()(
   )
 );
 
-// Initialize auth state (equivalent to the useEffect in auth-context)
-// export const initializeAuth = async () => {
-//   const { setUser, setLoading, setError } = useAuthStore.getState();
-
-//   const csrfToken = await getCookie();
-
-//   try {
-//     setLoading(true);
-//     setError(null);
-
-
-//     try {
-//       const res = await fetch(`${API_CONFIG.baseUrl}/auth/me`, {
-//         method: 'GET',
-//         credentials: 'include',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           'X-CSRF-Token': csrfToken,
-//         },
-//       });
-
-//       const result = await res.json();
-
-//       console.log(result);
-
-//       if (res.ok) {
-//         let userData = result.data.data;
-//         console.log(userData);
-//         setUser(userData);
-//       }
-//     } catch (error) {
-//       console.error('Error fetching user data:', error);
-//     }
-//   } catch (error) {
-//     console.error('Error in auth check:', error);
-//     setError('Authentication initialization failed');
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-
 
 export const initializeAuth = async (router?: NextRouter) => {
   const { setUser, setLoading, setError } = useAuthStore.getState();

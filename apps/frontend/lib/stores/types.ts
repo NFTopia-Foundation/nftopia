@@ -1,6 +1,6 @@
 // Auth Store Types
 export interface User {
-  id: string;
+  sub: string;
   walletAddress: string;
   isArtist?: boolean;
   username?: string;
