@@ -1,7 +1,12 @@
 from django.urls import path
 from . import views, heatmap
+from .views_dir.visualization_views import MintingTrendVisualization
+
 
 app_name = "analytics"
+
+
+
 
 urlpatterns = [
     # Dashboard views
@@ -26,4 +31,6 @@ urlpatterns = [
     path("api/analytics/minting/", views.MintingAnalyticsView.as_view(), name="minting_analytics"),
     path("api/analytics/sales/", views.SalesAnalyticsView.as_view(), name="sales_analytics"),
     path("api/analytics/users/", views.UserAnalyticsView.as_view(), name="user_analytics"),
+    path('visualizations/minting-trend/', MintingTrendVisualization.as_view(), name='minting-trend'),
+
 ]

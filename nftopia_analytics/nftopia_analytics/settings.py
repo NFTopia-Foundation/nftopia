@@ -45,8 +45,13 @@ CACHES = {
         },
         'KEY_PREFIX': 'nftopia_analytics',
         'TIMEOUT': 3600,  # 1 hour default
+    },
+    'visualization': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     }
 }
+
 
 # JWT Configuration
 SIMPLE_JWT = {
