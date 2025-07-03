@@ -16,7 +16,6 @@ enum SwapStatus {
 // Storage for the escrow contract
 #[starknet::contract]
 mod EscrowStorage {
-    use super::Swap;
     use super::SwapStatus;
     use starknet::contract_address::ContractAddress;
     use starknet::get_caller_address;
@@ -24,7 +23,6 @@ mod EscrowStorage {
     #[storage]
     struct Storage {
         // Swap tracking
-        swaps: LegacyMap<u256, Swap>,
         next_swap_id: u256,
         
         // User data
