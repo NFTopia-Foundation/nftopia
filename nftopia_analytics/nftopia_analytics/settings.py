@@ -31,6 +31,23 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Redis Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'CONNECTION_POOL_KWARGS': {
+                'max_connections': 20,
+                'retry_on_timeout': True,
+            }
+        },
+        'KEY_PREFIX': 'nftopia_analytics',
+        'TIMEOUT': 3600,  # 1 hour default
+    }
+}
+
 # JWT Configuration
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
