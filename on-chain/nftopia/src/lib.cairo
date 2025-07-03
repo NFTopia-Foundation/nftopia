@@ -9,6 +9,7 @@ mod modules {
 mod storage {
     pub mod storage;
     pub mod transaction_storage;
+    pub mod escrow_storage;
 }
 mod events {
     pub mod events;
@@ -18,6 +19,7 @@ mod events {
 mod interfaces {
     pub mod collection_factory;
     pub mod INFI;
+    pub mod escrow_interfaces;
 }
 mod utils {
     pub mod helpers;
@@ -25,6 +27,7 @@ mod utils {
 mod contracts {
     pub mod collection_factory;
     pub mod nft_contract;
+    pub mod escrow_contract;
 }
 
 pub mod transaction {
