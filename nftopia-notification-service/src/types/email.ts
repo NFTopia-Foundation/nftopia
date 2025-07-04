@@ -78,3 +78,32 @@ export interface EmailStats {
   unsubscribes: number;
   spamReports: number;
 }
+
+export interface PurchaseData {
+  nftName: string;
+  nftImageUrl: string;
+  txHash: string;
+  price: string | number;
+  currency: string;
+  txLink: string;
+}
+
+export interface EmailOptions {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+}
+
+export interface PurchaseRequest {
+  email: string;
+  nftData: {
+    name: string;
+    image: string;
+  };
+  txData: {
+    hash: string;
+    value: string | number;
+    currency?: string;
+  };
+}
