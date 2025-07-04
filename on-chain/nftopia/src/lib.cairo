@@ -5,6 +5,7 @@ mod modules {
     pub mod nft_contract;
     pub mod transaction;
     pub mod royalty_contract;
+    pub mod reentrancy_guard;
 }
 mod storage {
     pub mod storage;
@@ -20,6 +21,7 @@ mod interfaces {
     pub mod collection_factory;
     pub mod INFI;
     pub mod escrow_interfaces;
+    pub mod reentrancy_interfaces;  
 }
 mod utils {
     pub mod helpers;
