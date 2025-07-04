@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { ConnectOptions } from 'mongoose';
 
 const retryOptions = {
   maxRetries: 5,
@@ -8,8 +8,14 @@ const retryOptions = {
 
 export const connectWithRetry = async (
   uri: string,
-  options: mongoose.ConnectOptions = {}
+  options: {
+    retryAttempts?: number;
+    retryDelay?: number;
+  } & ConnectOptions = {}
 ) => {
+
+  const { retryAttempts = 5, retryDelay = 5000, ...connectOptions } = options;
+
   let attempts = 1;
 
   const connect = async () => {

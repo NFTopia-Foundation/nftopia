@@ -5,6 +5,10 @@ import emailRoutes from './routes/email.routes';
 import smsRoutes from './routes/sms.routes';
 import { database } from './config/database';
 
+import exphbs from 'express-handlebars';
+import htmlToText from 'html-to-text';
+import path from 'path';
+
 const app = express();
 
 // Initialize database connection on startup
@@ -54,6 +58,19 @@ app.get('/health', async (req, res) => {
 app.use('/api', routes);
 app.use('/api/v1/email', emailRoutes);
 app.use('/api/v1/sms', smsRoutes);
+
+
+
+// Configure Handlebars
+const hbs = exphbs.create({
+  extname: '.hbs',
+  partialsDir: path.join(__dirname, 'templates/partials'),
+});
+
+// Register template engine
+app.engine('.hbs', hbs.engine);
+app.set('view engine', '.hbs');
+app.set('views', path.join(__dirname, 'templates/emails'));
 
 // Initialize database when starting the app
 initializeDatabase().catch(err => {
