@@ -1,11 +1,14 @@
 from django.urls import path
 from . import views, heatmap
 from .views_dir.visualization_views import MintingTrendVisualization
+from .views_dir.collection_views import (
+    CollectionMetricsView,
+    CollectionMintingView,
+    CollectionHoldersView
+)
 
 
 app_name = "analytics"
-
-
 
 
 urlpatterns = [
@@ -33,4 +36,8 @@ urlpatterns = [
     path("api/analytics/users/", views.UserAnalyticsView.as_view(), name="user_analytics"),
     path('visualizations/minting-trend/', MintingTrendVisualization.as_view(), name='minting-trend'),
 
+    # Collection Specific endpoiints
+    path('collections/<uuid:collection_id>/metrics', CollectionMetricsView.as_view()),
+    path('collections/<uuid:collection_id>/minting', CollectionMintingView.as_view()),
+    path('collections/<uuid:collection_id>/holders', CollectionHoldersView.as_view()),
 ]
