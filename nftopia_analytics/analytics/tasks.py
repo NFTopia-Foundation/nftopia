@@ -5,6 +5,8 @@ from .detection_engine import AnomalyDetectionEngine
 from .models import AnomalyDetection, AlertWebhook, WebhookLog, UserBehaviorProfile, NFTTransaction
 from .webhook_service import WebhookService
 import logging
+from django.db import connection
+from redis import Redis
 
 logger = logging.getLogger(__name__)
 
@@ -321,3 +323,50 @@ def generate_adhoc_report(report_type: str, config: Dict[str, Any]):
             'status': 'error',
             'error': str(e)
         }
+
+
+@shared_task
+def aggregate_mints():
+    """Aggregate daily NFT mint count by collection and store in materialized view and Redis."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY daily_mint_count_by_collection;")
+        redis_client = Redis()
+        # Example: cache top collections by mint count
+        cursor.execute("SELECT collection, mint_count FROM daily_mint_count_by_collection WHERE date = CURRENT_DATE ORDER BY mint_count DESC LIMIT 10;")
+        top_collections = cursor.fetchall()
+        redis_client.set('top_mint_collections', str(top_collections))
+        return {'status': 'success', 'top_collections': top_collections}
+    except Exception as e:
+        logger.error(f"Mint aggregation failed: {str(e)}")
+        return {'status': 'error', 'message': str(e)}
+
+@shared_task
+def aggregate_sales():
+    """Aggregate daily NFT sales volume rollups and store in materialized view and Redis."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY daily_sales_volume_rollup;")
+        redis_client = Redis()
+        cursor.execute("SELECT collection, total_sales FROM daily_sales_volume_rollup WHERE date = CURRENT_DATE ORDER BY total_sales DESC LIMIT 10;")
+        top_sales = cursor.fetchall()
+        redis_client.set('top_sales_collections', str(top_sales))
+        return {'status': 'success', 'top_sales': top_sales}
+    except Exception as e:
+        logger.error(f"Sales aggregation failed: {str(e)}")
+        return {'status': 'error', 'message': str(e)}
+
+@shared_task
+def aggregate_user_activity():
+    """Aggregate daily user activity summaries and store in materialized view and Redis."""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY daily_user_activity_summary;")
+        redis_client = Redis()
+        cursor.execute("SELECT user_id, activity_score FROM daily_user_activity_summary WHERE date = CURRENT_DATE ORDER BY activity_score DESC LIMIT 10;")
+        top_users = cursor.fetchall()
+        redis_client.set('top_active_users', str(top_users))
+        return {'status': 'success', 'top_users': top_users}
+    except Exception as e:
+        logger.error(f"User activity aggregation failed: {str(e)}")
+        return {'status': 'error', 'message': str(e)}

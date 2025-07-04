@@ -279,11 +279,23 @@ from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
     'generate-scheduled-reports': {
         'task': 'analytics.tasks.generate_scheduled_reports_task',
-        'schedule': crontab(minute=0, hour='*/6'),  # Every 6 hours
+        'schedule': crontab(minute=0, hour='*/6'),
     },
     'cleanup-old-data': {
         'task': 'analytics.tasks.cleanup_old_data_task',
-        'schedule': crontab(minute=0, hour=2),  # Daily at 2 AM
+        'schedule': crontab(minute=0, hour=2),
+    },
+    'aggregate-daily-mints': {
+        'task': 'analytics.tasks.aggregate_mints',
+        'schedule': crontab(minute=5, hour=0),
+    },
+    'aggregate-daily-sales': {
+        'task': 'analytics.tasks.aggregate_sales',
+        'schedule': crontab(minute=15, hour=0),
+    },
+    'aggregate-daily-user-activity': {
+        'task': 'analytics.tasks.aggregate_user_activity',
+        'schedule': crontab(minute=30, hour=0),
     },
 }
 
