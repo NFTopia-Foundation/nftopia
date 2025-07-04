@@ -58,6 +58,8 @@ pub mod NftContract {
     use core::traits::Into;
     use starknet::event::EventEmitter;
     use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess, Map};
+    use crate::modules::reentrancy_guard::ReentrancyGuard;
+
 
     // Import event types
     use crate::events::nft_events::{Mint, Transfer, Approval, ApprovalForAll};
@@ -90,6 +92,7 @@ pub mod NftContract {
         creators: Map<u256, ContractAddress>,
         // Token collection mapping: token_id => collection
         collections: Map<u256, ContractAddress>,
+        reentrancy_guard: ReentrancyGuard::Storage,
     }
 
     #[generate_trait]
@@ -116,27 +119,34 @@ pub mod NftContract {
         fn _transfer(
             ref self: ContractState, from: ContractAddress, to: ContractAddress, token_id: u256,
         ) {
+
+            self.reentrancy_guard._assert_non_reentrant();
+            self.reentrancy_guard._lock();
+                        
+                        
             // Validate addresses
             assert(!from.is_zero(), 'Transfer from zero address');
             assert(!to.is_zero(), 'Transfer to zero address');
-
+            
             // Get current owner and validate ownership
             let owner = self.owners.read(token_id);
             assert(!owner.is_zero(), 'Token does not exist');
             assert(owner == from, 'From is not the owner');
-
+            
             // Clear approvals for this token
             self.token_approvals.write(token_id, Zero::zero());
-
+            
             // Update balances
             self.balances.write(from, self.balances.read(from) - 1);
             self.balances.write(to, self.balances.read(to) + 1);
-
+            
             // Update ownership
             self.owners.write(token_id, to);
-
+            
             // Emit transfer event
             self.emit(Event::Transfer(Transfer { from, to, token_id }));
+
+            self.reentrancy_guard._unlock();
         }
     }
 
