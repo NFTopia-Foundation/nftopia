@@ -8,6 +8,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from .report_generator import ReportGenerator
+from .distribution_service import DistributionService
+from .models import AutomatedReport, ReportExecution
+from .report_service import ReportGenerator
+from .models import AutomatedReport
+
 @shared_task
 def run_anomaly_detection_task(detection_type=None):
     """Celery task to run anomaly detection"""
@@ -186,4 +192,132 @@ def cleanup_old_data_task():
         return {
             'status': 'error',
             'message': str(e)
+        }
+
+
+@shared_task
+def generate_scheduled_reports_task():
+    """Generate all scheduled reports that are due"""
+    try:
+        now = timezone.now()
+        due_reports = AutomatedReport.objects.filter(
+            is_active=True,
+            next_run__lte=now
+        )
+        
+        generator = ReportGenerator()
+        generated_count = 0
+        
+        for report in due_reports:
+            try:
+                execution = generator.generate_report(report)
+                
+                # Update last_run and calculate next_run
+                report.last_run = now
+                report.calculate_next_run()
+                report.save()
+                
+                generated_count += 1
+                logger.info(f"Generated report {report.id}: {execution.status}")
+                
+            except Exception as e:
+                logger.error(f"Failed to generate report {report.id}: {str(e)}")
+        
+        logger.info(f"Scheduled report generation completed. Generated {generated_count} reports.")
+        
+        return {
+            'status': 'success',
+            'reports_generated': generated_count
+        }
+        
+    except Exception as e:
+        logger.error(f"Scheduled report generation task failed: {str(e)}")
+        return {
+            'status': 'error',
+            'message': str(e)
+        }
+
+@shared_task
+def generate_single_report_task(report_id):
+    """Generate a single report by ID"""
+    try:
+        report = AutomatedReport.objects.get(id=report_id)
+        generator = ReportGenerator()
+        execution = generator.generate_report(report)
+        
+        logger.info(f"Single report generation completed for report {report_id}: {execution.status}")
+        
+        return {
+            'status': 'success',
+            'execution_id': execution.id,
+            'execution_status': execution.status
+        }
+        
+    except AutomatedReport.DoesNotExist:
+        logger.error(f"Report {report_id} not found")
+        return {
+            'status': 'error',
+            'message': f"Report {report_id} not found"
+        }
+    except Exception as e:
+        logger.error(f"Single report generation failed for report {report_id}: {str(e)}")
+        return {
+            'status': 'error',
+            'message': str(e)
+        }
+
+@shared_task
+def cleanup_temp_files(file_paths: List[str]):
+    """Clean up temporary files after report distribution"""
+    try:
+        cleaned_count = 0
+        for file_path in file_paths:
+            try:
+                if os.path.exists(file_path) and 'temp_' in os.path.basename(file_path):
+                    os.remove(file_path)
+                    cleaned_count += 1
+            except Exception as e:
+                logger.warning(f"Failed to clean up file {file_path}: {str(e)}")
+        
+        logger.info(f"Cleaned up {cleaned_count} temporary files.")
+        
+        return {
+            'status': 'success',
+            'files_cleaned': cleaned_count
+        }
+        
+    except Exception as e:
+        logger.error(f"Cleanup task failed: {str(e)}")
+        return {
+            'status': 'error',
+            'message': str(e)
+        }
+
+@shared_task
+def generate_adhoc_report(report_type: str, config: Dict[str, Any]):
+    """Generate an ad-hoc report (not scheduled)"""
+    try:
+        generator = ReportGenerator()
+        generation_result = generator.generate_report(config)
+        
+        if config.get('distribute', False):
+            distributor = DistributionService()
+            distribution_result = distributor.distribute_report(config, generation_result['files'])
+            
+            return {
+                'status': 'success',
+                'generation_result': generation_result,
+                'distribution_result': distribution_result
+            }
+        
+        return {
+            'status': 'success',
+            'generation_result': generation_result
+        }
+        
+    except Exception as e:
+        logger.error(f"Ad-hoc report generation failed: {str(e)}")
+        return {
+            'status': 'error',
+            'error': str(e)
         }

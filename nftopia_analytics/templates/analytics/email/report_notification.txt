@@ -1,0 +1,19 @@
+NFTopia Analytics Report
+
+Your scheduled {{ report.get_frequency_display|lower }} report has been generated successfully.
+
+Report Details:
+- Type: {{ report.get_report_type_display }}
+- Generated: {{ generated_at|date:"F d, Y H:i" }}
+- Status: {{ execution.status|title }}
+{% if execution.data_points_processed %}- Data Points: {{ execution.data_points_processed }}{% endif %}
+
+{% if execution.s3_pdf_url or execution.s3_csv_url %}Download Links:
+{% if execution.s3_pdf_url %}- PDF Report: {{ execution.s3_pdf_url }}{% endif %}
+{% if execution.s3_csv_url %}- CSV Data: {{ execution.s3_csv_url }}{% endif %}
+{% else %}The report files are attached to this email.{% endif %}
+
+Thank you for using NFTopia Analytics!
+
+---
+This is an automated message from NFTopia Analytics.

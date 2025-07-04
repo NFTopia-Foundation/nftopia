@@ -9,9 +9,23 @@ python-dotenv==1.1.1
 redis==6.2.0
 sqlparse==0.5.3
 tzdata==2025.2
-pandas==2.1.1
-numpy==1.26.0
-plotly==5.15.0
-kaleido==0.2.1  
-drf-spectacular==0.26.2  
-psycopg2-binary==2.9.7 
+
+# Report Generation
+reportlab==4.0.4
+matplotlib==3.7.2
+seaborn==0.12.2
+Pillow==10.0.0
+
+# Celery and Task Management
+celery==5.3.4
+django-celery-beat==2.5.0
+django-celery-results==2.5.0
+redis==4.6.0
+
+# AWS S3 Integration
+boto3==1.28.25
+botocore==1.31.25
+
+# Additional utilities
+pandas==2.0.3
+numpy==1.24.3
