@@ -1,0 +1,32 @@
+/* Base styles */
+.email-wrapper {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .nft-image {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .button {
+    background: #6e45e2;
+    color: white;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  
+  /* Dark mode */
+  .dark {
+    background-color: #121212;
+    color: #ffffff;
+  }
+  
+  /* Media queries */
+  @media only screen and (max-width: 480px) {
+    .nft-card img {
+      width: 100% !important;
+    }
+  }
