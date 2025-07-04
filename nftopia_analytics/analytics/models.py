@@ -250,3 +250,96 @@ def invalidate_analytics_cache_signal(sender, instance, **kwargs):
     Signal handler to invalidate analytics cache when relevant models change
     """
     invalidate_analytics_cache()
+
+
+class AutomatedReport(models.Model):
+    report_type = models.CharField(choices=REPORT_TYPES)  # All 4 types included
+    frequency = models.CharField(choices=['daily', 'weekly', 'monthly'])
+    recipients = models.JSONField()  # List of emails/webhooks
+    format = models.CharField(choices=['pdf', 'csv', 'both'])
+    last_run = models.DateTimeField(null=True)
+    next_run = models.DateTimeField()  # Additional scheduling field
+    is_active = models.BooleanField(default=True)  # Additional control field
+    s3_bucket = models.CharField(max_length=255, blank=True)  # S3 integration
+    s3_prefix = models.CharField(max_length=255, blank=True)  # S3 organization
+    template_config = models.JSONField(default=dict)  # Template customization
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['report_type', 'frequency']),
+            models.Index(fields=['next_run', 'is_active']),
+        ]
+    
+    def __str__(self):
+        return f"{self.get_report_type_display()} - {self.get_frequency_display()}"
+    
+    def calculate_next_run(self):
+        """Calculate next run time based on frequency"""
+        if not self.last_run:
+            self.next_run = timezone.now()
+            return
+        
+        if self.frequency == 'daily':
+            self.next_run = self.last_run + timedelta(days=1)
+        elif self.frequency == 'weekly':
+            self.next_run = self.last_run + timedelta(weeks=1)
+        elif self.frequency == 'monthly':
+            # Add one month
+            next_month = self.last_run.replace(day=28) + timedelta(days=4)
+            self.next_run = next_month - timedelta(days=next_month.day-1)
+
+
+class ReportExecution(models.Model):
+    """Track report execution history"""
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('running', 'Running'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+    ]
+    
+    report = models.ForeignKey(AutomatedReport, on_delete=models.CASCADE, related_name='executions')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    error_message = models.TextField(blank=True)
+    
+    # Generated files
+    pdf_file_path = models.CharField(max_length=500, blank=True)
+    csv_file_path = models.CharField(max_length=500, blank=True)
+    s3_pdf_url = models.URLField(blank=True)
+    s3_csv_url = models.URLField(blank=True)
+    
+    # Metrics
+    data_points_processed = models.IntegerField(default=0)
+    recipients_notified = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['-started_at']
+    
+    def __str__(self):
+        return f"{self.report} - {self.status} - {self.started_at}"
+
+
+class ReportTemplate(models.Model):
+    """Customizable report templates"""
+    
+    name = models.CharField(max_length=255)
+    report_type = models.CharField(max_length=50)
+    template_content = models.TextField()  # HTML template for PDF generation
+    css_styles = models.TextField(blank=True)  # Custom CSS for styling
+    chart_config = models.JSONField(default=dict)  # Chart configuration
+    is_default = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['report_type', 'name']
+        ordering = ['report_type', 'name']
+    
+    def __str__(self):
+        return f"{self.name} ({self.report_type})"

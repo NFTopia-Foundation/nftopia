@@ -88,6 +88,236 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
+    "django_celery_beat",  # Add for scheduled tasks
+    "django_celery_results",  # Add for task results
+    # NFTopia apps
+    "users",
+    "sales",
+    "minting",
+    "marketplace",
+    "analytics",  # New analytics app
+    "authentication",
+]
+
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "analytics.middleware.AnalyticsMiddleware",  # Add analytics middleware
+]
+
+ROOT_URLCONF = "nftopia_analytics.urls"
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = "nftopia_analytics.wsgi.application"
+
+
+# Database
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+# TimescaleDB PostgreSQL Configuration
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("TIMESCALE_DB_NAME", "nftopia_analytics"),
+        "USER": os.getenv("TIMESCALE_DB_USER", "postgres"),
+        "PASSWORD": os.getenv("TIMESCALE_DB_PASSWORD", "postgres"),
+        "HOST": os.getenv("TIMESCALE_DB_HOST", "localhost"),
+        "PORT": os.getenv("TIMESCALE_DB_PORT", "5432"),
+        "OPTIONS": {"options": "-c default_transaction_isolation=serializable"},
+    }
+}
+
+# Fallback to SQLite for development if PostgreSQL is not available
+if os.getenv("USE_SQLITE", "false").lower() == "true":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
+
+# Password validation
+# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
+]
+
+
+# Internationalization
+# https://docs.djangoproject.com/en/5.2/topics/i18n/
+
+LANGUAGE_CODE = "en-us"
+
+TIME_ZONE = "UTC"
+
+USE_I18N = True
+
+USE_TZ = True
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.2/howto/static-files/
+
+STATIC_URL = "static/"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Analytics settings
+ANALYTICS_TRACK_ANONYMOUS_USERS = True
+ANALYTICS_GEO_IP_ENABLED = False  # Set to True to enable geographic tracking
+
+# TimescaleDB Configuration
+TIMESCALEDB_SETTINGS = {
+    "CHUNK_TIME_INTERVAL": {
+        "nft_mints": "1 day",
+        "nft_sales": "1 day",
+        "nft_transfers": "1 day",
+        "gas_metrics": "1 day",
+        "page_views": "1 day",
+        "user_sessions": "7 days",
+    },
+    "RETENTION_POLICIES": {
+        "raw_events": "90 days",
+        "aggregates": "1 year",
+    },
+    "COMPRESSION": {
+        "enabled": True,
+        "compress_after": "7 days",
+        "compression_level": 1,
+    },
+}
+
+# Logging Configuration
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "auth_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": "auth.log",
+            "formatter": "verbose",
+        },
+        "auth_errors": {
+            "level": "WARNING",
+            "class": "logging.FileHandler",
+            "filename": "auth_errors.log",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "authentication": {
+            "handlers": ["auth_file", "auth_errors"],
+            "level": "INFO",
+            "propagate": True,
+        },
+    },
+}
+
+
+# Celery Configuration
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+# Celery Beat Schedule for automated reports
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'generate-scheduled-reports': {
+        'task': 'analytics.tasks.generate_scheduled_reports_task',
+        'schedule': crontab(minute=0, hour='*/6'),  # Every 6 hours
+    },
+    'cleanup-old-data': {
+        'task': 'analytics.tasks.cleanup_old_data_task',
+        'schedule': crontab(minute=0, hour=2),  # Daily at 2 AM
+    },
+}
+
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@nftopia.com')
+
+# AWS S3 Configuration (optional)
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
+
+# Report Generation Settings
+REPORT_SETTINGS = {
+    'MAX_RECORDS_PDF': 50,
+    'MAX_RECORDS_CSV': 10000,
+    'TEMP_DIR': '/tmp',
+    'DEFAULT_S3_BUCKET': os.getenv('REPORTS_S3_BUCKET', ''),
+}
+
+# Add required packages to INSTALLED_APPS
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    # Third-party apps
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    "django_celery_beat",  # Add this for scheduled tasks
+    "django_celery_results",  # Add for task results
     # NFTopia apps
     "users",
     "sales",
