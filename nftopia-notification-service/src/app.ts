@@ -4,8 +4,10 @@ import config from './config/env';
 import emailRoutes from './routes/email.routes';
 import smsRoutes from './routes/sms.routes';
 import { database } from './config/database';
+import { EmailWebhooksController } from './controllers/email-webhooks.controller';
 
 const app = express();
+const emailWebhooksController = new EmailWebhooksController();
 
 // Initialize database connection on startup
 async function initializeDatabase() {
@@ -54,6 +56,7 @@ app.get('/health', async (req, res) => {
 app.use('/api', routes);
 app.use('/api/v1/email', emailRoutes);
 app.use('/api/v1/sms', smsRoutes);
+app.post('/webhooks/email', emailWebhooksController.handleEvent);
 
 // Initialize database when starting the app
 initializeDatabase().catch(err => {
