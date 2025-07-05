@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .models import (
     AnomalyDetection, AnomalyModel, NFTTransaction, 
-    UserBehaviorProfile, AlertWebhook, WebhookLog
+    UserBehaviorProfile, AlertWebhook, WebhookLog, UserSegment,
+    UserSegmentMembership
 )
 
 class AnomalyModelSerializer(serializers.ModelSerializer):
@@ -37,3 +38,19 @@ class WebhookLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = WebhookLog
         fields = '__all__'
+
+
+
+class UserSegmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserSegment
+        fields = '__all__'
+        read_only_fields = ('created_at', 'last_updated')
+
+class UserSegmentMembershipSerializer(serializers.ModelSerializer):
+    segment = UserSegmentSerializer(read_only=True)
+    
+    class Meta:
+        model = UserSegmentMembership
+        fields = '__all__'
+        read_only_fields = ('joined_at', 'last_evaluated')
