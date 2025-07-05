@@ -6,16 +6,25 @@ mod modules {
     pub mod transaction;
     pub mod royalty_contract;
     pub mod reentrancy_guard;
+    pub mod royalty {
+        pub mod logic;
+        pub mod interfaces;
+    }
+    pub mod marketplace {
+        pub mod settlement;
+    }
 }
 mod storage {
     pub mod storage;
     pub mod transaction_storage;
     pub mod escrow_storage;
+    pub mod royalty_storage;
 }
 mod events {
     pub mod events;
     pub mod nft_events;
     pub mod transaction_events;
+    pub mod royalty_events;
 }
 mod interfaces {
     pub mod collection_factory;
