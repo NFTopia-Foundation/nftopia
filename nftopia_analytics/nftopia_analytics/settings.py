@@ -273,6 +273,8 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
+WEBHOOK_SECRET = 'your-secret-key'  # In production, use environment variables
+
 # Celery Beat Schedule for automated reports
 from celery.schedules import crontab
 
@@ -342,6 +344,8 @@ INSTALLED_APPS = [
     "marketplace",
     "analytics",  # New analytics app
     "authentication",
+    'webhooks'
+    'django_celery_results'
 ]
 
 MIDDLEWARE = [
