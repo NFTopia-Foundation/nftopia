@@ -345,7 +345,9 @@ INSTALLED_APPS = [
     "analytics",  # New analytics app
     "authentication",
     'webhooks'
-    'django_celery_results'
+    'django_celery_results',
+    'django_pandas',
+    'celery'
 ]
 
 MIDDLEWARE = [

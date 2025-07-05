@@ -8,6 +8,22 @@ from django.dispatch import receiver
 from apps.cache.redis_utils import invalidate_analytics_cache
 from django.contrib.postgres.fields import JSONField
 from users.models import User  
+from analytics.aggregations.utils import queryset_to_dataframe
+
+class NFTEvent(models.Model):
+    event_type = models.CharField(max_length=20)  # MINT/TRANSFER/SALE
+    contract_address = models.CharField(max_length=42)
+    token_id = models.CharField(max_length=78)
+    amount = models.DecimalField(max_digits=36, decimal_places=18)
+    price = models.DecimalField(max_digits=36, decimal_places=18, null=True)
+    timestamp = models.DateTimeField()
+    from_address = models.CharField(max_length=42, blank=True)
+    to_address = models.CharField(max_length=42)
+    
+    @classmethod
+    def to_dataframe(cls, **filters):
+        qs = cls.objects.filter(**filters)
+        return queryset_to_dataframe(qs)
 
 class UserSession(models.Model):
     """Track user session activity"""
@@ -376,3 +392,4 @@ class UserSegmentMembership(models.Model):
 
     def __str__(self):
         return f"{self.user} in {self.segment}"
+    
