@@ -7,13 +7,18 @@ from datetime import timedelta
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import viewsets, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.pagination import PageNumberPagination
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from marketplace.models import NFTMint, NFTSale, Collection, GasMetrics
 from django.db.models import Min, Max, Avg, Sum, Count
+
+from rest_framework.decorators import action
+from .models import UserSegment, UserSegmentMembership
+from .serializers import UserSegmentSerializer, UserSegmentMembershipSerializer
+from users.models import User
 # --- DRF Analytics Endpoints ---
 
 class TimeFilterMixin:
@@ -443,3 +448,46 @@ def track_wallet_connection(request):
         return Response(
             {"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST
         )
+
+class UserSegmentViewSet(viewsets.ModelViewSet):
+    queryset = UserSegment.objects.filter(is_active=True)
+    serializer_class = UserSegmentSerializer
+
+    @action(detail=True, methods=['get'])
+    def users(self, request, pk=None):
+        segment = self.get_object()
+        members = segment.members.all()
+        serializer = UserSegmentMembershipSerializer(members, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'])
+    def evaluate_rules(self, request):
+        # Implement rule evaluation logic here
+        pass
+
+    @action(detail=True, methods=['get'])
+    def export(self, request, pk=None):
+        segment = self.get_object()
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{segment.name}_users.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['User ID', 'Username', 'Email', 'Date Joined Segment'])
+
+        for membership in segment.members.all():
+            writer.writerow([
+                membership.user.id,
+                membership.user.username,
+                membership.user.email,
+                membership.joined_at
+            ])
+
+        return response
+
+class UserSegmentationView(viewsets.ViewSet):
+    @action(detail=True, methods=['get'])
+    def segments(self, request, pk=None):
+        user = User.objects.get(pk=pk)
+        memberships = user.segments.all()
+        serializer = UserSegmentMembershipSerializer(memberships, many=True)
+        return Response(serializer.data)

@@ -6,7 +6,8 @@ import uuid
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from apps.cache.redis_utils import invalidate_analytics_cache
-
+from django.contrib.postgres.fields import JSONField
+from users.models import User  
 
 class UserSession(models.Model):
     """Track user session activity"""
@@ -343,3 +344,35 @@ class ReportTemplate(models.Model):
     
     def __str__(self):
         return f"{self.name} ({self.report_type})"
+
+
+class UserSegment(models.Model):
+    SEGMENT_TYPES = [
+        ('ACTIVITY', 'Activity Level'),
+        ('HOLDING', 'Holding Pattern'),
+        ('COLLECTION', 'Collection Preference'),
+        ('CUSTOM', 'Custom')
+    ]
+    
+    name = models.CharField(max_length=100)
+    segment_type = models.CharField(max_length=20, choices=SEGMENT_TYPES)
+    description = models.TextField(blank=True)
+    rules = JSONField()  # Stores segmentation criteria
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.get_segment_type_display()})"
+
+class UserSegmentMembership(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='segments')
+    segment = models.ForeignKey(UserSegment, on_delete=models.CASCADE, related_name='members')
+    joined_at = models.DateTimeField(auto_now_add=True)
+    last_evaluated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'segment')
+
+    def __str__(self):
+        return f"{self.user} in {self.segment}"
