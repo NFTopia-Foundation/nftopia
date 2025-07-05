@@ -31,6 +31,18 @@ export const smsConfig: SMSConfig = {
   },
 };
 
+export const twilioConfig = {
+  accountSid: process.env.TWILIO_ACCOUNT_SID!,
+  authToken: process.env.TWILIO_AUTH_TOKEN!,
+  phoneNumber: process.env.TWILIO_PHONE_NUMBER!,
+  webhookUrl: `${process.env.API_URL}/sms/webhooks`,
+  maxLength: 320,
+  rateLimit: {
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 10 // 10 messages/hour/user
+  }
+};
+
 export const smsTemplates = {
   bidAlert: {
     en: '[NFTopia] Outbid on {{nft.name}} ({{formatEth oldBid}} → {{formatEth newBid}}). {{truncateTx txHash}}',

@@ -49,7 +49,7 @@ router.post(
 );
 
 // Internal API for carrier opt-outs
-router.post('/sms/carrier-opt-out', authMiddleware, optOutController.handleCarrierOptOut);
+router.post('/sms/carrier-opt-out',  authMiddleware, optOutController.handleCarrierOptOut);
 
 
 // Health check endpoint
