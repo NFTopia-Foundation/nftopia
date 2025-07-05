@@ -18,6 +18,14 @@ export const sendGridConfig = {
   },
   sandboxMode: env.NODE_ENV !== 'production',
   webhookSecret: env.SENDGRID_WEBHOOK_SECRET,
+  webhook: {
+    verificationToken: env.SENDGRID_WEBHOOK_SECRET,
+    ipWhitelist: [
+      '167.89.0.0/17',    // SendGrid Webhook IP range
+      '149.72.0.0/16'     // Additional SendGrid IPs
+    ],
+    events: ['bounce', 'spamreport', 'blocked', 'delivered']
+  },
   rateLimits: {
     requestsPerSecond: 10,
     burstLimit: 50,
