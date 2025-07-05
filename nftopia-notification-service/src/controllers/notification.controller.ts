@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { EmailService } from '../services/email.service';
 import { PurchaseRequest, PurchaseData } from '../types/email';
+import { NotificationRepository } from '../repositories/notification.repository';
+import { logger } from '../utils/logger';
 
 export const sendPurchaseEmail = async (
   req: Request<{}, {}, PurchaseRequest>,
@@ -25,3 +27,37 @@ export const sendPurchaseEmail = async (
     res.status(500).json({ error: errorMessage });
   }
 };
+
+
+
+
+
+export class NotificationController {
+  private repository = new NotificationRepository();
+
+  async createNotification(req: Request, res: Response) {
+    try {
+      const notification = await this.repository.create(req.body);
+      res.status(201).json(notification);
+    } catch (error) {
+      logger.error('Create notification error:', error);
+      res.status(500).json({ error: 'Failed to create notification' });
+    }
+  }
+
+  async getNotification(req: Request, res: Response) {
+    try {
+      const notification = await this.repository.findById(req.params.id);
+      if (!notification) {
+        return res.status(404).json({ error: 'Notification not found' });
+      }
+      res.json(notification);
+    } catch (error) {
+      logger.error('Get notification error:', error);
+      res.status(500).json({ error: 'Failed to get notification' });
+    }
+  }
+
+  // Implement other CRUD methods following the same pattern
+  // getUserNotifications, getNFTNotifications, markAsRead, etc.
+}

@@ -1,32 +1,52 @@
 import { Document, Model } from 'mongoose';
 
-// Base notification interface
-export interface INotification {
-  _id?: string; // Fixed: Changed from *id to _id (MongoDB convention)
-  userId: string;
-  type: 'email' | 'sms' | 'push' | 'in-app';
-  status: 'pending' | 'sent' | 'failed';
-  content: string;
-  recipient: string;
-  createdAt: Date;
-  updatedAt: Date;
-  metadata?: Record<string, any>;
+// 1. NFT-specific metadata type
+export interface NFTMetadata {
+  nftId: string;
+  collectionId?: string;
+  transactionHash?: string;
+  contractAddress?: string;
+  tokenStandard?: 'ERC-721' | 'ERC-1155';
 }
 
-// Mongoose Document interface (extends Document and INotification)
+// 2. Core Notification Types
+export type NotificationType = 'email' | 'sms' | 'push' | 'in-app';
+export type NotificationStatus = 'pending' | 'sent' | 'failed' | 'read';
+
+// 3. Base Notification Interface
+export interface INotification {
+  _id?: string;
+  userId: string;
+  type: NotificationType;
+  status: NotificationStatus;
+  content: string;
+  recipient: string;
+  metadata?: {
+    nft?: NFTMetadata;
+    [key: string]: any;
+  };
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// 4. Document Interfaces
 export interface INotificationDocument extends INotification, Document {
   _id: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// Mongoose Model interface (for static methods)
+// 5. Type alias for backward compatibility
+export type NotificationDocument = INotificationDocument;
+
+// 6. Model Interface
 export interface INotificationModel extends Model<INotificationDocument> {
-  // Add any static methods here if needed
   findByUserId(userId: string): Promise<INotificationDocument[]>;
-  findByStatus(status: 'pending' | 'sent' | 'failed'): Promise<INotificationDocument[]>;
-  findByType(type: 'email' | 'sms' | 'push' | 'in-app'): Promise<INotificationDocument[]>;
+  findByStatus(status: NotificationStatus): Promise<INotificationDocument[]>;
+  findByType(type: NotificationType): Promise<INotificationDocument[]>;
+  findByNFTMetadata(nftId: string): Promise<INotificationDocument[]>;
 }
+
 
 // Data Transfer Objects and other interfaces
 export interface NotificationPayload {
@@ -120,3 +140,4 @@ declare global {
     }
   }
 }
+
