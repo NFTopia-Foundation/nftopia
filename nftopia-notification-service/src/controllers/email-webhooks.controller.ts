@@ -11,6 +11,14 @@ interface SendGridEvent {
   type?: 'hard' | 'soft';
 }
 
+interface BounceEvent {
+  email: string;
+  timestamp: number;
+  event: 'bounce';
+  type: 'hard' | 'soft';
+  reason?: string;
+}
+
 export class EmailWebhooksController {
   private bounceService: BounceService;
   private suppressionService: SuppressionService;
@@ -40,6 +48,58 @@ export class EmailWebhooksController {
   }
 
   /**
+   * Processes individual SendGrid webhook events
+   * @param event - SendGrid event object
+   * @returns Promise that resolves when event is processed
+   */
+  private async processEvent(event: SendGridEvent): Promise<void> {
+    try {
+      switch (event.event) {
+        case 'bounce':
+          // Create properly typed bounce event
+          const bounceEvent: BounceEvent = {
+            email: event.email,
+            timestamp: event.timestamp,
+            event: 'bounce',
+            type: event.type || 'hard', // Default to 'hard' for safety
+            reason: event.reason
+          };
+          
+          if (!event.type) {
+            console.warn(`Bounce event missing type field for email: ${event.email}, defaulting to 'hard'`);
+          }
+          
+          await this.bounceService.process(bounceEvent);
+          break;
+
+        case 'spamreport':
+          await this.suppressionService.addWithReason(
+            event.email,
+            'spam_report'
+          );
+          break;
+
+        case 'blocked':
+          await this.bounceService.handleBlocked(
+            event.email,
+            event.reason
+          );
+          break;
+
+        case 'delivered':
+          // Successfully delivered, no action needed
+          break;
+
+        default:
+          console.warn(`Unhandled event type: ${event.event}`);
+      }
+    } catch (error) {
+      console.error(`Error processing ${event.event} event for ${event.email}:`, error);
+      // Don't rethrow - let other events continue processing
+    }
+  }
+
+  /**
    * Handles incoming SendGrid webhook events
    * @param req - Express request object
    * @param res - Express response object
@@ -56,43 +116,20 @@ export class EmailWebhooksController {
     }
 
     try {
-      // Process events in parallel
-      await Promise.all(
-        req.body.map(async (event: SendGridEvent) => {
-          switch (event.event) {
-            case 'bounce':
-              // Ensure bounce events have a type field
-              if (!event.type) {
-                console.warn(`Bounce event missing type field for email: ${event.email}`);
-                // Default to 'hard' for safety in production
-                event.type = 'hard';
-              }
-              await this.bounceService.process(event);
-              break;
-
-            case 'spamreport':
-              await this.suppressionService.addWithReason(
-                event.email,
-                'spam_report'
-              );
-              break;
-
-            case 'blocked':
-              await this.bounceService.handleBlocked(
-                event.email,
-                event.reason
-              );
-              break;
-
-            case 'delivered':
-              // Successfully delivered, no action needed
-              break;
-
-            default:
-              console.warn(`Unhandled event type: ${event.event}`);
-          }
-        })
+      // Process events in parallel with error isolation
+      const eventPromises = req.body.map((event: SendGridEvent) => 
+        this.processEvent(event)
       );
+      
+      // Use Promise.allSettled to ensure all events are processed
+      // even if some fail
+      const results = await Promise.allSettled(eventPromises);
+      
+      // Log any failed events for monitoring
+      const failedEvents = results.filter(result => result.status === 'rejected');
+      if (failedEvents.length > 0) {
+        console.error(`${failedEvents.length} events failed to process out of ${req.body.length} total events`);
+      }
 
       return res.status(200).send('Webhook processed successfully');
 

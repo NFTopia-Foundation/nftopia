@@ -1,4 +1,3 @@
-// src/queues/notification.queue.ts
 import { emailService } from '../services/emailService';
 import { RedisService } from '../services/redisService';
 
