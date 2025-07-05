@@ -3,54 +3,134 @@ import { Request, Response, NextFunction } from 'express';
 import twilio from 'twilio';
 import { logger } from '../utils/logger';
 
-export function validateTwilioWebhook(req: Request, res: Response, next: NextFunction) {
+// Type definitions for our helper functions
+interface SignatureResult {
+  valid: boolean;
+  statusCode?: number;
+  errorMessage?: string;
+  signature?: string;
+}
+
+interface ValidationResult {
+  valid: boolean;
+  statusCode?: number;
+  errorMessage?: string;
+}
+
+export function validateTwilioWebhook(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void {
   const authToken = process.env.TWILIO_AUTH_TOKEN;
   
+  // Validate configuration
   if (!authToken) {
     logger.error('Twilio auth token not configured');
-    return res.status(500).send('Server configuration error');
+    res.status(500).send('Server configuration error');
+    return;
   }
 
-  // Handle potential array of headers
+  // Process signature header with type safety
+  const signatureResult = processTwilioSignature(req);
+  if (!signatureResult.valid) {
+    if (signatureResult.statusCode && signatureResult.errorMessage) {
+      res.status(signatureResult.statusCode).send(signatureResult.errorMessage);
+    } else {
+      res.status(500).send('Unexpected signature validation error');
+    }
+    return;
+  }
+
+  // Validate request with type safety
+  if (!signatureResult.signature) {
+    res.status(500).send('Missing signature after validation');
+    return;
+  }
+
+  const validationResult = validateTwilioRequest(
+    authToken,
+    signatureResult.signature,
+    req
+  );
+  
+  if (!validationResult.valid) {
+    if (validationResult.statusCode && validationResult.errorMessage) {
+      res.status(validationResult.statusCode).send(validationResult.errorMessage);
+    } else {
+      res.status(500).send('Unexpected validation error');
+    }
+    return;
+  }
+
+  next();
+}
+
+// Helper function with explicit return type
+function processTwilioSignature(req: Request): SignatureResult {
   const twilioSignatureHeader = req.headers['x-twilio-signature'];
-  let twilioSignature: string;
 
   if (Array.isArray(twilioSignatureHeader)) {
-    // Take the first signature if multiple exist
-    twilioSignature = twilioSignatureHeader[0];
     logger.warn('Multiple Twilio signatures received, using first one', {
       signatures: twilioSignatureHeader
     });
-  } else if (typeof twilioSignatureHeader === 'string') {
-    twilioSignature = twilioSignatureHeader;
-  } else {
-    logger.warn('Missing Twilio signature header', { url: req.originalUrl });
-    return res.status(403).send('Missing signature header');
+    return {
+      valid: true,
+      signature: twilioSignatureHeader[0]
+    };
   }
 
-  const url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
-  const params = req.body;
+  if (typeof twilioSignatureHeader === 'string') {
+    return {
+      valid: true,
+      signature: twilioSignatureHeader
+    };
+  }
 
+  logger.warn('Missing Twilio signature header', { url: req.originalUrl });
+  return {
+    valid: false,
+    statusCode: 403,
+    errorMessage: 'Missing signature header'
+  };
+}
+
+// Helper function with explicit return type
+function validateTwilioRequest(
+  authToken: string,
+  signature: string,
+  req: Request
+): ValidationResult {
   try {
+    const url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
     const isValid = twilio.validateRequest(
       authToken,
-      twilioSignature, // Now guaranteed to be string
+      signature,
       url,
-      params
+      req.body
     );
 
     if (!isValid) {
       logger.warn('Invalid Twilio signature', {
         ip: req.ip,
         url,
-        signature: twilioSignature
+        signature
       });
-      return res.status(403).send('Invalid signature');
+      return {
+        valid: false,
+        statusCode: 403,
+        errorMessage: 'Invalid signature'
+      };
     }
 
-    return next();
+    return { valid: true };
   } catch (error) {
     logger.error('Twilio validation error:', error);
-    return res.status(500).send('Validation error');
+    return {
+      valid: false,
+      statusCode: 500,
+      errorMessage: 'Validation error'
+    };
   }
 }
+
