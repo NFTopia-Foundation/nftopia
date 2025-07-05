@@ -60,6 +60,17 @@ pub mod NftContract {
     use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess, Map};
     use crate::modules::reentrancy_guard::ReentrancyGuard;
 
+    use crate::modules::royalty::interfaces::{
+        IRoyaltyStandardDispatcher,
+        IRoyaltyStandardDispatcherTrait
+    };
+
+    #[external(v0)]
+    fn supports_interface(self: @ContractState, interface_id: felt252) -> bool {
+        if interface_id == ROYALTY_STANDARD_INTERFACE_ID {
+            return true;
+        }
+    }
 
     // Import event types
     use crate::events::nft_events::{Mint, Transfer, Approval, ApprovalForAll};

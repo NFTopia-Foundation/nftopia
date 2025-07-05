@@ -2,11 +2,28 @@
 /// Includes purchase history tracking, price recording, and ownership status management
 
 /// Event emitted when an NFT transaction is recorded
+use crate::modules::marketplace::settlement::IMarketplaceSettlementDispatcher;
+
+
 #[derive(Drop, starknet::Event)]
 pub struct TransactionRecorded {
     pub buyer: starknet::ContractAddress,
     pub token_id: u256,
     pub amount: u256,
+}
+
+
+#[external(v0)]
+fn complete_sale(
+    ref self: ContractState,
+    token_id: u256,
+    price: u256,
+    seller: ContractAddress
+) {
+    let settlement = IMarketplaceSettlementDispatcher { 
+        contract_address: self.marketplace_address.read() 
+    };
+    settlement.distribute_payment(token_id, price, seller, self.nft_address.read());
 }
 
 /// Interface for the Transaction Module
