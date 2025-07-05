@@ -1,4 +1,7 @@
-import express, { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
+import { Router } from 'express';
+import { SmsOptOutController } from '../controllers/sms-optout.controller';
+import { validateTwilioWebhook } from '../middlewares/twilio.middleware'; 
 import {
   sendSMS,
   sendBidAlert,
@@ -15,6 +18,7 @@ import {
   twoFARateLimit,
   nftPurchaseRateLimit,
 } from '../middlewares/smsRateLimit';
+import { authMiddleware } from '../middlewares/auth.middleware';
 
 // Extend Express Request interface to include notificationPayload
 declare global {
@@ -31,7 +35,22 @@ declare global {
   }
 }
 
-const router = express.Router();
+const router = Router();
+
+
+
+const optOutController = new SmsOptOutController();
+
+// Twilio webhook route with validation middleware
+router.post(
+  '/sms/opt-out',
+  validateTwilioWebhook, // Security middleware
+  optOutController.handleUserOptOut
+);
+
+// Internal API for carrier opt-outs
+router.post('/sms/carrier-opt-out',  authMiddleware, optOutController.handleCarrierOptOut);
+
 
 // Health check endpoint
 router.get('/health', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -163,5 +182,6 @@ router.get('/abuse/:userId/:notificationType', async (req: Request, res: Respons
     next(error);
   }
 });
+
 
 export default router;

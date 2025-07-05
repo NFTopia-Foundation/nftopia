@@ -16,6 +16,12 @@ on-chain/node_modules/
 # Ignore build artifacts
 /on-chain/**/target/
 
+# JetBrains IDE (PyCharm/IntelliJ) files
+.idea/
+*.iml
+*.ipr
+*.iws
+
 
 
 /.pnp

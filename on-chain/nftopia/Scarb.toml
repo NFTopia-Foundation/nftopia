@@ -8,6 +8,9 @@ edition = "2024_07"
 [dependencies]
 starknet = "2.9.2"
 
+[tool.cairo]
+plugins = ["starknet_macros"]
+
 [dev-dependencies]
 snforge_std = "0.38.3"
 assert_macros = "2.9.2"
