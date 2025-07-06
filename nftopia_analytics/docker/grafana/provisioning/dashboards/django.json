@@ -1,0 +1,21 @@
+{
+    "title": "Django Metrics",
+    "panels": [
+      {
+        "title": "Request Rate",
+        "type": "graph",
+        "targets": [{
+          "expr": "rate(django_http_requests_total[1m])",
+          "legendFormat": "{{path}}"
+        }]
+      },
+      {
+        "title": "Error Rate",
+        "type": "singlestat",
+        "targets": [{
+          "expr": "sum(rate(django_http_requests_total{status=~'5..'}[5m])) / sum(rate(django_http_requests_total[5m]))"
+        }],
+        "thresholds": "0.05,0.1"
+      }
+    ]
+  }

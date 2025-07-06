@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import smsService from '../services/smsService';
 import { SendSMSRequest, NotificationType } from '../types/sms';
+import { logger } from '../utils/logger';
+
 
 /**
  * Send SMS notification
@@ -357,3 +359,10 @@ export const healthCheck = async (req: Request, res: Response) => {
     });
   }
 }; 
+
+
+export const handleWebhook = async (req: Request, res: Response) => {
+  const { MessageStatus, To } = req.body;
+  logger.info(`SMS delivery update for ${To}: ${MessageStatus}`);
+  res.status(200).end();
+}

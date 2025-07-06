@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -10,7 +12,84 @@ class Collection(models.Model):
 
     def __str__(self):
         return self.name
+class NFT(models.Model):
+    """
+    Core NFT model representing digital assets across collections
+    """
+    token_id = models.CharField(
+        max_length=78,  # Supports ERC721 and ERC1155
+        help_text="Unique identifier within the collection"
+    )
+    collection = models.ForeignKey(
+        'marketplace.Collection',
+        on_delete=models.CASCADE,
+        related_name='nfts'
+    )
+    owner = models.CharField(
+        max_length=42,  
+        help_text="Current owner wallet address"
+    )
+    creator = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='created_nfts'
+    )
+    metadata_uri = models.URLField(
+        max_length=512,
+        blank=True,
+        help_text="URI pointing to NFT metadata"
+    )
+    last_sale_price = models.DecimalField(
+        max_digits=36,
+        decimal_places=18,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)]
+    )
+    last_sale_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+    mint_date = models.DateTimeField(
+        auto_now_add=True
+    )
+    is_listed = models.BooleanField(
+        default=False
+    )
+    current_price = models.DecimalField(
+        max_digits=36,
+        decimal_places=18,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)]
+    )
 
+    class Meta:
+        unique_together = [('collection', 'token_id')]
+        indexes = [
+            models.Index(fields=['owner']),
+            models.Index(fields=['collection', 'token_id']),
+            models.Index(fields=['-last_sale_at']),
+        ]
+        verbose_name = "NFT"
+        verbose_name_plural = "NFTs"
+
+    def clean(self):
+        """Validate Ethereum address format"""
+        if not self.owner.startswith('0x') or len(self.owner) != 42:
+            raise ValidationError("Invalid Ethereum address format")
+        
+        if self.current_price and self.current_price < 0:
+            raise ValidationError("Price cannot be negative")
+
+    def __str__(self):
+        return f"{self.collection.name} #{self.token_id}"
+
+    @property
+    def full_identifier(self):
+        """Returns collection_address:token_id"""
+        return f"{self.collection.contract_address}:{self.token_id}"
 
 class NFTMint(models.Model):
     """Time-series data for NFT minting events"""

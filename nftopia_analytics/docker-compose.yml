@@ -1,6 +1,10 @@
 version: '3.8'
 
 services:
+  django:
+    ports:
+      - "8000:8000"
+      - "8002:8002" 
   timescaledb:
     image: timescale/timescaledb:latest-pg14
     container_name: nftopia_timescaledb
@@ -34,6 +38,12 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+  celery:
+    build: .
+    command: celery -A nftopia_analytics worker --loglevel=info
+    depends_on:
+      - redis
+      - db
 
   pgadmin:
     image: dpage/pgadmin4:latest

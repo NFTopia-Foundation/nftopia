@@ -1,0 +1,20 @@
+{{> header theme="dark"}}
+
+<tr>
+  <td class="nft-card">
+    <img src="{{nftImageUrl}}" width="300" alt="{{nftName}}" class="nft-image">
+    <h2>{{nftName}}</h2>
+    <p>You've successfully purchased this NFT!</p>
+  </td>
+</tr>
+
+{{> transaction-table 
+  txHash=txHash 
+  price=price 
+  currency=currency 
+  txLink=txLink
+}}
+
+{{> unsubscribe isCritical=isCritical isTransactional=isTransactional}}
+
+{{> footer}}

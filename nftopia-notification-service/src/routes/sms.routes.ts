@@ -1,4 +1,6 @@
-import express, { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
+import { Router } from 'express';
+import { validateTwilioWebhook } from '../middlewares/twilio.middleware';
 import {
   sendSMS,
   sendBidAlert,
@@ -15,6 +17,8 @@ import {
   twoFARateLimit,
   nftPurchaseRateLimit,
 } from '../middlewares/smsRateLimit';
+import { authMiddleware } from '../middlewares/auth.middleware';
+import { smsWebhooksController } from '../controllers/sms-webhooks.controller';
 
 // Extend Express Request interface to include notificationPayload
 declare global {
@@ -31,7 +35,21 @@ declare global {
   }
 }
 
-const router = express.Router();
+const router = Router();
+
+// Twilio SMS webhook for failure handling
+router.post(
+  '/sms/status',
+  validateTwilioWebhook,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await smsWebhooksController.handleStatus(req, res);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 
 // Health check endpoint
 router.get('/health', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -163,5 +181,6 @@ router.get('/abuse/:userId/:notificationType', async (req: Request, res: Respons
     next(error);
   }
 });
+
 
 export default router;

@@ -3,6 +3,10 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 from decimal import Decimal
+from django.utils.translation import gettext_lazy as _
+import uuid
+from django.core.validators import RegexValidator
+
 
 class SalesEvent(models.Model):
     """Model to track NFT sales events"""
@@ -158,3 +162,83 @@ def invalidate_sales_cache_on_aggregate_delete(sender, instance, **kwargs):
         import logging
         logger = logging.getLogger(__name__)
         logger.error(f"Failed to invalidate sales cache on aggregate delete: {str(e)}")
+
+
+
+class Transaction(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'pending', _('Pending')
+        COMPLETED = 'completed', _('Completed')
+        FAILED = 'failed', _('Failed')
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
+    buyer = models.ForeignKey(
+        'users.User',
+        on_delete=models.PROTECT,
+        related_name='purchases',
+        verbose_name=_('buyer')
+    )
+    seller = models.ForeignKey(
+        'users.User',
+        on_delete=models.PROTECT,
+        related_name='sales',
+        verbose_name=_('seller')
+    )
+    nft = models.ForeignKey(
+        'nfts.NFT',
+        on_delete=models.PROTECT,
+        related_name='transactions',
+        verbose_name=_('NFT')
+    )
+    auction = models.ForeignKey(
+        'auctions.Auction',
+        on_delete=models.PROTECT,
+        related_name='transactions',
+        null=True,
+        blank=True,
+        verbose_name=_('auction')
+    )
+    amount = models.DecimalField(
+        _('amount'),
+        max_digits=36,
+        decimal_places=18
+    )
+    transaction_hash = models.CharField(
+        _('transaction hash'),
+        max_length=66,
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex='^0x[a-fA-F0-9]{64}$',
+                message='Transaction hash must be a valid Starknet transaction hash'
+            )
+        ]
+    )
+
+    status = models.CharField(
+        _('status'),
+        max_length=10,
+        choices=Status.choices,
+        default=Status.PENDING
+    )
+    timestamp = models.DateTimeField(
+        _('timestamp'),
+        auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = _('transaction')
+        verbose_name_plural = _('transactions')
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['transaction_hash']),
+            models.Index(fields=['status']),
+            models.Index(fields=['timestamp']),
+        ]
+
+    def __str__(self):
+        return f"TX {self.transaction_hash[:10]}... ({self.amount})"

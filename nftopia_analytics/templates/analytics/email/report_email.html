@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NFTopia Analytics Report</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        background: linear-gradient(135deg, #2e86ab, #a23b72);
+        color: white;
+        padding: 30px;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+      }
+      .content {
+        background: #f9f9f9;
+        padding: 30px;
+        border-radius: 0 0 10px 10px;
+      }
+      .report-info {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .files-list {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      .file-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin: 10px 0;
+      }
+      .file-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 10px;
+        background: #2e86ab;
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 30px;
+        padding: 20px;
+        color: #666;
+        font-size: 14px;
+      }
+      .btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background: #2e86ab;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        margin: 10px 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>📊 NFTopia Analytics Report</h1>
+      <p>{{ report_name }}</p>
+    </div>
+
+    <div class="content">
+      <div class="report-info">
+        <h2>Report Details</h2>
+        <p><strong>Report Type:</strong> {{ report_type|title }}</p>
+        <p>
+          <strong>Generated:</strong> {{ generated_at|date:"F j, Y g:i A" }}
+        </p>
+        <p><strong>Period:</strong> Last 30 days</p>
+      </div>
+
+      {% if files %}
+      <div class="files-list">
+        <h2>📎 Attached Files</h2>
+        {% for file_type, file_path in files.items %}
+        <div class="file-item">
+          <div class="file-icon">{{ file_type|upper }}</div>
+          <div>
+            <strong>{{ file_type|upper }} Report</strong><br />
+            <small>{{ file_path|basename }}</small>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="report-info">
+        <h2>📈 Key Insights</h2>
+        <p>
+          This automated report contains comprehensive analytics for your NFT
+          marketplace including:
+        </p>
+        <ul>
+          <li>Trading volume trends and patterns</li>
+          <li>Collection performance metrics</li>
+          <li>User activity and engagement data</li>
+          <li>Anomaly detection highlights</li>
+        </ul>
+
+        <p>
+          For detailed analysis and interactive dashboards, visit your analytics
+          dashboard:
+        </p>
+        <a href="https://analytics.nftopia.com/dashboard" class="btn"
+          >View Dashboard</a
+        >
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>This is an automated report from NFTopia Analytics.</p>
+      <p>
+        If you have questions, contact our support team at
+        <a href="mailto:support@nftopia.com">support@nftopia.com</a>
+      </p>
+      <p><small>© 2024 NFTopia. All rights reserved.</small></p>
+    </div>
+  </body>
+</html>
