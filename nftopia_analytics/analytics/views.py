@@ -19,7 +19,43 @@ from rest_framework.decorators import action
 from .models import UserSegment, UserSegmentMembership
 from .serializers import UserSegmentSerializer, UserSegmentMembershipSerializer
 from users.models import User
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .tasks import analyze_nft_metadata
+from django.core.cache import cache
+
+
 # --- DRF Analytics Endpoints ---
+
+
+
+
+
+class AnalyzeMetadataView(APIView):
+    @method_decorator(cache_page(60*15))  # Cache for 15 minutes
+    def get(self, request, cid):
+        from .models import NFTMetadata
+        try:
+            result = analyze_nft_metadata.delay(cid)
+            analysis = result.get(timeout=30)  # Wait for result with timeout
+            nft_meta = NFTMetadata.objects.get(id=analysis)
+            return Response({
+                'status': 'success',
+                'data': {
+                    'metadata': nft_meta.raw_metadata,
+                    'analysis': {
+                        'content_type': nft_meta.content_type,
+                        'authenticity_score': nft_meta.authenticity_score,
+                        'copyright_risk': nft_meta.copyright_risk
+                    }
+                }
+            })
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class TimeFilterMixin:
     """Mixin to filter queryset by ?range=7d, 30d, etc."""
