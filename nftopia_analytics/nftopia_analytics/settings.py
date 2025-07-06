@@ -80,49 +80,29 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_SCHEMA_CLASS": ["drf_spectacular.openapi.AutoSchema"],
-
 }
 
-REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'NFTopia Analytics API',
+    'DESCRIPTION': 'NFT transaction and analytics platform',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_DIST': 'SIDECAR',
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
+    'SCHEMA_PATH_PREFIX': r'/api/',
+    'SCHEMA_PATH_PREFIX_TRIM': True,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'AUTHENTICATION_WHITELIST': ['rest_framework_simplejwt.authentication.JWTAuthentication'],
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+        'filter': True,
+        'darkTheme': True,  # Enable dark mode
+    },
 }
-
-# Application definition
-
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    # Third-party apps
-    "rest_framework",
-    "rest_framework_simplejwt",
-    "rest_framework_simplejwt.token_blacklist",
-    "django_celery_beat",  # Add for scheduled tasks
-    "django_celery_results",  # Add for task results
-    # NFTopia apps
-    "users",
-    "sales",
-    "minting",
-    "marketplace",
-    "analytics",  # New analytics app
-    "authentication",
-    'drf_spectacular',
-    'drf_spectacular_sidecar',
-]
-
-MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "analytics.middleware.AnalyticsMiddleware",  # Add analytics middleware
-]
 
 ROOT_URLCONF = "nftopia_analytics.urls"
 
@@ -148,27 +128,6 @@ WSGI_APPLICATION = "nftopia_analytics.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# TimescaleDB PostgreSQL Configuration
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("TIMESCALE_DB_NAME", "nftopia_analytics"),
-        "USER": os.getenv("TIMESCALE_DB_USER", "postgres"),
-        "PASSWORD": os.getenv("TIMESCALE_DB_PASSWORD", "postgres"),
-        "HOST": os.getenv("TIMESCALE_DB_HOST", "localhost"),
-        "PORT": os.getenv("TIMESCALE_DB_PORT", "5432"),
-        "OPTIONS": {"options": "-c default_transaction_isolation=serializable"},
-    }
-}
-
-# Fallback to SQLite for development if PostgreSQL is not available
-if os.getenv("USE_SQLITE", "false").lower() == "true":
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
 
 
 # Password validation
@@ -273,7 +232,6 @@ LOGGING = {
     },
 }
 
-
 # Celery Configuration
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
@@ -334,33 +292,38 @@ REPORT_SETTINGS = {
 
 # Add required packages to INSTALLED_APPS
 INSTALLED_APPS = [
+    # Django core apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     # Third-party apps
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
-    "django_celery_beat",  # Add this for scheduled tasks
-    "django_celery_results",  # Add for task results
+    "django_celery_beat",
+    "django_celery_results",
+    "django_pandas",
+    "django_prometheus",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
+    "celery",
+
     # NFTopia apps
     "users",
     "sales",
     "minting",
     "marketplace",
-    "analytics",  # New analytics app
+    "analytics",
     "authentication",
-    'webhooks'
-    'django_celery_results',
-    'django_pandas',
-    'celery',
-    'django_prometheus',
+    "webhooks"
 ]
 
 MIDDLEWARE = [
+    # Django core middleware
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -368,30 +331,20 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "analytics.middleware.AnalyticsMiddleware", 
+    
+    # Prometheus monitoring middleware
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
+    
+    # Custom analytics middleware
+    "analytics.middleware.AnalyticsMiddleware",
+    
+    # Prometheus (must come after all other middleware)
     'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 PROMETHEUS_EXPORT_MIGRATIONS = False
 
 ROOT_URLCONF = "nftopia_analytics.urls"
-
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-]
 
 WSGI_APPLICATION = "nftopia_analytics.wsgi.application"
 
@@ -402,13 +355,16 @@ WSGI_APPLICATION = "nftopia_analytics.wsgi.application"
 # TimescaleDB PostgreSQL Configuration
 DATABASES = {
     "default": {
-        'ENGINE': 'django_prometheus.db.backends.postgresql',
+        "ENGINE": "django_prometheus.db.backends.postgresql",  # Using Prometheus-enabled engine
         "NAME": os.getenv("TIMESCALE_DB_NAME", "nftopia_analytics"),
         "USER": os.getenv("TIMESCALE_DB_USER", "postgres"),
         "PASSWORD": os.getenv("TIMESCALE_DB_PASSWORD", "postgres"),
         "HOST": os.getenv("TIMESCALE_DB_HOST", "localhost"),
         "PORT": os.getenv("TIMESCALE_DB_PORT", "5432"),
         "OPTIONS": {"options": "-c default_transaction_isolation=serializable"},
+        # Additional recommended production settings:
+        "CONN_MAX_AGE": 300,  # 5 minute connection persistence
+        "DISABLE_SERVER_SIDE_CURSORS": False,  # Important for TimescaleDB
     }
 }
 
@@ -473,57 +429,3 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Analytics settings
 ANALYTICS_TRACK_ANONYMOUS_USERS = True
 ANALYTICS_GEO_IP_ENABLED = False  # Set to True to enable geographic tracking
-
-# TimescaleDB Configuration
-TIMESCALEDB_SETTINGS = {
-    "CHUNK_TIME_INTERVAL": {
-        "nft_mints": "1 day",
-        "nft_sales": "1 day",
-        "nft_transfers": "1 day",
-        "gas_metrics": "1 day",
-        "page_views": "1 day",
-        "user_sessions": "7 days",
-    },
-    "RETENTION_POLICIES": {
-        "raw_events": "90 days",
-        "aggregates": "1 year",
-    },
-    "COMPRESSION": {
-        "enabled": True,
-        "compress_after": "7 days",
-        "compression_level": 1,
-    },
-}
-
-# Logging Configuration
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "auth_file": {
-            "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": "auth.log",
-            "formatter": "verbose",
-        },
-        "auth_errors": {
-            "level": "WARNING",
-            "class": "logging.FileHandler",
-            "filename": "auth_errors.log",
-            "formatter": "verbose",
-        },
-    },
-    "loggers": {
-        "authentication": {
-            "handlers": ["auth_file", "auth_errors"],
-            "level": "INFO",
-            "propagate": True,
-        },
-    },
-}
