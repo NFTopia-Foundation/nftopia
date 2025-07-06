@@ -7,7 +7,8 @@ from .views_dir.collection_views import (
     CollectionMintingView,
     CollectionHoldersView
 )
-from .views import UserSegmentViewSet, UserSegmentationView
+from .views import UserSegmentViewSet, UserSegmentationView, AnalyzeMetadataView
+
 
 
 
@@ -19,8 +20,7 @@ router = DefaultRouter()
 router.register(r'segments', UserSegmentViewSet, basename='segment')
 router.register(r'users', UserSegmentationView, basename='user-segments')
 
-urlpatterns = [
-]
+
 
 urlpatterns = [
     # Dashboard views
@@ -53,5 +53,5 @@ urlpatterns = [
     path('collections/<uuid:collection_id>/holders', CollectionHoldersView.as_view()),
 
     path('api/', include(router.urls)),
-
+    path('analyze/<str:cid>/', AnalyzeMetadataView.as_view(), name='analyze-metadata'),
 ]

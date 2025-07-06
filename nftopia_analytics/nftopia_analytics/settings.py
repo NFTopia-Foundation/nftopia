@@ -161,6 +161,11 @@ USE_I18N = True
 USE_TZ = True
 
 
+# IPFS Configuration
+IPFS_GATEWAY = "https://ipfs.io"  # Can be overridden in environment
+IPFS_CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours cache
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
