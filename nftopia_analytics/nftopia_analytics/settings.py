@@ -34,7 +34,7 @@ ALLOWED_HOSTS = []
 # Redis Cache Configuration
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
+        'BACKEND': 'django_prometheus.cache.backends.redis.RedisCache',
         'LOCATION': 'redis://127.0.0.1:6379/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
@@ -51,6 +51,7 @@ CACHES = {
         'LOCATION': 'unique-snowflake',
     }
 }
+
 
 
 # JWT Configuration
@@ -347,7 +348,8 @@ INSTALLED_APPS = [
     'webhooks'
     'django_celery_results',
     'django_pandas',
-    'celery'
+    'celery',
+    'django_prometheus',
 ]
 
 MIDDLEWARE = [
@@ -358,8 +360,12 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "analytics.middleware.AnalyticsMiddleware",  # Add analytics middleware
+    "analytics.middleware.AnalyticsMiddleware", 
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
+
+PROMETHEUS_EXPORT_MIGRATIONS = False
 
 ROOT_URLCONF = "nftopia_analytics.urls"
 
@@ -388,7 +394,7 @@ WSGI_APPLICATION = "nftopia_analytics.wsgi.application"
 # TimescaleDB PostgreSQL Configuration
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        'ENGINE': 'django_prometheus.db.backends.postgresql',
         "NAME": os.getenv("TIMESCALE_DB_NAME", "nftopia_analytics"),
         "USER": os.getenv("TIMESCALE_DB_USER", "postgres"),
         "PASSWORD": os.getenv("TIMESCALE_DB_PASSWORD", "postgres"),

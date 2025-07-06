@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'django'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['django:8000']
+  
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+  
+  - job_name: 'celery'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['celery:8001']  # Exporter port
