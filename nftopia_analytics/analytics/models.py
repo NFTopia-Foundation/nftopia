@@ -25,6 +25,23 @@ class NFTEvent(models.Model):
         qs = cls.objects.filter(**filters)
         return queryset_to_dataframe(qs)
 
+class NFTMetadata(models.Model):
+    ipfs_cid = models.CharField(max_length=128, unique=True)
+    raw_metadata = JSONField()
+    content_type = models.CharField(max_length=50, null=True)
+    authenticity_score = models.FloatField(null=True)
+    copyright_risk = models.BooleanField(default=False)
+    standardization_issues = models.TextField(null=True, blank=True)
+    last_analyzed = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "NFT Metadata"
+
+    def __str__(self):
+        return f"{self.ipfs_cid}"
+
+
 class UserSession(models.Model):
     """Track user session activity"""
 
