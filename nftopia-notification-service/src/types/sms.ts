@@ -56,4 +56,28 @@ export interface SMSTemplate {
   marketing: string;
   '2fa': string;
   nftPurchase: string;
+}
+
+// Simple types for streamlined SMS failure handling
+export interface TwilioWebhookPayload {
+  MessageSid: string;
+  MessageStatus: string;
+  To: string;
+  From: string;
+  ErrorCode?: string;
+  ErrorMessage?: string;
+}
+
+export interface SMSRetryData {
+  messageSid: string;
+  phoneNumber: string;
+  scheduledFor: Date;
+  attempt: number;
+}
+
+export interface FailureAlert {
+  phoneNumber: string;
+  failureCount: number;
+  timestamp: Date;
+  type: string;
 } 

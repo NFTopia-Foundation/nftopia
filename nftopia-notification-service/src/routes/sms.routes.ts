@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Router } from 'express';
-import { SmsOptOutController } from '../controllers/sms-optout.controller';
-import { validateTwilioWebhook } from '../middlewares/twilio.middleware'; 
+import { validateTwilioWebhook } from '../middlewares/twilio.middleware';
 import {
   sendSMS,
   sendBidAlert,
@@ -19,6 +18,7 @@ import {
   nftPurchaseRateLimit,
 } from '../middlewares/smsRateLimit';
 import { authMiddleware } from '../middlewares/auth.middleware';
+import { smsWebhooksController } from '../controllers/sms-webhooks.controller';
 
 // Extend Express Request interface to include notificationPayload
 declare global {
@@ -37,19 +37,18 @@ declare global {
 
 const router = Router();
 
-
-
-const optOutController = new SmsOptOutController();
-
-// Twilio webhook route with validation middleware
+// Twilio SMS webhook for failure handling
 router.post(
-  '/sms/opt-out',
-  validateTwilioWebhook, // Security middleware
-  optOutController.handleUserOptOut
+  '/sms/status',
+  validateTwilioWebhook,
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      await smsWebhooksController.handleStatus(req, res);
+    } catch (error) {
+      next(error);
+    }
+  }
 );
-
-// Internal API for carrier opt-outs
-router.post('/sms/carrier-opt-out',  authMiddleware, optOutController.handleCarrierOptOut);
 
 
 // Health check endpoint

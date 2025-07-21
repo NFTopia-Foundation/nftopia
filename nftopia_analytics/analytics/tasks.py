@@ -7,14 +7,59 @@ from .webhook_service import WebhookService
 import logging
 from django.db import connection
 from redis import Redis
-
-logger = logging.getLogger(__name__)
-
 from .report_generator import ReportGenerator
 from .distribution_service import DistributionService
 from .models import AutomatedReport, ReportExecution
-from .report_service import ReportGenerator
-from .models import AutomatedReport
+from .models import NFTMetadata
+from nftopia_analytics.storage.ipfs import IPFSClient
+from .utils import check_authenticity, detect_copyright_issues, check_standardization, \
+    determine_content_type
+
+logger = logging.getLogger(__name__)
+
+
+
+
+
+
+
+
+@shared_task(bind=True, rate_limit='10/m')  # Rate limiting
+def analyze_nft_metadata(self, ipfs_cid):
+    ipfs = IPFSClient()
+    
+    # Check if we already have recent analysis
+    existing = NFTMetadata.objects.filter(
+        ipfs_cid=ipfs_cid,
+        last_analyzed__gte=timezone.now() - timezone.timedelta(days=1)
+    ).first()
+    
+    if existing:
+        return existing.id
+    
+    try:
+        metadata = ipfs.fetch(ipfs_cid)
+        
+        # Perform analysis (simplified example)
+        analysis = {
+            'content_type': determine_content_type(metadata),
+            'authenticity_score': check_authenticity(metadata),
+            'copyright_risk': detect_copyright_issues(metadata),
+            'standardization_issues': check_standardization(metadata)
+        }
+        
+        # Save results
+        nft_meta, created = NFTMetadata.objects.update_or_create(
+            ipfs_cid=ipfs_cid,
+            defaults={
+                'raw_metadata': metadata,
+                **analysis
+            }
+        )
+        
+        return nft_meta.id
+    except Exception as e:
+        self.retry(exc=e, countdown=60)
 
 @shared_task
 def run_anomaly_detection_task(detection_type=None):
