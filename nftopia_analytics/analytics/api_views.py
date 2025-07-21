@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from datetime import timedelta
 from .models import AnomalyDetection, AnomalyModel, NFTTransaction, UserBehaviorProfile
-from .serializers import (
+from .serializers_dir import (
     AnomalyDetectionSerializer, AnomalyModelSerializer, 
     NFTTransactionSerializer, UserBehaviorProfileSerializer
 )

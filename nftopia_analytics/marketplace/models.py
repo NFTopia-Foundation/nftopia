@@ -12,6 +12,7 @@ class Collection(models.Model):
 
     def __str__(self):
         return self.name
+    
 class NFT(models.Model):
     """
     Core NFT model representing digital assets across collections
