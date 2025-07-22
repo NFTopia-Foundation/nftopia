@@ -47,7 +47,7 @@ The **NFTopia Payment Service** is a Spring Boot microservice handling all payme
 ### Installation  
 1. **Clone the repo**:  
    ```bash
-   git clone https://github.com/NFTopia-Foundation/nftopia-payment-service.git
+   git clone https://github.com/NFTopia-Foundation/nftopia.git
    cd nftopia-payment-service
    ```
 2. Configure environment:

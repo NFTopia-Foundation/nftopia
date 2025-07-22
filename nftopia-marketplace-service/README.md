@@ -47,7 +47,7 @@ The **NFTopia Marketplace Service** is a Laravel-powered microservice handling a
 ### Installation  
 1. **Clone the repo**:  
    ```bash
-   git clone https://github.com/NFTopia-Foundation/nftopia-marketplace-service.git
+   git clone https://github.com/NFTopia-Foundation/nftopia.git
    cd nftopia-marketplace-service
    ```
 2. Install dependencies:
