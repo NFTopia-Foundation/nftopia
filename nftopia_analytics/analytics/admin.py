@@ -7,8 +7,26 @@ from .models import (
     WalletConnection,
     UserBehaviorMetrics,
     PageView,
+    AutomatedReport,
+    ReportExecution,
+    NFTMetadata
 )
-from .models import AutomatedReport, ReportExecution
+
+
+@admin.register(NFTMetadata)
+class NFTMetadataAdmin(admin.ModelAdmin):
+    list_display = ('ipfs_cid', 'content_type', 'authenticity_score', 'copyright_risk')
+    list_filter = ('content_type', 'copyright_risk')
+    search_fields = ('ipfs_cid',)
+    readonly_fields = ('last_analyzed', 'created_at')
+    
+    actions = ['reanalyze_metadata']
+    
+    def reanalyze_metadata(self, request, queryset):
+        from .tasks import analyze_nft_metadata
+        for item in queryset:
+            analyze_nft_metadata.delay(item.ipfs_cid)
+        self.message_user(request, f"Scheduled {queryset.count()} items for reanalysis")
 
 
 @admin.register(UserSession)

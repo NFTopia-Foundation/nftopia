@@ -44,7 +44,7 @@ class RedisService {
   async checkRateLimit(userId: string, notificationType: NotificationType): Promise<RateLimitInfo> {
     const config = smsConfig.rateLimits[notificationType];
     const key = `${smsConfig.redis.prefix}:limit:${userId}:${notificationType}`;
-    
+
     if (config.bypassable || config.limit === -1) {
       return {
         current: 0,
@@ -57,21 +57,21 @@ class RedisService {
 
     const now = Date.now();
     const windowStart = now - (config.window * 1000);
-    
+
     // Get current count
     const currentCount = await this.client.zcount(key, windowStart, '+inf');
-    
+
     // Remove expired entries
     await this.client.zremrangebyscore(key, '-inf', windowStart - 1);
-    
+
     // Add current request
     await this.client.zadd(key, now, now.toString());
-    
+
     // Set expiry on the key
     await this.client.expire(key, config.window);
-    
+
     const remaining = Math.max(0, config.limit - currentCount - 1);
-    
+
     return {
       current: currentCount + 1,
       limit: config.limit,
@@ -87,11 +87,11 @@ class RedisService {
   async isRateLimited(userId: string, notificationType: NotificationType): Promise<boolean> {
     const rateLimitInfo = await this.checkRateLimit(userId, notificationType);
     const config = smsConfig.rateLimits[notificationType];
-    
+
     if (config.bypassable || config.limit === -1) {
       return false;
     }
-    
+
     return rateLimitInfo.current > config.limit;
   }
 
@@ -101,7 +101,7 @@ class RedisService {
   async getRateLimitInfo(userId: string, notificationType: NotificationType): Promise<RateLimitInfo> {
     const config = smsConfig.rateLimits[notificationType];
     const key = `${smsConfig.redis.prefix}:limit:${userId}:${notificationType}`;
-    
+
     if (config.bypassable || config.limit === -1) {
       return {
         current: 0,
@@ -114,10 +114,10 @@ class RedisService {
 
     const now = Date.now();
     const windowStart = now - (config.window * 1000);
-    
+
     // Get current count without incrementing
     const currentCount = await this.client.zcount(key, windowStart, '+inf');
-    
+
     return {
       current: currentCount,
       limit: config.limit,
@@ -136,7 +136,7 @@ class RedisService {
       ...abuseAlert,
       timestamp: abuseAlert.timestamp.toISOString(),
     };
-    
+
     await this.client.lpush(key, JSON.stringify(abuseData));
     await this.client.expire(key, 86400); // Keep for 24 hours
   }
@@ -147,7 +147,7 @@ class RedisService {
   async getAbuseAttempts(userId: string, notificationType: NotificationType): Promise<AbuseAlert[]> {
     const key = `${smsConfig.redis.prefix}:abuse:${userId}:${notificationType}`;
     const attempts = await this.client.lrange(key, 0, -1);
-    
+
     return attempts.map(attempt => {
       const data = JSON.parse(attempt);
       return {
@@ -165,11 +165,49 @@ class RedisService {
       await this.client.ping();
       return { status: 'healthy' };
     } catch (error) {
-      return { 
-        status: 'unhealthy', 
-        details: error instanceof Error ? error.message : 'Unknown error' 
+      return {
+        status: 'unhealthy',
+        details: error instanceof Error ? error.message : 'Unknown error'
       };
     }
+  }
+
+  // SMS failure handling methods
+  async set(key: string, value: string, options?: { PX?: number }): Promise<void> {
+    if (options?.PX) {
+      await this.client.setEx(key, Math.ceil(options.PX / 1000), value);
+    } else {
+      await this.client.set(key, value);
+    }
+  }
+
+  async get(key: string): Promise<string | null> {
+    return await this.client.get(key);
+  }
+
+  async del(key: string): Promise<number> {
+    return await this.client.del(key);
+  }
+
+  async zAdd(key: string, items: Array<{ score: number; value: string }>): Promise<number> {
+    const args = items.flatMap(item => [item.score, item.value]);
+    return await this.client.zAdd(key, args);
+  }
+
+  async zRemRangeByScore(key: string, min: number | string, max: number | string): Promise<number> {
+    return await this.client.zRemRangeByScore(key, min, max);
+  }
+
+  async zCard(key: string): Promise<number> {
+    return await this.client.zCard(key);
+  }
+
+  async lPush(key: string, value: string): Promise<number> {
+    return await this.client.lPush(key, value);
+  }
+
+  async lTrim(key: string, start: number, stop: number): Promise<string> {
+    return await this.client.lTrim(key, start, stop);
   }
 }
 
