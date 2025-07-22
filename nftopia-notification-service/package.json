@@ -15,7 +15,7 @@
     "db:seed": "ts-node src/scripts/seedDatabase.ts",
     "db:reset": "ts-node src/scripts/resetDatabase.ts",
     "db:indexes": "ts-node src/utils/dbIndexes.ts",
-    "db:health": "ts-node src/scripts/checkDbHealth.ts"
+    "db:health": "ts-node src/scripts/checkDbHealth.ts",
     "build:emails": "mjml templates/emails/**/*.mjml -o templates/emails/",
     "test:emails": "email-on-acid --config ./email-tests.json"
   },

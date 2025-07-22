@@ -47,7 +47,7 @@ The **NFTopia Mobile App** is the React Native implementation of the NFTopia pla
 ### Installation  
 1. **Clone the repo**:  
    ```bash
-   git clone https://github.com/NFTopia-Foundation/nftopia-mobile-app.git
+   git clone https://github.com/NFTopia-Foundation/nftopia.git
    cd nftopia-mobile-app
    ```
 2. Install dependencies:
