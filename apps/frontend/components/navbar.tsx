@@ -7,6 +7,7 @@ import { ModernSearchInput } from "@/components/ui/modern-search-input";
 import { Menu, X, Compass, ShoppingBag, Users, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import ConnectWallet from "./ConnectWallet";
+import { Search } from "lucide-react";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,13 +31,14 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4">
         <nav className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center min-w-[100px]">
             <Image
               src="/nftopia-04.svg"
               alt="NFTopia Logo"
-              width={120}
-              height={32}
-              className="h-8 w-auto"
+              width={0} // <-- Let it grow dynamically
+              height={0}
+              sizes="(max-width: 768px) 100px, 120px"
+              className="w-[100px] sm:w-[120px] h-auto object-contain"
             />
           </Link>
 
@@ -74,11 +76,19 @@ export function Navbar() {
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
-            <div className="hidden md:block">
-              <ModernSearchInput
-                placeholder="Search"
-                className="w-[180px] lg:w-[220px]"
-              />
+            {/* Search icon for md screens only */}
+            <div className="hidden lg:hidden md:block md:mr-2">
+              <button
+                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                onClick={() => console.log("Open search modal or expand input")}
+              >
+                <Search className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Full search input for lg screens and above */}
+            <div className="hidden lg:block">
+              <ModernSearchInput placeholder="Search" className="w-[220px]" />
             </div>
 
             <ConnectWallet />
