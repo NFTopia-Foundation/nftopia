@@ -11,8 +11,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-
-# from dotenv import load_dotenv
 import os
 from datetime import timedelta
 
@@ -256,3 +254,30 @@ LOGGING = {
         },
     },
 }
+
+# Celery Configuration (Added to fix import-time settings access)
+def get_celery_settings():
+    """
+    Lazy-load Celery configuration to avoid Django settings initialization issues.
+    This function will only be called when Celery actually needs the settings.
+    """
+    from celery.schedules import crontab
+    
+    return {
+        'CELERY_BROKER_URL': os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0'),
+        'CELERY_RESULT_BACKEND': os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/1'),
+        'CELERY_ACCEPT_CONTENT': ['json'],
+        'CELERY_TASK_SERIALIZER': 'json',
+        'CELERY_RESULT_SERIALIZER': 'json',
+        'CELERY_TIMEZONE': TIME_ZONE,
+        'CELERY_BEAT_SCHEDULE': {
+            'update_analytics': {
+                'task': 'analytics.tasks.update_analytics',
+                'schedule': crontab(minute='*/15'),  # Every 15 minutes
+            },
+        }
+    }
+
+# Apply minimal Celery settings needed at Django startup
+CELERY_BROKER_URL = get_celery_settings()['CELERY_BROKER_URL']
+CELERY_RESULT_BACKEND = get_celery_settings()['CELERY_RESULT_BACKEND']

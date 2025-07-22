@@ -7,5 +7,6 @@ djangorestframework_simplejwt==5.5.0
 PyJWT==2.9.0
 python-dotenv==1.1.1
 redis==6.2.0
+celery==5.3.6
 sqlparse==0.5.3
 tzdata==2025.2
