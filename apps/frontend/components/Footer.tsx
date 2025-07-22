@@ -9,11 +9,12 @@ import {
   Youtube,
   ChevronDown,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const Footer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [language, setLanguage] = useState("English");
+  const languageRef = useRef<HTMLDivElement>(null);
 
   const languages = ["English", "French", "Spanish"];
 
@@ -21,114 +22,161 @@ const Footer = () => {
     setLanguage(lang);
     setIsOpen(false);
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        languageRef.current &&
+        !languageRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <footer className="bg-[#181359] text-white py-8 px-4 border-t border-purple-500/20">
-      <div className="max-w-7xl mx-auto flex flex-col items-center text-center md:justify-between space-y-6">
-        {/* Logo */}
-        <Link href="/" className="flex items-center">
-          <Image
-            src="/nftopia-04.svg"
-            alt="NFTopia Logo"
-            width={120}
-            height={32}
-            className="h-8 w-auto"
-          />
-        </Link>
-
-        {/* Navigation Links */}
-        <nav className="flex flex-wrap flex-col md:flex-row justify-center mt-4 md:mt-0 gap-4 text-sm">
-          <Link href="/sitemap" className="hover:text-gray-300 transition">
-            Sitemap
-          </Link>
-          <Link
-            href="/privacy-policy"
-            className="hover:text-gray-300 transition"
-          >
-            Privacy Policy
-          </Link>
-          <Link
-            href="/terms-of-service"
-            className="hover:text-gray-300 transition"
-          >
-            Terms of Service
-          </Link>
-          <Link href="/contact" className="hover:text-gray-300 transition">
-            Contact Us
-          </Link>
-          <Link href="/shop" className="hover:text-gray-300 transition">
-            Official Shop
-          </Link>
-        </nav>
-
-        {/* Social Media Icons */}
-        <div className="flex gap-4 mt-4 md:mt-0">
-          <Link
-            href="https://facebook.com"
-            target="_blank"
-            aria-label="Facebook"
-            className="border border-gray-300 rounded-full p-2 hover:opacity-80 transition bg-gray-800"
-          >
-            <Facebook className="w-4 h-4 " />
-          </Link>
-          <Link
-            href="https://instagram.com"
-            target="_blank"
-            aria-label="Instagram"
-            className="border border-gray-300 rounded-full p-2 hover:opacity-80 transition bg-gray-800"
-          >
-            <Instagram className="w-4 h-4" />
-          </Link>
-          <Link
-            href="https://twitter.com"
-            target="_blank"
-            aria-label="Twitter"
-            className="border border-gray-300 rounded-full p-2 hover:opacity-80 transition bg-gray-800"
-          >
-            <Twitter className="w-4 h-4 " />
-          </Link>
-          <Link
-            href="mailto:support@nftopia.com"
-            aria-label="Email"
-            className="border border-gray-300 rounded-full p-2 hover:opacity-80 transition bg-gray-800"
-          >
-            <Mail className="w-4 h-4" />
-          </Link>
-          <Link
-            href="https://youtube.com"
-            target="_blank"
-            aria-label="YouTube"
-            className="border border-gray-300 rounded-full p-2 hover:opacity-80 transition bg-gray-800"
-          >
-            <Youtube className="w-4 h-4" />
+      {/* Changed to grid layout with proper breakpoints */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Logo section */}
+        <div className="flex flex-col items-center lg:items-start space-y-4">
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/nftopia-04.svg"
+              alt="NFTopia Logo"
+              width={120}
+              height={32}
+              className="h-8 w-auto"
+            />
           </Link>
         </div>
 
-        <div className="relative mt-4">
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="border border-gray-300 px-4 py-2 rounded-full text-sm flex items-center hover:bg-gray-800 transition"
-          >
-            {language}
-          </button>
+        {/* Navigation Links - now in proper columns */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Link
+              href="/sitemap"
+              className="text-sm block hover:text-purple-400 transition"
+            >
+              Sitemap
+            </Link>
+            <Link
+              href="/privacy-policy"
+              className="text-sm block hover:text-purple-400 transition"
+            >
+              Privacy Policy
+            </Link>
+          </div>
+          <div className="space-y-2">
+            <Link
+              href="/terms-of-service"
+              className="text-sm block hover:text-purple-400 transition"
+            >
+              Terms of Service
+            </Link>
+            <Link
+              href="/contact"
+              className="text-sm block hover:text-purple-400 transition"
+            >
+              Contact Us
+            </Link>
+            <Link
+              href="/shop"
+              className="text-sm block hover:text-purple-400 transition"
+            >
+              Official Shop
+            </Link>
+          </div>
+        </div>
 
-          {isOpen && (
-            <ul className="absolute mt-2 w-36 bottom-full bg-white text-black rounded-md shadow-md">
-              {languages.map((lang) => (
-                <li
-                  key={lang}
-                  onClick={() => handleLanguageChange(lang)}
-                  className="px-4 py-2 cursor-pointer hover:bg-gray-200 transition"
+        {/* Social and Language - now properly aligned */}
+        <div className="flex flex-col items-center lg:items-end space-y-4">
+          {/* Social Icons with horizontal scroll on mobile */}
+          <div className="w-full overflow-x-auto pb-2">
+            <div className="flex gap-3 justify-center lg:justify-end min-w-max">
+              {[
+                {
+                  icon: Facebook,
+                  href: "https://facebook.com",
+                  label: "Facebook",
+                },
+                {
+                  icon: Instagram,
+                  href: "https://instagram.com",
+                  label: "Instagram",
+                },
+                {
+                  icon: Twitter,
+                  href: "https://twitter.com",
+                  label: "Twitter",
+                },
+                {
+                  icon: Mail,
+                  href: "mailto:support@nftopia.com",
+                  label: "Email",
+                },
+                {
+                  icon: Youtube,
+                  href: "https://youtube.com",
+                  label: "YouTube",
+                },
+              ].map(({ icon: Icon, href, label }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  aria-label={label}
+                  className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 hover:bg-purple-900/30 transition flex-shrink-0"
                 >
-                  {lang}
-                </li>
+                  <Icon className="w-4 h-4" />
+                </Link>
               ))}
-            </ul>
-          )}
+            </div>
+          </div>
+
+          {/* Language Selector */}
+          <div ref={languageRef} className="relative">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="border border-gray-300 px-4 py-2 rounded-full text-sm flex items-center gap-2 hover:bg-purple-900/30 transition"
+              aria-label="Language selector"
+              aria-expanded={isOpen}
+            >
+              {language}
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${
+                  isOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {isOpen && (
+              <ul className="absolute mt-2 w-full bg-[#241970] rounded-lg shadow-lg z-10 overflow-hidden">
+                {languages.map((lang) => (
+                  <li key={lang}>
+                    <button
+                      onClick={() => handleLanguageChange(lang)}
+                      className="w-full text-left px-4 py-2 hover:bg-purple-800 transition text-sm"
+                    >
+                      {lang}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Copyright Notice */}
-      <p className="text-xs text-gray-400 mt-6 text-center">
+      {/* Copyright Notice with clamp() sizing */}
+      <p
+        className="text-gray-400 mt-8 text-center"
+        style={{ fontSize: "clamp(0.7rem, 2.5vw, 0.75rem)" }}
+      >
         © {new Date().getFullYear()} NFTopia, Inc. All rights reserved.
       </p>
     </footer>

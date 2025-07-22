@@ -28,7 +28,7 @@ export function Navbar() {
       bg-[#181359] shadow-md border-b border-purple-500/20`}
     >
       <div className="max-w-7xl mx-auto px-4">
-        <nav className="flex items-center justify-between h-16 md:h-20 relative">
+        <nav className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image
@@ -40,8 +40,8 @@ export function Navbar() {
             />
           </Link>
 
-          
-          <div className="hidden md:flex items-center justify-center absolute left-1/2 transform -translate-x-1/2 space-x-8">
+          {/* Center Nav Links - No absolute positioning */}
+          <div className="hidden md:flex items-center space-x-8">
             <Link
               href="/explore"
               className="text-sm font-medium tracking-wide hover:text-purple-400 transition-colors flex items-center gap-1.5"
@@ -72,8 +72,7 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Rest of the navbar remains unchanged */}
-          {/* Right Side - Search & Register */}
+          {/* Right Side */}
           <div className="flex items-center gap-4">
             <div className="hidden md:block">
               <ModernSearchInput
@@ -81,8 +80,8 @@ export function Navbar() {
                 className="w-[180px] lg:w-[220px]"
               />
             </div>
-            
-              <ConnectWallet />
+
+            <ConnectWallet />
 
             <button
               className="md:hidden flex items-center justify-center p-2 rounded-full bg-gray-900/40 backdrop-blur-sm border border-gray-800/50"
@@ -102,44 +101,44 @@ export function Navbar() {
       {/* Mobile Menu */}
       <div
         className={`md:hidden transition-all duration-300 overflow-hidden ${
-          isMenuOpen ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"
-        } bg-glass backdrop-blur-md border-t border-purple-500/20`}
+          isMenuOpen
+            ? "max-h-screen opacity-100 py-4 px-4"
+            : "max-h-0 opacity-0"
+        } bg-[#181359] backdrop-blur-md border-t border-purple-500/20`}
       >
-        <div className="px-4 py-4 space-y-4">
-          <div className="flex flex-col space-y-4">
-            <Link
-              href="/explore"
-              className="text-sm font-medium py-2 hover:text-purple-400 transition-colors flex items-center gap-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <Compass className="h-5 w-5" />
-              Explore
-            </Link>
-            <Link
-              href="/marketplace"
-              className="text-sm font-medium py-2 hover:text-purple-400 transition-colors flex items-center gap-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <ShoppingBag className="h-5 w-5" />
-              Marketplace
-            </Link>
-            <Link
-              href="/artists"
-              className="text-sm font-medium py-2 hover:text-purple-400 transition-colors flex items-center gap-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <Users className="h-5 w-5" />
-              Artists
-            </Link>
-            <Link
-              href="/vault"
-              className="text-sm font-medium py-2 hover:text-purple-400 transition-colors flex items-center gap-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <Lock className="h-5 w-5" />
-              Vault
-            </Link>
-          </div>
+        <div className="flex flex-col space-y-4">
+          <Link
+            href="/explore"
+            className="text-sm font-medium py-2 hover:text-purple-400 transition-colors flex items-center gap-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <Compass className="h-5 w-5" />
+            Explore
+          </Link>
+          <Link
+            href="/marketplace"
+            className="text-sm font-medium py-2 hover:text-purple-400 transition-colors flex items-center gap-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <ShoppingBag className="h-5 w-5" />
+            Marketplace
+          </Link>
+          <Link
+            href="/artists"
+            className="text-sm font-medium py-2 hover:text-purple-400 transition-colors flex items-center gap-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <Users className="h-5 w-5" />
+            Artists
+          </Link>
+          <Link
+            href="/vault"
+            className="text-sm font-medium py-2 hover:text-purple-400 transition-colors flex items-center gap-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <Lock className="h-5 w-5" />
+            Vault
+          </Link>
 
           {/* Mobile Search */}
           <div className="mt-4">
@@ -153,7 +152,6 @@ export function Navbar() {
           >
             Register
           </Button>
-          
         </div>
       </div>
     </header>
