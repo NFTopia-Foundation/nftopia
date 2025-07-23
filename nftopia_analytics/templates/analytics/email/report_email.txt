@@ -1,0 +1,19 @@
+NFTopia Analytics Report
+========================
+
+Report: {{ report_name }}
+Type: {{ report_type|title }}
+Generated: {{ generated_at|date:"F j, Y g:i A" }}
+
+{% if files %}Attached Files:
+{% for file_type, file_path in files.items %}- {{ file_type|upper }}: {{ file_path|basename }}
+{% endfor %}
+{% endif %}
+This automated report contains comprehensive analytics for your NFT marketplace including trading volume trends, collection performance metrics, user activity data, and anomaly detection highlights.
+
+For detailed analysis and interactive dashboards, visit:
+https://analytics.nftopia.com/dashboard
+
+Questions? Contact support@nftopia.com
+
+© 2024 NFTopia. All rights reserved.

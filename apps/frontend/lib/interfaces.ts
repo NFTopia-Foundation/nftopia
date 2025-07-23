@@ -42,6 +42,7 @@ export interface FileWithMeta {
     onFilesSelected?: (files: FileWithMeta[]) => void;
     uploadFn?: (file: File) => Promise<void>;
     showUploadButton?: boolean;
+    disabled?: boolean;
   }
 
 

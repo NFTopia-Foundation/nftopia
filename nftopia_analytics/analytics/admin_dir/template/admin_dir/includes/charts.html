@@ -1,0 +1,51 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'admin/css/analytics.css' %}">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+  <!-- Your dashboard HTML content here -->
+  <div class="chart-container">
+    <div id="mint-chart" class="chart"></div>
+    <div id="sales-chart" class="chart"></div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Safely parse the Django template variables
+  const mintData = JSON.parse('{{ mint_data|escapejs }}');
+  const salesData = JSON.parse('{{ sales_data|escapejs }}');
+  
+  // Initialize Mint Chart
+  Plotly.newPlot('mint-chart', [{
+    x: mintData.labels,
+    y: mintData.data,
+    type: 'bar',
+    marker: { color: '#636EFA' }
+  }], {
+    title: 'NFT Minting Volume',
+    xaxis: { title: 'Date' },
+    yaxis: { title: 'Number of Mints' }
+  });
+
+  // Initialize Sales Chart
+  Plotly.newPlot('sales-chart', [{
+    x: salesData.labels,
+    y: salesData.data,
+    type: 'line',
+    line: { color: '#FFA15A', width: 2 }
+  }], {
+    title: 'NFT Sales Volume',
+    xaxis: { title: 'Date' },
+    yaxis: { title: 'Sales Count' }
+  });
+});
+</script>
+{% endblock %}
+

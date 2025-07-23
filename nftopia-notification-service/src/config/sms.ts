@@ -31,11 +31,31 @@ export const smsConfig: SMSConfig = {
   },
 };
 
+export const twilioConfig = {
+  accountSid: process.env.TWILIO_ACCOUNT_SID!,
+  authToken: process.env.TWILIO_AUTH_TOKEN!,
+  phoneNumber: process.env.TWILIO_PHONE_NUMBER!,
+  webhookUrl: `${process.env.API_URL}/sms/webhooks`,
+  maxLength: 320,
+  rateLimit: {
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 10 // 10 messages/hour/user
+  }
+};
+
 export const smsTemplates = {
-  bidAlert: 'New bid of {bidAmount} on {nftName}. Current highest: {currentHighestBid}. Auction ends: {auctionEndDate}',
-  marketing: '{announcementTitle}: {announcementContent}',
-  '2fa': 'Your NFTopia verification code is: {code}. Valid for 10 minutes.',
-  nftPurchase: 'NFT Purchase Confirmed! You bought {nftName} for {purchasePrice}. Transaction: {transactionHash}',
+  bidAlert: {
+    en: '[NFTopia] Outbid on {{nft.name}} ({{formatEth oldBid}} → {{formatEth newBid}}). {{truncateTx txHash}}',
+  },
+  marketing: {
+    en: '[NFTopia] {{announcementTitle}}: {{announcementContent}}',
+  },
+  '2fa': {
+    en: '[NFTopia] Your code: {{code}}. Expires in {{minutes}}m.',
+  },
+  nftPurchase: {
+    en: '[NFTopia] Purchased {{nft.name}} for {{formatEth price}}. View: {{blockExplorer nft.id}}',
+  },
 };
 
 export const smsSettings = {

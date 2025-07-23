@@ -19,6 +19,14 @@ from django.contrib import admin
 from django.urls import path, include
 from marketplace.views import GasMintingView, GasSalesView, GasPredictionsView
 
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView
+)
+
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("analytics/", include("analytics.urls")),
@@ -27,4 +35,8 @@ urlpatterns = [
     path("api/gas/predictions/", GasPredictionsView.as_view(), name="gas-predictions"),
     path("api/auth/", include("authentication.urls")),
     path('cache/clear/', include('apps.cache.urls')),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('api/analytics/', include('analytics.urls')),
 ]

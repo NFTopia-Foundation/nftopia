@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.3'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.nftopia'
+
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot Starters
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    
+    // Spring Retry (as regular dependency, not plugin)
+    implementation 'org.springframework.retry:spring-retry:2.0.2'
+    implementation 'org.springframework:spring-aspects:6.1.5'
+    
+    // HTTP Clients
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    implementation 'io.projectreactor.netty:reactor-netty:1.1.13'
+    
+    // Database
+    runtimeOnly 'org.postgresql:postgresql'
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+
+    
+    // Security
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    
+    // Development Tools
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

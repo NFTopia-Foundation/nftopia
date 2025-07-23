@@ -26,8 +26,10 @@
     "eslint-config-next": "13.5.1",
     "firebase": "^11.9.1",
     "framer-motion": "^12.5.0",
+    "get-starknet": "^3.3.3",
     "get-starknet-core": "^3.3.5",
     "gsap": "^3.12.7",
+    "immer": "^10.1.1",
     "localforage": "^1.10.0",
     "lucide-react": "^0.446.0",
     "next": "13.5.1",
@@ -41,8 +43,17 @@
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "5.2.2",
     "use-sound": "^5.0.0",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "zustand": "^5.0.6"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/react-hooks": "^8.0.1",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
+    "ts-jest": "^29.4.0"
   }
 }
