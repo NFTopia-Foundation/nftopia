@@ -248,41 +248,59 @@ LOGGING = {
     },
 }
 
-# Celery Configuration
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+# Celery Configuration (Modified to fix import-time settings access)
+def get_celery_settings():
+    """
+    Lazy-load Celery configuration to avoid Django settings initialization issues.
+    This function will only be called when Celery actually needs the settings.
+    """
+    from celery.schedules import crontab  # Import moved here to prevent early loading
+    
+    return {
+        'CELERY_BROKER_URL': os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0'),
+        'CELERY_RESULT_BACKEND': os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/1'),
+        'CELERY_ACCEPT_CONTENT': ['json'],
+        'CELERY_TASK_SERIALIZER': 'json',
+        'CELERY_RESULT_SERIALIZER': 'json',
+        'CELERY_TIMEZONE': TIME_ZONE,
+        'CELERY_BEAT_SCHEDULE': {
+            # Keep all scheduled tasks from both versions
+            'update_analytics': {
+                'task': 'analytics.tasks.update_analytics',
+                'schedule': crontab(minute='*/15'),
+            },
+            'generate-scheduled-reports': {
+                'task': 'analytics.tasks.generate_scheduled_reports_task',
+                'schedule': crontab(minute=0, hour='*/6'),
+            },
+            'cleanup-old-data': {
+                'task': 'analytics.tasks.cleanup_old_data_task',
+                'schedule': crontab(minute=0, hour=2),
+            },
+            'aggregate-daily-mints': {
+                'task': 'analytics.tasks.aggregate_mints',
+                'schedule': crontab(minute=5, hour=0),
+            },
+            'aggregate-daily-sales': {
+                'task': 'analytics.tasks.aggregate_sales',
+                'schedule': crontab(minute=15, hour=0),
+            },
+            'aggregate-daily-user-activity': {
+                'task': 'analytics.tasks.aggregate_user_activity',
+                'schedule': crontab(minute=30, hour=0),
+            }
+        }
+    }
+
+# Apply minimal Celery settings needed at Django startup
+CELERY_BROKER_URL = get_celery_settings()['CELERY_BROKER_URL']
+CELERY_RESULT_BACKEND = get_celery_settings()['CELERY_RESULT_BACKEND']
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
+CELERY_TIMEZONE = TIME_ZONE
 
-WEBHOOK_SECRET = 'your-secret-key'  # In production, use environment variables
-
-# Celery Beat Schedule for automated reports
-from celery.schedules import crontab
-
-CELERY_BEAT_SCHEDULE = {
-    'generate-scheduled-reports': {
-        'task': 'analytics.tasks.generate_scheduled_reports_task',
-        'schedule': crontab(minute=0, hour='*/6'),
-    },
-    'cleanup-old-data': {
-        'task': 'analytics.tasks.cleanup_old_data_task',
-        'schedule': crontab(minute=0, hour=2),
-    },
-    'aggregate-daily-mints': {
-        'task': 'analytics.tasks.aggregate_mints',
-        'schedule': crontab(minute=5, hour=0),
-    },
-    'aggregate-daily-sales': {
-        'task': 'analytics.tasks.aggregate_sales',
-        'schedule': crontab(minute=15, hour=0),
-    },
-    'aggregate-daily-user-activity': {
-        'task': 'analytics.tasks.aggregate_user_activity',
-        'schedule': crontab(minute=30, hour=0),
-    },
-}
+WEBHOOK_SECRET = os.getenv('WEBHOOK_SECRET', 'your-secret-key')  # Moved to environment variable
 
 # Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
