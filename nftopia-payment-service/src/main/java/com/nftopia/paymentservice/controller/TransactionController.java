@@ -19,6 +19,11 @@ import com.nftopia.paymentservice.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import com.nftopia.paymentservice.exception.TransactionNotFoundException;
+import com.nftopia.paymentservice.exception.EscrowUpdateException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.http.ProblemDetail;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -78,5 +83,24 @@ public class TransactionController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
+    }
+}
+
+@RestControllerAdvice
+class TransactionControllerAdvice {
+    @ExceptionHandler(TransactionNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleNotFound(TransactionNotFoundException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        problem.setTitle("Transaction Not Found");
+        problem.setDetail(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    }
+
+    @ExceptionHandler(EscrowUpdateException.class)
+    public ResponseEntity<ProblemDetail> handleEscrowUpdate(EscrowUpdateException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problem.setTitle("Escrow Update Failed");
+        problem.setDetail(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
     }
 } 

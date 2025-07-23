@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import com.nftopia.paymentservice.exception.TransactionNotFoundException;
+import com.nftopia.paymentservice.exception.EscrowUpdateException;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -79,7 +81,7 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionResponse getTransaction(UUID id) {
         Optional<Transaction> transaction = transactionRepository.findById(id);
         if (transaction.isEmpty()) {
-            throw new RuntimeException("Transaction not found"); // TODO: Replace with proper exception
+            throw new TransactionNotFoundException("Transaction not found");
         }
         return toResponse(transaction.get());
     }
@@ -115,15 +117,20 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionResponse updateEscrowStatus(UUID id, EscrowDetailsDTO escrowDetails) {
         Optional<Transaction> transactionOpt = transactionRepository.findById(id);
         if (transactionOpt.isEmpty()) {
-            throw new RuntimeException("Transaction not found"); // TODO: Replace with proper exception
+            throw new TransactionNotFoundException("Transaction not found");
         }
         Transaction transaction = transactionOpt.get();
-        transaction.setStatus(TransactionStatus.ESCROW);
-        transaction.setUpdatedAt(Instant.now());
-        // Example: set escrowStatus from DTO (expand as needed)
-        transaction.setEscrowStatus("UPDATED"); // TODO: Use real value from escrowDetails
-        transaction = transactionRepository.save(transaction);
-        return toResponse(transaction);
+        try {
+            transaction.setEscrowStatus(escrowDetails.escrowStatus());
+            transaction.setEscrowExpiration(escrowDetails.expiration());
+            transaction.setDisputed(escrowDetails.isDisputed());
+            transaction.setStatus(TransactionStatus.ESCROW);
+            transaction.setUpdatedAt(Instant.now());
+            transaction = transactionRepository.save(transaction);
+            return toResponse(transaction);
+        } catch (Exception e) {
+            throw new EscrowUpdateException("Failed to update escrow status: " + e.getMessage());
+        }
     }
 
     private TransactionResponse toResponse(Transaction transaction) {

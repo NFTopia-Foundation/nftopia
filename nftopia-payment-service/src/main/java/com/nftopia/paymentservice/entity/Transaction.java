@@ -38,7 +38,17 @@ public class Transaction {
     @Column
     private String escrowStatus;
 
-    // TODO: Add escrow details fields as needed
+    @Column
+    private Instant escrowExpiration;
+
+    @Column
+    private boolean isDisputed;
 
     // Getters and setters omitted for brevity
+    public String getEscrowStatus() { return escrowStatus; }
+    public void setEscrowStatus(String escrowStatus) { this.escrowStatus = escrowStatus; }
+    public Instant getEscrowExpiration() { return escrowExpiration; }
+    public void setEscrowExpiration(Instant escrowExpiration) { this.escrowExpiration = escrowExpiration; }
+    public boolean isDisputed() { return isDisputed; }
+    public void setDisputed(boolean disputed) { isDisputed = disputed; }
 } 
