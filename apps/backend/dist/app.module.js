@@ -27,6 +27,7 @@ const stats_module_1 = require("./stats/stats.module");
 const starknet_module_1 = require("./starknet/starknet.module");
 const redis_module_1 = require("./redis/redis.module");
 const events_module_1 = require("./events/events.module");
+const fraud_detection_module_1 = require("./fraud-detection/fraud-detection.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -62,7 +63,8 @@ exports.AppModule = AppModule = __decorate([
             stats_module_1.StatsModule,
             starknet_module_1.StarknetModule,
             redis_module_1.RedisModule,
-            events_module_1.EventsModule
+            events_module_1.EventsModule,
+            fraud_detection_module_1.FraudDetectionModule
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

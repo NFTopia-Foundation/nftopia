@@ -18,6 +18,7 @@ import { StatsModule } from './stats/stats.module';
 import { StarknetModule } from './starknet/starknet.module';
 import { RedisModule } from './redis/redis.module';
 import { EventsModule } from './events/events.module';
+import { FraudDetectionModule } from './fraud-detection/fraud-detection.module';
 
 @Module({
   imports: [
@@ -50,7 +51,8 @@ import { EventsModule } from './events/events.module';
     StatsModule,
     StarknetModule,
     RedisModule,
-    EventsModule
+    EventsModule,
+    FraudDetectionModule
   ],
   controllers: [AppController],
   providers: [AppService],

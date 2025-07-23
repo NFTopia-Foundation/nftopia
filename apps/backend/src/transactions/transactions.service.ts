@@ -7,6 +7,9 @@ import { User } from '../users/entities/user.entity';
 import { NFT } from '../nfts/entities/nft.entity';
 import { NftStorageService } from '../nftstorage/nftstorage.service';
 import { fileTypeResultFromBuffer } from '../utils/file-type-result';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { TransactionCreatedEvent } from '../fraud-detection/listeners/transaction-fraud.listener';
+import { TransactionContext } from '../fraud-detection/dto/fraud-check-result.dto';
 
 @Injectable()
 export class TransactionsService {
@@ -18,10 +21,15 @@ export class TransactionsService {
     @InjectRepository(NFT)
     private readonly nftRepo: Repository<NFT>,
     private readonly nftStorageService: NftStorageService,
+    private readonly eventEmitter: EventEmitter2, // Add this
   ) {}
 
-
-  async recordTransaction(buyerId: string, nftId: string, amount: number): Promise<Transaction> {
+  async recordTransaction(
+    buyerId: string, 
+    nftId: string, 
+    amount: number,
+    context: TransactionContext // Add this parameter
+  ): Promise<Transaction> {
     const buyer = await this.userRepo.findOneBy({ id: buyerId });
     const nft = await this.nftRepo.findOne({
       where: { id: nftId },
@@ -72,8 +80,13 @@ export class TransactionsService {
       nft,
       amount,
     });
-  
-    return this.txRepo.save(tx);
+
+    const savedTx = await this.txRepo.save(tx);
+    
+    // Emit event for fraud detection
+    this.eventEmitter.emit('transaction.created', new TransactionCreatedEvent(savedTx, context));
+    
+    return savedTx;
   }
 
   async getTransactionsByUser(userId: string): Promise<Transaction[]> {
