@@ -1,6 +1,6 @@
 package com.nftopia.paymentservice.dto;
 
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 import java.time.Instant;
 
 public record EscrowDetailsDTO(

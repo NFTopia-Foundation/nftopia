@@ -46,6 +46,16 @@ dependencies {
     
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.h2database:h2'
+
+    // Swagger/OpenAPI (Springdoc)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+    // Jakarta Validation API (for annotations like @NotNull, @Valid, etc.)
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+    // Jakarta Persistence API (for JPA annotations)
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
 }
 
 tasks.named('test') {

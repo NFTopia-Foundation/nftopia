@@ -10,13 +10,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.context.annotation.Import;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Import(TestSecurityConfig.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 public class TransactionControllerIntegrationTest {
@@ -90,7 +93,9 @@ public class TransactionControllerIntegrationTest {
         // Now, update escrow
         mockMvc.perform(patch("/api/transactions/" + id + "/escrow")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new EscrowDetailsDTO())))
+                .content(objectMapper.writeValueAsString(
+                    new EscrowDetailsDTO("PENDING", Instant.now().plusSeconds(3600), false)
+                )))
                 .andExpect(status().isOk());
     }
 

@@ -9,8 +9,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
@@ -44,6 +44,8 @@ public class TransactionController {
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
         } catch (Exception e) {
+            System.out.println("EXCEPTION IN CONTROLLER: " + e.getMessage());
+            e.printStackTrace(); // Print the real exception for debugging
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
@@ -54,7 +56,7 @@ public class TransactionController {
         try {
             TransactionResponse response = transactionService.getTransaction(id);
             return ResponseEntity.ok(response);
-        } catch (NoSuchElementException | RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Transaction not found");
         }
     }

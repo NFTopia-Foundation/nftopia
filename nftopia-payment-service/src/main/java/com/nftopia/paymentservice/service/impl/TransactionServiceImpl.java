@@ -19,6 +19,8 @@ import java.util.UUID;
 import com.nftopia.paymentservice.exception.TransactionNotFoundException;
 import com.nftopia.paymentservice.exception.EscrowUpdateException;
 
+import java.util.List;
+
 @Service
 public class TransactionServiceImpl implements TransactionService {
     @Autowired
@@ -56,8 +58,8 @@ public class TransactionServiceImpl implements TransactionService {
             TransactionResponse response = toResponse(transaction);
             try {
                 String responseJson = objectMapper.writeValueAsString(response);
-                IdempotencyKey key = new IdempotencyKey(idempotencyKey, requestHash, responseJson, Instant.now());
-                idempotencyKeyRepository.save(key);
+                IdempotencyKey keyEntity = new IdempotencyKey(idempotencyKey, requestHash, responseJson, Instant.now());
+                idempotencyKeyRepository.save(keyEntity);
             } catch (Exception e) {
                 // Log and continue
             }
@@ -90,17 +92,25 @@ public class TransactionServiceImpl implements TransactionService {
     public Page<TransactionResponse> getTransactions(UUID nftId, UUID userId, TransactionStatus status, int page, int size) {
         Page<Transaction> transactions;
         if (nftId != null && userId != null && status != null) {
-            // TODO: Implement combined query if needed
-            transactions = transactionRepository.findAll(PageRequest.of(page, size)).map(t -> t)
-                .filter(t -> t.getNftId().equals(nftId) && t.getReceiverId().equals(userId) && t.getStatus() == status);
+            // Fetch all and filter in memory (not optimal for large datasets)
+            List<Transaction> all = transactionRepository.findAll();
+            List<Transaction> filtered = all.stream()
+                .filter(t -> t.getNftId().equals(nftId) && t.getReceiverId().equals(userId) && t.getStatus() == status)
+                .toList();
+            int start = Math.min(page * size, filtered.size());
+            int end = Math.min(start + size, filtered.size());
+            List<Transaction> pageList = filtered.subList(start, end);
+            return new PageImpl<>(pageList, PageRequest.of(page, size), filtered.size()).map(this::toResponse);
         } else if (nftId != null && userId != null) {
             transactions = transactionRepository.findByNftIdAndReceiverId(nftId, userId, PageRequest.of(page, size));
         } else if (nftId != null && status != null) {
-            transactions = transactionRepository.findByNftId(nftId, PageRequest.of(page, size)).map(t -> t)
-                .filter(t -> t.getStatus() == status);
+            List<Transaction> all = transactionRepository.findByNftId(nftId, PageRequest.of(page, size)).getContent();
+            List<Transaction> filtered = all.stream().filter(t -> t.getStatus() == status).toList();
+            return new PageImpl<>(filtered, PageRequest.of(page, size), filtered.size()).map(this::toResponse);
         } else if (userId != null && status != null) {
-            transactions = transactionRepository.findByReceiverId(userId, PageRequest.of(page, size)).map(t -> t)
-                .filter(t -> t.getStatus() == status);
+            List<Transaction> all = transactionRepository.findByReceiverId(userId, PageRequest.of(page, size)).getContent();
+            List<Transaction> filtered = all.stream().filter(t -> t.getStatus() == status).toList();
+            return new PageImpl<>(filtered, PageRequest.of(page, size), filtered.size()).map(this::toResponse);
         } else if (nftId != null) {
             transactions = transactionRepository.findByNftId(nftId, PageRequest.of(page, size));
         } else if (userId != null) {
