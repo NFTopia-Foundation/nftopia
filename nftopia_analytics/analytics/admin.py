@@ -11,6 +11,13 @@ from .models import (
     ReportExecution,
     NFTMetadata
 )
+from .models_dir.marketplace_health import (
+    LiquidityMetrics,
+    TradingActivityMetrics,
+    UserEngagementMetrics,
+    MarketplaceHealthSnapshot,
+    CollectionWatchlist
+)
 
 
 @admin.register(NFTMetadata)
@@ -224,3 +231,145 @@ class ReportExecutionAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         })
     )
+
+
+@admin.register(LiquidityMetrics)
+class LiquidityMetricsAdmin(admin.ModelAdmin):
+    list_display = [
+        'collection',
+        'timestamp',
+        'liquidity_score_display',
+        'bid_ask_spread',
+        'fill_rate_24h',
+        'total_bids',
+        'total_asks'
+    ]
+    list_filter = ['timestamp', 'collection']
+    search_fields = ['collection__name']
+    readonly_fields = ['created_at']
+    date_hierarchy = 'timestamp'
+    
+    def liquidity_score_display(self, obj):
+        color = (
+            "green" if obj.liquidity_score >= 75
+            else "orange" if obj.liquidity_score >= 50 else "red"
+        )
+        return format_html(
+            '<span style="color: {};">{:.2f}</span>', color, obj.liquidity_score
+        )
+    liquidity_score_display.short_description = "Liquidity Score"
+
+
+@admin.register(TradingActivityMetrics)
+class TradingActivityMetricsAdmin(admin.ModelAdmin):
+    list_display = [
+        'collection_display',
+        'timeframe',
+        'timestamp',
+        'trading_volume',
+        'total_trades',
+        'unique_traders',
+        'wash_trading_score_display'
+    ]
+    list_filter = ['timeframe', 'timestamp', 'collection']
+    search_fields = ['collection__name']
+    readonly_fields = ['created_at']
+    date_hierarchy = 'timestamp'
+    
+    def collection_display(self, obj):
+        return obj.collection.name if obj.collection else "Global"
+    collection_display.short_description = "Collection"
+    
+    def wash_trading_score_display(self, obj):
+        color = (
+            "red" if obj.wash_trading_score >= 50
+            else "orange" if obj.wash_trading_score >= 20 else "green"
+        )
+        return format_html(
+            '<span style="color: {};">{:.2f}%</span>', color, obj.wash_trading_score
+        )
+    wash_trading_score_display.short_description = "Wash Trading Risk"
+
+
+@admin.register(UserEngagementMetrics)
+class UserEngagementMetricsAdmin(admin.ModelAdmin):
+    list_display = [
+        'metric_type',
+        'timestamp',
+        'retention_rate_display',
+        'daily_active_users',
+        'weekly_active_users',
+        'monthly_active_users'
+    ]
+    list_filter = ['metric_type', 'timestamp']
+    readonly_fields = ['created_at']
+    date_hierarchy = 'timestamp'
+    
+    def retention_rate_display(self, obj):
+        if obj.retention_rate:
+            color = (
+                "green" if obj.retention_rate >= 50
+                else "orange" if obj.retention_rate >= 25 else "red"
+            )
+            return format_html(
+                '<span style="color: {};">{:.2f}%</span>', color, obj.retention_rate
+            )
+        return "N/A"
+    retention_rate_display.short_description = "Retention Rate"
+
+
+@admin.register(MarketplaceHealthSnapshot)
+class MarketplaceHealthSnapshotAdmin(admin.ModelAdmin):
+    list_display = [
+        'timestamp',
+        'health_status_display',
+        'overall_health_score',
+        'liquidity_score',
+        'trading_activity_score',
+        'user_engagement_score',
+        'total_24h_volume',
+        'daily_active_users'
+    ]
+    list_filter = ['health_status', 'timestamp']
+    readonly_fields = ['created_at']
+    date_hierarchy = 'timestamp'
+    
+    def health_status_display(self, obj):
+        colors = {
+            'excellent': 'green',
+            'good': 'lightgreen',
+            'fair': 'orange',
+            'poor': 'red',
+            'critical': 'darkred'
+        }
+        color = colors.get(obj.health_status, 'black')
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}</span>',
+            color, obj.get_health_status_display()
+        )
+    health_status_display.short_description = "Health Status"
+    
+    actions = ['recalculate_health_score']
+    
+    def recalculate_health_score(self, request, queryset):
+        for snapshot in queryset:
+            snapshot.calculate_overall_score()
+            snapshot.save()
+        self.message_user(request, f"Recalculated health scores for {queryset.count()} snapshots")
+    recalculate_health_score.short_description = "Recalculate health scores"
+
+
+@admin.register(CollectionWatchlist)
+class CollectionWatchlistAdmin(admin.ModelAdmin):
+    list_display = [
+        'user',
+        'collection',
+        'added_at',
+        'is_active',
+        'view_count',
+        'last_viewed'
+    ]
+    list_filter = ['is_active', 'added_at', 'collection']
+    search_fields = ['user__username', 'collection__name']
+    readonly_fields = ['added_at', 'removed_at']
+    date_hierarchy = 'added_at'
