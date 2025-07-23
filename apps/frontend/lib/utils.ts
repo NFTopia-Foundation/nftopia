@@ -6,4 +6,4 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Re-export breakpoints utilities
-export * from "./utils/breakpoints";
+export * from "../utils/breakpoints";

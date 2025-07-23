@@ -1,3 +1,3 @@
 export * from "./useMobile";
 export * from "./useMediaQuery";
-export * from "./types";
+export * from "../types/hooks";

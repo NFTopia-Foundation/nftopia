@@ -1,6 +1,6 @@
 import React from "react";
-import { useMobile, useMediaQuery } from "@/lib/hooks";
-import { BREAKPOINTS, getBreakpointQuery } from "@/lib/utils/breakpoints";
+import { useMobile, useMediaQuery } from "@/hooks";
+import { BREAKPOINTS, getBreakpointQuery } from "@/utils/breakpoints";
 
 export const ResponsiveDemo: React.FC = () => {
   const isMobile = useMobile(); // default: 640px
