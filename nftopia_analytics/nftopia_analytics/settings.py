@@ -258,7 +258,7 @@ CELERY_TIMEZONE = 'UTC'
 
 WEBHOOK_SECRET = 'your-secret-key'  # In production, use environment variables
 
-# Celery Beat Schedule for automated reports
+# Celery Beat Schedule
 from celery.schedules import crontab
 
 CELERY_BEAT_SCHEDULE = {
@@ -282,229 +282,31 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'analytics.tasks.aggregate_user_activity',
         'schedule': crontab(minute=30, hour=0),
     },
-}
-
-# Email Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@nftopia.com')
-
-# AWS S3 Configuration (optional)
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
-AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
-
-# Report Generation Settings
-REPORT_SETTINGS = {
-    'MAX_RECORDS_PDF': 50,
-    'MAX_RECORDS_CSV': 10000,
-    'TEMP_DIR': '/tmp',
-    'DEFAULT_S3_BUCKET': os.getenv('REPORTS_S3_BUCKET', ''),
-}
-
-# Add required packages to INSTALLED_APPS
-INSTALLED_APPS = [
-    # Django core apps
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-
-    # Third-party apps
-    "rest_framework",
-    "rest_framework_simplejwt",
-    "rest_framework_simplejwt.token_blacklist",
-    "django_celery_beat",
-    "django_celery_results",
-    "django_pandas",
-    "django_prometheus",
-    "drf_spectacular",
-    "drf_spectacular_sidecar",
-    "celery",
-
-    # NFTopia apps
-    "users",
-    "sales",
-    "minting",
-    "marketplace",
-    "analytics",
-    "authentication",
-    "webhooks"
-]
-
-MIDDLEWARE = [
-    # Django core middleware
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
     
-    # Prometheus monitoring middleware
-    'django_prometheus.middleware.PrometheusBeforeMiddleware',
-    
-    # Custom analytics middleware
-    "analytics.middleware.AnalyticsMiddleware",
-    
-    # Prometheus (must come after all other middleware)
-    'django_prometheus.middleware.PrometheusAfterMiddleware',
-]
-
-PROMETHEUS_EXPORT_MIGRATIONS = False
-
-ROOT_URLCONF = "nftopia_analytics.urls"
-
-WSGI_APPLICATION = "nftopia_analytics.wsgi.application"
-
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    # Marketplace Health Monitoring
+    'calculate-liquidity-metrics': {
+        'task': 'analytics.tasks.calculate_liquidity_metrics_task',
+        'schedule': crontab(minute=0),  # Every hour
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    'calculate-trading-activity': {
+        'task': 'analytics.tasks.calculate_trading_activity_task',
+        'schedule': crontab(minute=15),  # Every hour at 15 minutes
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    'calculate-user-engagement': {
+        'task': 'analytics.tasks.calculate_user_engagement_task',
+        'schedule': crontab(minute=30),  # Every hour at 30 minutes
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    'generate-health-snapshot': {
+        'task': 'analytics.tasks.generate_health_snapshot_task',
+        'schedule': crontab(minute=45),  # Every hour at 45 minutes
     },
-]
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = "en-us"
-
-TIME_ZONE = "UTC"
-
-USE_I18N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = "static/"
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# Analytics settings
-ANALYTICS_TRACK_ANONYMOUS_USERS = True
-ANALYTICS_GEO_IP_ENABLED = False  # Set to True to enable geographic tracking
-
-# TimescaleDB Configuration
-TIMESCALEDB_SETTINGS = {
-    "CHUNK_TIME_INTERVAL": {
-        "nft_mints": "1 day",
-        "nft_sales": "1 day",
-        "nft_transfers": "1 day",
-        "gas_metrics": "1 day",
-        "page_views": "1 day",
-        "user_sessions": "7 days",
+    'cleanup-old-metrics': {
+        'task': 'analytics.tasks.cleanup_old_metrics',
+        'schedule': crontab(hour=2, minute=0),  # Daily at 2 AM
     },
-    "RETENTION_POLICIES": {
-        "raw_events": "90 days",
-        "aggregates": "1 year",
-    },
-    "COMPRESSION": {
-        "enabled": True,
-        "compress_after": "7 days",
-        "compression_level": 1,
-    },
-}
-
-# Logging Configuration
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "auth_file": {
-            "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": "auth.log",
-            "formatter": "verbose",
-        },
-        "auth_errors": {
-            "level": "WARNING",
-            "class": "logging.FileHandler",
-            "filename": "auth_errors.log",
-            "formatter": "verbose",
-        },
-    },
-    "loggers": {
-        "authentication": {
-            "handlers": ["auth_file", "auth_errors"],
-            "level": "INFO",
-            "propagate": True,
-        },
-    },
-}
-
-# Celery Configuration
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
-
-WEBHOOK_SECRET = 'your-secret-key'  # In production, use environment variables
-
-# Celery Beat Schedule for automated reports
-from celery.schedules import crontab
-
-CELERY_BEAT_SCHEDULE = {
-    'generate-scheduled-reports': {
-        'task': 'analytics.tasks.generate_scheduled_reports_task',
-        'schedule': crontab(minute=0, hour='*/6'),
-    },
-    'cleanup-old-data': {
-        'task': 'analytics.tasks.cleanup_old_data_task',
-        'schedule': crontab(minute=0, hour=2),
-    },
-    'aggregate-daily-mints': {
-        'task': 'analytics.tasks.aggregate_mints',
-        'schedule': crontab(minute=5, hour=0),
-    },
-    'aggregate-daily-sales': {
-        'task': 'analytics.tasks.aggregate_sales',
-        'schedule': crontab(minute=15, hour=0),
-    },
-    'aggregate-daily-user-activity': {
-        'task': 'analytics.tasks.aggregate_user_activity',
-        'schedule': crontab(minute=30, hour=0),
+    'marketplace-health-pipeline': {
+        'task': 'analytics.tasks.run_marketplace_health_pipeline',
+        'schedule': crontab(minute=0, hour='*/6'),  # Every 6 hours
     },
 }
 
