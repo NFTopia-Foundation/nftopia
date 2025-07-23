@@ -59,3 +59,77 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .qodo
+
+####################
+# Python
+####################
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-wheel-metadata/
+*.manifest
+*.spec
+*.log
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+env.bak/
+*.env
+*.venv
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+####################
+# Java / Gradle
+####################
+# Compiled class files
+*.class
+.gradle/
+
+
+# Log files
+*.log
+
+# Gradle
+.gradle/
+build/
+out/
+
+# IntelliJ / Eclipse / VSCode IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.project
+.classpath
+.settings/
+
+####################
+# OS / Editor files
+####################
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Other temporary files
+*.swp
+*.swo
+*.tmp
+*.bak
