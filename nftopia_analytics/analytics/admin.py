@@ -7,7 +7,26 @@ from .models import (
     WalletConnection,
     UserBehaviorMetrics,
     PageView,
+    AutomatedReport,
+    ReportExecution,
+    NFTMetadata
 )
+
+
+@admin.register(NFTMetadata)
+class NFTMetadataAdmin(admin.ModelAdmin):
+    list_display = ('ipfs_cid', 'content_type', 'authenticity_score', 'copyright_risk')
+    list_filter = ('content_type', 'copyright_risk')
+    search_fields = ('ipfs_cid',)
+    readonly_fields = ('last_analyzed', 'created_at')
+    
+    actions = ['reanalyze_metadata']
+    
+    def reanalyze_metadata(self, request, queryset):
+        from .tasks import analyze_nft_metadata
+        for item in queryset:
+            analyze_nft_metadata.delay(item.ipfs_cid)
+        self.message_user(request, f"Scheduled {queryset.count()} items for reanalysis")
 
 
 @admin.register(UserSession)
@@ -153,3 +172,55 @@ class PageViewAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("user", "session")
+
+
+@admin.register(AutomatedReport)
+class AutomatedReportAdmin(admin.ModelAdmin):
+    list_display = ['report_type', 'frequency', 'is_active', 'last_run', 'next_run']
+    list_filter = ['report_type', 'frequency', 'is_active']
+    search_fields = ['report_type']
+    readonly_fields = ['last_run', 'next_run']
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('report_type', 'frequency', 'is_active')
+        }),
+        ('Distribution', {
+            'fields': ('recipients', 'format')
+        }),
+        ('S3 Configuration', {
+            'fields': ('s3_bucket', 's3_prefix'),
+            'classes': ('collapse',)
+        }),
+        ('Template Configuration', {
+            'fields': ('template_config',),
+            'classes': ('collapse',)
+        }),
+        ('Schedule Information', {
+            'fields': ('last_run', 'next_run'),
+            'classes': ('collapse',)
+        })
+    )
+
+@admin.register(ReportExecution)
+class ReportExecutionAdmin(admin.ModelAdmin):
+    list_display = ['report', 'status', 'started_at', 'completed_at', 'data_points_processed']
+    list_filter = ['status', 'started_at']
+    search_fields = ['report__report_type']
+    readonly_fields = ['started_at', 'completed_at']
+    
+    fieldsets = (
+        ('Execution Info', {
+            'fields': ('report', 'status', 'started_at', 'completed_at')
+        }),
+        ('Files', {
+            'fields': ('pdf_file_path', 'csv_file_path', 's3_pdf_url', 's3_csv_url')
+        }),
+        ('Metrics', {
+            'fields': ('data_points_processed', 'recipients_notified')
+        }),
+        ('Error Info', {
+            'fields': ('error_message',),
+            'classes': ('collapse',)
+        })
+    )

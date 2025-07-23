@@ -1,0 +1,38 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'admin/css/analytics.css' %}">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>NFTopia Analytics Dashboard</h1>
+    <div class="timeframe-selector">
+      <select id="timeframe-selector">
+        <option value="24h">Last 24 Hours</option>
+        <option value="7d" selected>Last 7 Days</option>
+        <option value="30d">Last 30 Days</option>
+      </select>
+      <button id="export-btn" class="button">Export Data</button>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="chart-container">
+      {% include "admin/includes/charts.html" %}
+    </div>
+    <div class="heatmap-container">
+      {% include "admin/includes/heatmap.html" %}
+    </div>
+    <div class="system-container">
+      {% include "admin/includes/system_health.html" %}
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'admin/js/dashboard.js' %}"></script>
+{% endblock %}

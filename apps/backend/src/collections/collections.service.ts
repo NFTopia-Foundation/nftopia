@@ -38,6 +38,25 @@ export class CollectionsService {
     return this.collectionRepo.save(collection);
   }
 
+
+  async createCollectionJson(
+    dto: CreateCollectionDto, // includes name, description, and bannerImage (as string URL)
+    userId: string,
+  ): Promise<Collection> {
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+    });
+    if (!user) throw new UnauthorizedException('User not found');
+  
+    const collection = this.collectionRepo.create({
+      ...dto, // dto.bannerImage is already the Firebase URL
+      creator: user,
+    });
+  
+    return this.collectionRepo.save(collection);
+  }
+  
+
   // Get all collections (optional: with pagination later)
   async getAllCollections(): Promise<Collection[]> {
     return this.collectionRepo.find({

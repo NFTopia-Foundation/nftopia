@@ -29,32 +29,39 @@ pub mod CollectionFactory {
     #[starknet::interface]
     trait ICollectionFactory<TContractState> {
         fn create_collection(ref self: TContractState) -> ContractAddress;
-        fn get_user_collections(self: @TContractState, user: ContractAddress) -> Array<ContractAddress>;
+        fn get_user_collections(
+            self: @TContractState, user: ContractAddress,
+        ) -> Array<ContractAddress>;
     }
 
     #[abi(embed_v0)]
     impl CollectionFactoryImpl of ICollectionFactory<ContractState> {
         fn create_collection(ref self: ContractState) -> ContractAddress {
             let caller = get_caller_address();
-            let collection_address = contract_address_const::<0x1234>(); // Dummy value, to be replaced
+            let collection_address = contract_address_const::<
+                0x1234,
+            >(); // Dummy value, to be replaced
 
             self.collections.write(collection_address, true);
             // Map::write(self.collections, collection_address, true);
-
 
             let count = self.user_collection_count.read(caller);
             self.user_collections.write((caller, count), collection_address);
             self.user_collection_count.write(caller, count + 1);
 
-            self.emit(Event::CollectionCreated(CollectionCreated {
-                creator: caller,
-                collection: collection_address,
-            }));
+            self
+                .emit(
+                    Event::CollectionCreated(
+                        CollectionCreated { creator: caller, collection: collection_address },
+                    ),
+                );
 
             collection_address
         }
 
-        fn get_user_collections(self: @ContractState, user: ContractAddress) -> Array<ContractAddress> {
+        fn get_user_collections(
+            self: @ContractState, user: ContractAddress,
+        ) -> Array<ContractAddress> {
             let count = self.user_collection_count.read(user);
             let mut result = ArrayTrait::new();
 

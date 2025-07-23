@@ -6,6 +6,10 @@ import smsRoutes from './routes/sms.routes';
 import { database } from './config/database';
 import { EmailWebhooksController } from './controllers/email-webhooks.controller';
 
+import exphbs from 'express-handlebars';
+import htmlToText from 'html-to-text';
+import path from 'path';
+
 const app = express();
 const emailWebhooksController = new EmailWebhooksController();
 
@@ -57,6 +61,19 @@ app.use('/api', routes);
 app.use('/api/v1/email', emailRoutes);
 app.use('/api/v1/sms', smsRoutes);
 app.post('/webhooks/email', emailWebhooksController.handleEvent);
+
+
+
+// Configure Handlebars
+const hbs = exphbs.create({
+  extname: '.hbs',
+  partialsDir: path.join(__dirname, 'templates/partials'),
+});
+
+// Register template engine
+app.engine('.hbs', hbs.engine);
+app.set('view engine', '.hbs');
+app.set('views', path.join(__dirname, 'templates/emails'));
 
 // Initialize database when starting the app
 initializeDatabase().catch(err => {

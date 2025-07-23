@@ -10,9 +10,7 @@ const csurf_1 = __importDefault(require("csurf"));
 const interceptors_1 = require("./interceptors");
 const config_1 = require("@nestjs/config");
 const redis_adapter_1 = require("./redis/redis.adapter");
-const mongoConnection_1 = require("./utils/mongoConnection");
 async function bootstrap() {
-    await (0, mongoConnection_1.connectWithRetry)();
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const configService = app.get(config_1.ConfigService);
     const redisAdapter = new redis_adapter_1.RedisIoAdapter(app);
