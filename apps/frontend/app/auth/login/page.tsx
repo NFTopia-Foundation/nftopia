@@ -1,23 +1,34 @@
 "use client";
 
-import { useState } from "react";
-import { connect } from "get-starknet";
+import { CircuitBackground } from "@/components/circuit-background";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CircuitBackground } from "@/components/circuit-background";
-import Link from "next/link";
-import { Wallet, KeyRound, LogIn } from "lucide-react";
-import Image from "next/image";
+import { useAuthStore } from "@/features/auth/store/authStore";
+import { useMarketplaceStore } from "@/features/marketplace/store/marketplaceStore";
+import { useNFTStore } from "@/features/nft/store/nftStore";
+import { useUserStore } from "@/features/user/store/userStore";
 import { useAuth } from "@/lib/stores/auth-store";
-
+import { connect } from "get-starknet";
+import { KeyRound, LogIn, Wallet } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import React, { useState } from "react";
 export default function LoginPage() {
-  const { requestNonce, verifySignature, loading, error: authError, clearError } = useAuth();
+  const {
+    requestNonce,
+    verifySignature,
+    loading,
+    error: authError,
+    clearError,
+  } = useAuth();
   const [walletAddress, setWalletAddress] = useState("");
   const [nonce, setNonce] = useState("");
   const [connected, setConnected] = useState(false);
   const [signer, setSigner] = useState<any>(null);
   const [localError, setLocalError] = useState("");
-  const [walletType, setWalletType] = useState<'argentx' | 'braavos' | null>(null);
+  const [walletType, setWalletType] = useState<"argentx" | "braavos" | null>(
+    null
+  );
 
   const connectWallet = async () => {
     try {
@@ -36,9 +47,11 @@ export default function LoginPage() {
 
       // Detect wallet type
       const detectedType =
-        starknet.id === 'argentX' ? 'argentx' :
-        starknet.id === 'braavos' ? 'braavos' :
-        null;
+        starknet.id === "argentX"
+          ? "argentx"
+          : starknet.id === "braavos"
+          ? "braavos"
+          : null;
 
       if (!detectedType) {
         throw new Error("Unsupported wallet type");
@@ -89,27 +102,27 @@ export default function LoginPage() {
       const typedData = {
         types: {
           StarkNetDomain: [
-            { name: 'name', type: 'felt' },
-            { name: 'version', type: 'felt' },
-            { name: 'chainId', type: 'felt' },
+            { name: "name", type: "felt" },
+            { name: "version", type: "felt" },
+            { name: "chainId", type: "felt" },
           ],
-          Message: [{ name: 'nonce', type: 'felt' }],
+          Message: [{ name: "nonce", type: "felt" }],
         },
-        primaryType: 'Message',
+        primaryType: "Message",
         domain: {
-          name: 'NFTopia',
-          version: '1',
-          chainId: 'SN_SEPOLIA',
+          name: "NFTopia",
+          version: "1",
+          chainId: "SN_SEPOLIA",
         },
         message: { nonce },
       };
 
       let signature: [string, string];
-      if (walletType === 'argentx') {
+      if (walletType === "argentx") {
         const rawSignature = await signer.signMessage(typedData);
         console.log(rawSignature);
         signature = [rawSignature[2], rawSignature[3]];
-      } else if (walletType === 'braavos') {
+      } else if (walletType === "braavos") {
         const rawSignature = await signer.signMessage(typedData);
         console.log(rawSignature);
         signature = [rawSignature[1], rawSignature[2]];
@@ -126,6 +139,21 @@ export default function LoginPage() {
 
   // Combine local errors and auth store errors
   const error = localError || authError;
+  const authUser = useAuthStore((state) => state.user);
+  const userProfile = useUserStore((state) => state.user);
+  const nftCount = useNFTStore((state) => state.nfts.length);
+  const marketplaceListings = useMarketplaceStore(
+    (state) => state.listings.length
+  );
+
+  React.useEffect(() => {
+    console.log("[LoginPage Zustand State]", {
+      authUser,
+      userProfile,
+      nftCount,
+      marketplaceListings,
+    });
+  }, [authUser, userProfile, nftCount, marketplaceListings]);
 
   return (
     <div className="min-h-screen text-white">
@@ -218,8 +246,6 @@ export default function LoginPage() {
   );
 }
 
-
-
 // "use client";
 
 // import { useAuth } from "@/lib/auth-context";
@@ -232,7 +258,6 @@ export default function LoginPage() {
 // import { Wallet, KeyRound, LogIn } from "lucide-react";
 // import Image from "next/image";
 
-
 // export default function LoginPage() {
 //   const { requestNonce, verifySignature, loading } = useAuth();
 //   const [walletAddress, setWalletAddress] = useState("");
@@ -241,7 +266,6 @@ export default function LoginPage() {
 //   const [signer, setSigner] = useState<any>(null);
 //   const [error, setError] = useState("");
 //   const [walletType, setWalletType] = useState<'argentx' | 'braavos' | null>(null);
-
 
 //   const connectWallet = async () => {
 //   try {
@@ -277,7 +301,6 @@ export default function LoginPage() {
 //   }
 // };
 
-
 //   const getNonce = async () => {
 //     if (!walletAddress) {
 //       setError("Please connect your wallet first");
@@ -293,17 +316,16 @@ export default function LoginPage() {
 //     }
 //   };
 
-  
 //   const handleLogin = async () => {
 //     try {
 //       // setLoading(true);
 //       setError("");
-  
+
 //       // 1. Ensure wallet is connected
 //       if (!walletAddress || !signer || !walletType) {
 //         throw new Error("Wallet not connected");
 //       }
-  
+
 //       // 2. Get nonce from backend
 //       if (!nonce) {
 //         await getNonce();
@@ -327,10 +349,10 @@ export default function LoginPage() {
 //         },
 //         message: { nonce },
 //       };
-  
+
 //       let signature: [string, string];
 //       if (walletType === 'argentx') {
-        
+
 //         const rawSignature = await signer.signMessage(typedData);
 //         console.log(rawSignature);
 //         signature = [rawSignature[2], rawSignature[3]];
@@ -343,18 +365,15 @@ export default function LoginPage() {
 //       } else {
 //         throw new Error("Unsupported wallet type");
 //       }
-  
+
 //       await verifySignature(walletAddress, signature, nonce, walletType);
-  
-      
+
 //     } catch (err) {
 //       console.error("Login failed:", err);
 //       setError(err instanceof Error ? err.message : "Login failed");
 //     } finally {
 //     }
 //   };
-  
-  
 
 //   return (
 //     <div className="min-h-screen text-white">
