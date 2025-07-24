@@ -17,7 +17,10 @@ export class FCMService {
     if (!token) throw new Error(`No device token found for user ${userId}`);
 
     try {
-      await admin.messaging().sendToDevice(token, payload);
+      await admin.messaging().send({
+        token,
+        ...payload,
+      });
       console.log(`Push sent to user ${userId}`);
     } catch (error: any) {
       console.error(`FCM error for ${userId}:`, error.message);
