@@ -131,9 +131,26 @@ export const useAuthStore = create<AuthStore>()(
             state.error = null;
           });
 
+          // Step 1: Disconnect wallet first (before API call)
+          try {
+            // Try to disconnect from get-starknet
+            if (typeof window !== 'undefined' && (window as any).starknet) {
+              await (window as any).starknet.disable();
+            }
+          } catch (walletError) {
+            console.warn('Wallet disconnect failed:', walletError);
+            // Continue with logout even if wallet disconnect fails
+          }
+
+          // Step 2: Clear localStorage immediately
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('auth-user');
+          }
+
+          // Step 3: Call backend logout API with CSRF protection
           const csrfToken = await getCookie();
 
-          await fetch(`${API_CONFIG.baseUrl}/auth/logout`, {
+          const response = await fetch(`${API_CONFIG.baseUrl}/auth/logout`, {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -142,22 +159,41 @@ export const useAuthStore = create<AuthStore>()(
             },
           });
 
+          // Even if the API call fails, we should still clear local state for security
           set((state) => {
             state.user = null;
             state.isAuthenticated = false;
             state.loading = false;
           });
 
-          // Redirect to login (this could be handled by the component)
+          // If API call succeeded, show success
+          if (response.ok) {
+            console.log('Logout successful');
+          } else {
+            console.warn('Logout API failed but local state cleared');
+          }
+
+          // Redirect to login page
           if (typeof window !== 'undefined') {
             window.location.href = '/auth/login';
           }
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Logout failed';
+          
+          // Even on error, clear local state for security
           set((state) => {
-            state.error = errorMessage;
+            state.user = null;
+            state.isAuthenticated = false;
             state.loading = false;
+            state.error = errorMessage;
           });
+
+          // Clear localStorage even on error
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('auth-user');
+          }
+
+          console.error('Logout error:', error);
           throw error;
         }
       },

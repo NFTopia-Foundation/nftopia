@@ -7,10 +7,13 @@ import { ModernSearchInput } from "@/components/ui/modern-search-input";
 import { Menu, X, Compass, ShoppingBag, Users, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import ConnectWallet from "./ConnectWallet";
+import { UserDropdown } from "./user-dropdown";
+import { useAuth } from "@/lib/stores/auth-store";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { isAuthenticated, loading } = useAuth();
 
   // Handle scroll effect for navbar
   useEffect(() => {
@@ -72,8 +75,7 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Rest of the navbar remains unchanged */}
-          {/* Right Side - Search & Register */}
+          {/* Right Side - Search & Auth */}
           <div className="flex items-center gap-4">
             <div className="hidden md:block">
               <ModernSearchInput
@@ -82,7 +84,10 @@ export function Navbar() {
               />
             </div>
             
-              <ConnectWallet />
+            {/* Conditional Auth Component */}
+            {!loading && (
+              isAuthenticated ? <UserDropdown /> : <ConnectWallet />
+            )}
 
             <button
               className="md:hidden flex items-center justify-center p-2 rounded-full bg-gray-900/40 backdrop-blur-sm border border-gray-800/50"
@@ -146,14 +151,29 @@ export function Navbar() {
             <ModernSearchInput placeholder="Search" />
           </div>
 
-          {/* Mobile Register Button */}
-          <Button
-            className="w-full rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90 mt-4"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Register
-          </Button>
-          
+          {/* Mobile Auth Actions */}
+          <div className="mt-4">
+            {!loading && (
+              isAuthenticated ? (
+                <div className="space-y-2">
+                  <Link
+                    href="/creator-dashboard"
+                    className="block w-full text-center rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                </div>
+              ) : (
+                <Button
+                  className="w-full rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Register
+                </Button>
+              )
+            )}
+          </div>
         </div>
       </div>
     </header>

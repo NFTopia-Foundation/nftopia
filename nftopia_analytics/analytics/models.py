@@ -10,6 +10,15 @@ from django.contrib.postgres.fields import JSONField
 from users.models import User  
 from analytics.aggregations.utils import queryset_to_dataframe
 
+# Import marketplace health models
+from .models_dir.marketplace_health import (
+    LiquidityMetrics,
+    TradingActivityMetrics,
+    UserEngagementMetrics,
+    MarketplaceHealthSnapshot,
+    CollectionWatchlist
+)
+
 class NFTEvent(models.Model):
     event_type = models.CharField(max_length=20)  # MINT/TRANSFER/SALE
     contract_address = models.CharField(max_length=42)
