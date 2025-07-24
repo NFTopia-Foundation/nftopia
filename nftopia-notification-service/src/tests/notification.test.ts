@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Notification, { INotification } from "../models/Notification";
+import { Notification, INotification } from "../models/Notification";
 
 // Test database connection
 beforeAll(async () => {
@@ -471,7 +471,9 @@ describe("Notification Schema", () => {
   describe("Indexes", () => {
     it("should have proper indexes created", async () => {
       const indexes = await Notification.collection.indexes();
-      const indexNames = indexes.map((index: { name: any }) => index.name);
+      const indexNames = indexes.map(
+        (index: { name?: any }) => index.name || "unknown"
+      );
 
       // Check for required indexes
       expect(indexNames).toContain("userId_1");
