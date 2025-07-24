@@ -1,3 +1,5 @@
+import "@testing-library/jest-dom";
+
 // Mock window.matchMedia for all tests (jsdom does not implement it by default)
 if (typeof window !== "undefined" && !window.matchMedia) {
   window.matchMedia = function (query) {
