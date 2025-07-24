@@ -7,20 +7,21 @@ from .views_dir.collection_views import (
     CollectionMintingView,
     CollectionHoldersView
 )
+from .views_dir.marketplace_health_views import (
+    MarketplaceHealthDashboardView,
+    LiquidityMetricsListView,
+    TradingActivityMetricsListView,
+    UserEngagementMetricsListView,
+    MarketplaceHealthSnapshotListView,
+    generate_health_snapshot,
+    collection_liquidity_analysis
+)
 from .views import UserSegmentViewSet, UserSegmentationView, AnalyzeMetadataView
-
-
-
 
 app_name = "analytics"
 
-
-
 router = DefaultRouter()
-router.register(r'segments', UserSegmentViewSet, basename='segment')
-router.register(r'users', UserSegmentationView, basename='user-segments')
-
-
+router.register(r'user-segments', UserSegmentViewSet)
 
 urlpatterns = [
     # Dashboard views
@@ -54,4 +55,13 @@ urlpatterns = [
 
     path('api/', include(router.urls)),
     path('analyze/<str:cid>/', AnalyzeMetadataView.as_view(), name='analyze-metadata'),
+    
+    # Marketplace Health Monitoring URLs
+    path('marketplace-health/dashboard/', MarketplaceHealthDashboardView.as_view(), name='marketplace-health-dashboard'),
+    path('marketplace-health/liquidity/', LiquidityMetricsListView.as_view(), name='liquidity-metrics'),
+    path('marketplace-health/trading/', TradingActivityMetricsListView.as_view(), name='trading-metrics'),
+    path('marketplace-health/engagement/', UserEngagementMetricsListView.as_view(), name='engagement-metrics'),
+    path('marketplace-health/snapshots/', MarketplaceHealthSnapshotListView.as_view(), name='health-snapshots'),
+    path('marketplace-health/generate-snapshot/', generate_health_snapshot, name='generate-health-snapshot'),
+    path('marketplace-health/collection/<int:collection_id>/liquidity/', collection_liquidity_analysis, name='collection-liquidity-analysis'),
 ]

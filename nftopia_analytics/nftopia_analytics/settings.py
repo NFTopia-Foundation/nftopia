@@ -11,25 +11,32 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-
-# from dotenv import load_dotenv
 import os
 from datetime import timedelta
+
+# Load environment variables
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-your-secret-key-here")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    # Only use default in development
+    if os.getenv("DEBUG", "True").lower() == "true":
+        SECRET_KEY = "django-insecure-your-secret-key-here"
+    else:
+        raise ValueError("DJANGO_SECRET_KEY environment variable is required in production")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 # Redis Cache Configuration
 CACHES = {
@@ -54,14 +61,18 @@ CACHES = {
 
 
 
-# JWT Configuration
+# JWT Configuration with validation
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not JWT_SECRET_KEY and not DEBUG:
+    raise ValueError("JWT_SECRET_KEY environment variable is required")
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "ALGORITHM": "HS256",
-    "SIGNING_KEY": os.getenv("JWT_SECRET_KEY"),
+    "SIGNING_KEY": JWT_SECRET_KEY or SECRET_KEY,  # Fallback to SECRET_KEY in development
     "VERIFYING_KEY": None,
     "AUTH_HEADER_TYPES": ("Bearer",),
     "USER_ID_FIELD": "id",
@@ -82,6 +93,28 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": ["drf_spectacular.openapi.AutoSchema"],
 }
 
+# Application definition
+
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    # Third-party apps
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    # NFTopia apps
+    "users",
+    "sales",
+    "minting",
+    "marketplace",
+    "analytics",  # New analytics app
+    "authentication",
+    "apps.cache", #New app
+]
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'NFTopia Analytics API',
@@ -237,17 +270,53 @@ LOGGING = {
     },
 }
 
-# Celery Configuration
+
+# Celery Configuration (Simplified to avoid circular imports)
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/1')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
+CELERY_TIMEZONE = TIME_ZONE
+            # Keep all scheduled tasks from both versions
+            'update_analytics': {
+                'task': 'analytics.tasks.update_analytics',
+                'schedule': crontab(minute='*/15'),
+            },
+            'generate-scheduled-reports': {
+                'task': 'analytics.tasks.generate_scheduled_reports_task',
+                'schedule': crontab(minute=0, hour='*/6'),
+            },
+            'cleanup-old-data': {
+                'task': 'analytics.tasks.cleanup_old_data_task',
+                'schedule': crontab(minute=0, hour=2),
+            },
+            'aggregate-daily-mints': {
+                'task': 'analytics.tasks.aggregate_mints',
+                'schedule': crontab(minute=5, hour=0),
+            },
+            'aggregate-daily-sales': {
+                'task': 'analytics.tasks.aggregate_sales',
+                'schedule': crontab(minute=15, hour=0),
+            },
+            'aggregate-daily-user-activity': {
+                'task': 'analytics.tasks.aggregate_user_activity',
+                'schedule': crontab(minute=30, hour=0),
+            }
+        }
+    }
+
+# Apply minimal Celery settings needed at Django startup
+CELERY_BROKER_URL = get_celery_settings()['CELERY_BROKER_URL']
+CELERY_RESULT_BACKEND = get_celery_settings()['CELERY_RESULT_BACKEND']
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
 
 WEBHOOK_SECRET = 'your-secret-key'  # In production, use environment variables
 
-# Celery Beat Schedule for automated reports
+# Celery Beat Schedule
 from celery.schedules import crontab
 
 CELERY_BEAT_SCHEDULE = {
@@ -271,7 +340,107 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'analytics.tasks.aggregate_user_activity',
         'schedule': crontab(minute=30, hour=0),
     },
+    # Marketplace Health Monitoring
+    'calculate-liquidity-metrics': {
+        'task': 'analytics.tasks.calculate_liquidity_metrics_task',
+        'schedule': crontab(minute=0),  # Every hour
+    },
+    'calculate-trading-activity': {
+        'task': 'analytics.tasks.calculate_trading_activity_task',
+        'schedule': crontab(minute=15),  # Every hour at 15 minutes
+    },
+    'calculate-user-engagement': {
+        'task': 'analytics.tasks.calculate_user_engagement_task',
+        'schedule': crontab(minute=30),  # Every hour at 30 minutes
+    },
+    'generate-health-snapshot': {
+        'task': 'analytics.tasks.generate_health_snapshot_task',
+        'schedule': crontab(minute=45),  # Every hour at 45 minutes
+    },
+    'cleanup-old-metrics': {
+        'task': 'analytics.tasks.cleanup_old_metrics',
+        'schedule': crontab(hour=2, minute=0),  # Daily at 2 AM
+    },
+    'marketplace-health-pipeline': {
+        'task': 'analytics.tasks.run_marketplace_health_pipeline',
+        'schedule': crontab(minute=0, hour='*/6'),  # Every 6 hours
+    },
 }
+
+WEBHOOK_SECRET = os.getenv('WEBHOOK_SECRET', 'your-secret-key')  # Moved to environment variable
+
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@nftopia.com')
+
+# AWS S3 Configuration (optional)
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
+
+# Report Generation Settings
+REPORT_SETTINGS = {
+    'MAX_RECORDS_PDF': 50,
+    'MAX_RECORDS_CSV': 10000,
+    'TEMP_DIR': '/tmp',
+    'DEFAULT_S3_BUCKET': os.getenv('REPORTS_S3_BUCKET', ''),
+}
+
+# Add required packages to INSTALLED_APPS
+INSTALLED_APPS = [
+    # Django core apps
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+
+    # Third-party apps
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    "django_celery_beat",
+    "django_celery_results",
+    "django_pandas",
+    "django_prometheus",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
+    "celery",
+
+    # NFTopia apps
+    "users",
+    "sales",
+    "minting",
+    "marketplace",
+    "analytics",
+    "authentication",
+    "webhooks"
+]
+
+MIDDLEWARE = [
+    # Django core middleware
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    
+    # Prometheus monitoring middleware
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
+    
+    # Custom analytics middleware
+    "analytics.middleware.AnalyticsMiddleware",
+]
+    
+  
 
 # Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -357,21 +526,39 @@ WSGI_APPLICATION = "nftopia_analytics.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
+
 # TimescaleDB PostgreSQL Configuration
-DATABASES = {
-    "default": {
-        "ENGINE": "django_prometheus.db.backends.postgresql",  # Using Prometheus-enabled engine
-        "NAME": os.getenv("TIMESCALE_DB_NAME", "nftopia_analytics"),
-        "USER": os.getenv("TIMESCALE_DB_USER", "postgres"),
-        "PASSWORD": os.getenv("TIMESCALE_DB_PASSWORD", "postgres"),
-        "HOST": os.getenv("TIMESCALE_DB_HOST", "localhost"),
-        "PORT": os.getenv("TIMESCALE_DB_PORT", "5432"),
-        "OPTIONS": {"options": "-c default_transaction_isolation=serializable"},
-        # Additional recommended production settings:
-        "CONN_MAX_AGE": 300,  # 5 minute connection persistence
-        "DISABLE_SERVER_SIDE_CURSORS": False,  # Important for TimescaleDB
+def get_database_config():
+    """Get database configuration with fallback handling"""
+    use_sqlite = os.getenv("USE_SQLITE", "false").lower() == "true"
+    
+    if use_sqlite:
+        return {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "db.sqlite3",
+            }
+        }
+    
+    # PostgreSQL/TimescaleDB configuration
+    db_config = {
+        "default": {
+            "ENGINE": "django_prometheus.db.backends.postgresql",
+            "NAME": os.getenv("TIMESCALE_DB_NAME", "nftopia_analytics"),
+            "USER": os.getenv("TIMESCALE_DB_USER", "postgres"),
+            "PASSWORD": os.getenv("TIMESCALE_DB_PASSWORD", "postgres"),
+            "HOST": os.getenv("TIMESCALE_DB_HOST", "localhost"),
+            "PORT": os.getenv("TIMESCALE_DB_PORT", "5432"),
+            "OPTIONS": {"options": "-c default_transaction_isolation=serializable"},
+            "CONN_MAX_AGE": 300,
+            "DISABLE_SERVER_SIDE_CURSORS": False,
+        }
     }
-}
+    
+    return db_config
+
+DATABASES = get_database_config()
 
 # Fallback to SQLite for development if PostgreSQL is not available
 if os.getenv("USE_SQLITE", "false").lower() == "true":
