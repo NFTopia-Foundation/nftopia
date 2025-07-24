@@ -27,7 +27,7 @@ export class Transaction {
   transactionHash: string;
 
   @Column({ default: 'pending' })
-  status: 'pending' | 'completed' | 'failed';
+  status: 'pending' | 'completed' | 'failed' | 'confirmed' | 'reverted';
 
   @CreateDateColumn({ type: 'timestamptz' })
   timestamp: Date;
