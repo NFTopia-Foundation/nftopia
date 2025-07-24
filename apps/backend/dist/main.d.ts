@@ -1,1 +1,1 @@
-export {};
+import './queues/onchain.worker';

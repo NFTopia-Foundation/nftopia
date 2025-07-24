@@ -7,7 +7,23 @@ export const onchainWorker = new Worker(
   'onchain-queue',
   async job => {
     try {
-      // Simulate on-chain logic
+      const timeout = 15000; // timeout period 15s
+
+      // Create a promise that rejects after the timeout period
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error(`Job ${job.id} timed out after ${timeout}ms`));
+        }, timeout);
+      });
+
+      // Use Promise.race to enforce the timeout
+      await Promise.race([
+        (async () => {
+          // TODO: Replace this with actual onchain logic
+          console.log(`Processing onchain job ${job.id} with data:`, job.data);
+        })(),
+        timeoutPromise,
+      ]);
     } catch (error) {
       console.error(`Job failed: ${job.id}`, error);
       throw error;
@@ -15,12 +31,11 @@ export const onchainWorker = new Worker(
   },
   {
     connection: redisClient,
-    timeout: 15000,
     limiter: {
       max: 1000,
       duration: 60000,
     },
-}
+  }
 );
 
 onchainWorker.on('completed', job => {
@@ -29,11 +44,9 @@ onchainWorker.on('completed', job => {
 
 onchainWorker.on('failed', async (job, err) => {
   console.error(`Failed job ${job.id}:`, err);
-
   if (job && job.attemptsMade >= job.opts.attempts!) {
     const dlqQueue = new Queue('onchain-dlq', { connection: redisOptions });
     await dlqQueue.add('failed-job', job.data);
   }
-
   Sentry.captureException(err);
 });

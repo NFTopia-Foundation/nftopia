@@ -6,18 +6,32 @@ export const paymentWorker = new Worker(
   'payment-queue',
   async job => {
     try {
-        // TODO: Replace this with actual payment logic
-      console.log(`Processing payment job ${job.id}:`, job.data);
-      return { success: true };
+      const timeout = 15000; //timeout period 15s
+
+      // Create a promise that rejects after the timeout period
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error(`Job ${job.id} timed out after ${timeout}ms`));
+        }, timeout);
+      });
+
+      // Use Promise.race to enforce the timeout
+      await Promise.race([
+        (async () => {
+          // TODO: Replace this with actual payment logic
+          console.log(`Processing payment job ${job.id}:`, job.data);
+          return { success: true };
+        })(),
+        timeoutPromise,
+      ]);
     } catch (error) {
       console.error(`Payment job failed: ${job.id}`, error);
       Sentry.captureException(error);
-      throw error; 
+      throw error;
     }
   },
   {
     connection: redisClient,
-    timeout: 15000,
     limiter: {
       max: 1000,
       duration: 60000,
@@ -32,7 +46,6 @@ paymentWorker.on('completed', job => {
 paymentWorker.on('failed', async (job, err) => {
   console.error(`Payment job failed: ${job?.id}`, err);
   Sentry.captureException(err);
-
   if (job && job.attemptsMade >= job.opts.attempts!) {
     const dlqQueue = new Queue('payment-dlq', { connection: redisOptions });
     await dlqQueue.add('failed-payment-job', job.data);

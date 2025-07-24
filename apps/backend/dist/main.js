@@ -10,6 +10,10 @@ const csurf_1 = __importDefault(require("csurf"));
 const interceptors_1 = require("./interceptors");
 const config_1 = require("@nestjs/config");
 const redis_adapter_1 = require("./redis/redis.adapter");
+const payment_queue_1 = require("./queues/payment.queue");
+const notifications_queue_1 = require("./queues/notifications.queue");
+const onchain_queue_1 = require("./queues/onchain.queue");
+require("./queues/onchain.worker");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const configService = app.get(config_1.ConfigService);
@@ -38,6 +42,30 @@ async function bootstrap() {
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
     });
+    try {
+        await Promise.all([
+            payment_queue_1.paymentQueue.waitUntilReady(),
+            notifications_queue_1.notificationsQueue.waitUntilReady(),
+            onchain_queue_1.onchainQueue.waitUntilReady(),
+        ]);
+        console.log('All queues are live');
+        setInterval(async () => {
+            const jobCounts = await Promise.all([
+                payment_queue_1.paymentQueue.getJobCounts(),
+                notifications_queue_1.notificationsQueue.getJobCounts(),
+                onchain_queue_1.onchainQueue.getJobCounts(),
+            ]);
+            console.log('Queue Metrics:', {
+                payment: jobCounts[0],
+                notifications: jobCounts[1],
+                onchain: jobCounts[2],
+            });
+        }, 60000);
+    }
+    catch (err) {
+        console.error('Queue initialization failed', err);
+        process.exit(1);
+    }
     await app.listen(process.env.PORT ?? 9000);
 }
 bootstrap();

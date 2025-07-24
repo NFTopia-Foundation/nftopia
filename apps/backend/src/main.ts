@@ -15,7 +15,7 @@ import { paymentQueue } from './queues/payment.queue';
 import { notificationsQueue } from './queues/notifications.queue';
 import { onchainQueue } from './queues/onchain.queue';
 import './queues/onchain.worker';
-import { metricsHandler } from './metrics/queue.metrics';
+import metricsHandler from './metrics/queue_metrics';
 
 
 async function bootstrap() {  
@@ -91,8 +91,6 @@ async function bootstrap() {
     console.error('Queue initialization failed', err);
     process.exit(1);
   }
-
-  app.get('/metrics', metricsHandler);
 
   await app.listen(process.env.PORT ?? 9000);
 }
