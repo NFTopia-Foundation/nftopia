@@ -169,10 +169,54 @@ async verifySignature(
   }
 
   @Post('logout')
-  logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('jwt');
-    res.clearCookie('access_token');
-    res.clearCookie('refresh_token');
-    return { message: 'Logged out' };
+  @HttpCode(204)
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    try {
+      // Clear all authentication cookies with secure options
+      const cookieOptions = {
+        httpOnly: true,
+        sameSite: 'lax' as const,
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+      };
+
+      // Clear access token
+      res.clearCookie('access_token', cookieOptions);
+      
+      // Clear refresh token
+      res.clearCookie('refresh_token', cookieOptions);
+      
+      // Clear auth user data
+      res.clearCookie('auth-user', cookieOptions);
+
+      // For additional security, set expired cookies
+      res.cookie('access_token', '', {
+        ...cookieOptions,
+        expires: new Date(0),
+      });
+
+      res.cookie('refresh_token', '', {
+        ...cookieOptions,
+        expires: new Date(0),
+      });
+
+      res.cookie('auth-user', '', {
+        ...cookieOptions,
+        expires: new Date(0),
+      });
+
+      // Return 204 No Content for successful logout
+      return res.status(204).send();
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if there's an error, clear the cookies for security
+      res.clearCookie('access_token');
+      res.clearCookie('refresh_token');
+      res.clearCookie('auth-user');
+      return res.status(500).json({ message: 'Logout failed' });
+    }
   }
 }
