@@ -1,6 +1,6 @@
 "use client";
 
-import { uploadFile } from "@/lib/utils";
+import { uploadToFirebase } from "@/lib/firebase/uploadtofirebase";
 import { useState } from "react";
 
 export default function Page() {
@@ -8,28 +8,28 @@ export default function Page() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [fileUrl, setFileUrl] = useState<string>("");
 
-const handleSubmit = async (event: React.FormEvent) => {
-  event.preventDefault();
-  console.log("Submit triggered");
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    console.log("Submit triggered");
 
-  if (!imageFile) {
-    console.log("No image selected");
-    return;
-  }
+    if (!imageFile) {
+      console.log("No image selected");
+      return;
+    }
 
-  const ext = imageFile.name.split(".").pop();
-  const filename = `${Date.now()}.${ext}`;
-  console.log("Uploading file:", filename);
+    const ext = imageFile.name.split(".").pop();
+    const filename = `${Date.now()}.${ext}`;
+    console.log("Uploading file:", filename);
 
-  try {
-    const url = await uploadFile(imageFile, `item/${filename}`, setUploadProgress);
-    console.log("File uploaded to:", url);
-    setFileUrl(url || "");
-    setImageFile(null);
-  } catch (error) {
-    console.error("Upload failed:", error);
-  }
-};
+    try {
+      const url = await uploadToFirebase(imageFile);
+      console.log("File uploaded to:", url);
+      setFileUrl(url || "");
+      setImageFile(null);
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
+  };
 
   return (
     <div className="w-full h-screen flex items-center justify-center bg-gray-50">
@@ -61,10 +61,6 @@ const handleSubmit = async (event: React.FormEvent) => {
         {uploadProgress > 0 && (
           <p className="text-sm text-blue-600">Uploading: {uploadProgress}%</p>
         )}
-
-
-
-
 
         {fileUrl && (
           <div className="mt-3">

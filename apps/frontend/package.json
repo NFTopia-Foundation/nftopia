@@ -6,7 +6,9 @@
     "dev": "next dev -p 5000",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "chromatic": "chromatic --project-token=<your-project-token>",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "@argent/get-starknet": "^6.4.7",
@@ -48,12 +50,18 @@
     "zustand": "^5.0.6"
   },
   "devDependencies": {
+    "@storybook/react": "^9.0.18",
+    "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/react-hooks": "^8.0.1",
     "@types/jest": "^30.0.0",
+    "chromatic": "^13.1.2",
     "jest": "^30.0.5",
+    "jest-axe": "^10.0.0",
     "jest-environment-jsdom": "^30.0.5",
-    "ts-jest": "^29.4.0"
+    "ts-jest": "^29.4.0",
+    "typescript": "^5.8.3",
+    "webpack-bundle-analyzer": "^4.10.2"
   }
 }
