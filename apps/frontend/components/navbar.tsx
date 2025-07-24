@@ -16,85 +16,90 @@ export function Navbar() {
   // Handle scroll effect for navbar
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      setScrolled(window.scrollY > 10);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close menu when clicking outside or on a link
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isMenuOpen &&
+        !(event.target as HTMLElement).closest(".mobile-menu-container")
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMenuOpen]);
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 
-      bg-[#181359] shadow-md border-b border-purple-500/20`}
+      ${scrolled ? "bg-[#181359]/95 backdrop-blur-sm" : "bg-[#181359]"} 
+      shadow-md border-b border-purple-500/20 contain-layout`}
     >
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <nav className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <Link href="/" className="flex items-center min-w-[100px]">
+          {/* Logo - Improved responsive sizing */}
+          <Link href="/" className="flex items-center flex-shrink-0">
             <Image
               src="/nftopia-04.svg"
               alt="NFTopia Logo"
-              width={0} // <-- Let it grow dynamically
-              height={0}
-              sizes="(max-width: 768px) 100px, 120px"
-              className="w-[100px] sm:w-[120px] h-auto object-contain"
+              width={120}
+              height={40}
+              className="w-auto h-[clamp(1.5rem,5vw,2.5rem)] object-contain"
+              priority
             />
           </Link>
 
-          {/* Center Nav Links - No absolute positioning */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/explore"
-              className="text-sm font-medium tracking-wide hover:text-purple-400 transition-colors flex items-center gap-1.5"
-            >
-              <Compass className="h-4 w-4" />
+          {/* Center Nav Links - Adjusted spacing */}
+          <div className="hidden md:flex items-center space-x-4 lg:space-x-6 mx-4">
+            <NavLink href="/explore" icon={<Compass className="h-4 w-4" />}>
               Explore
-            </Link>
-            <Link
+            </NavLink>
+            <NavLink
               href="/marketplace"
-              className="text-sm font-medium tracking-wide hover:text-purple-400 transition-colors flex items-center gap-1.5"
+              icon={<ShoppingBag className="h-4 w-4" />}
             >
-              <ShoppingBag className="h-4 w-4" />
               Marketplace
-            </Link>
-            <Link
-              href="/artists"
-              className="text-sm font-medium tracking-wide hover:text-purple-400 transition-colors flex items-center gap-1.5"
-            >
-              <Users className="h-4 w-4" />
+            </NavLink>
+            <NavLink href="/artists" icon={<Users className="h-4 w-4" />}>
               Artists
-            </Link>
-            <Link
-              href="/vault"
-              className="text-sm font-medium tracking-wide hover:text-purple-400 transition-colors flex items-center gap-1.5"
-            >
-              <Lock className="h-4 w-4" />
+            </NavLink>
+            <NavLink href="/vault" icon={<Lock className="h-4 w-4" />}>
               Vault
-            </Link>
+            </NavLink>
           </div>
 
-          {/* Right Side */}
-          <div className="flex items-center gap-4">
-            {/* Search icon for md screens only */}
-            <div className="hidden lg:hidden md:block md:mr-2">
+          {/* Right Side - Improved search behavior */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Search - Better responsive behavior */}
+            <div className="hidden md:flex items-center">
+              <div className="hidden lg:block">
+                <ModernSearchInput
+                  placeholder="Search NFTs, artists..."
+                  className="w-[180px] xl:w-[220px]"
+                />
+              </div>
               <button
-                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-                onClick={() => console.log("Open search modal or expand input")}
+                className="lg:hidden p-2 rounded-md hover:bg-gray-100/10 transition-colors [-webkit-tap-highlight-color:transparent] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9747ff]"
+                aria-label="Search"
               >
                 <Search className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Full search input for lg screens and above */}
-            <div className="hidden lg:block">
-              <ModernSearchInput placeholder="Search" className="w-[220px]" />
-            </div>
+            <ConnectWallet className="hidden sm:flex" />
 
-            <ConnectWallet />
-
+            {/* Mobile menu button - Improved styling */}
             <button
-              className="md:hidden flex items-center justify-center p-2 rounded-full bg-gray-900/40 backdrop-blur-sm border border-gray-800/50"
+              className="md:hidden flex items-center justify-center p-2 rounded-full bg-gray-900/40 backdrop-blur-sm border border-gray-800/50 hover:bg-gray-800/60 transition-colors [-webkit-tap-highlight-color:transparent]"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -108,62 +113,106 @@ export function Navbar() {
         </nav>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Improved scrolling and positioning */}
       <div
-        className={`md:hidden transition-all duration-300 overflow-hidden ${
+        className={`mobile-menu-container md:hidden transition-all duration-300 overflow-hidden ${
           isMenuOpen
-            ? "max-h-screen opacity-100 py-4 px-4"
+            ? "max-h-[calc(100dvh-4rem)] opacity-100 py-4 px-4 border-t border-purple-500/20"
             : "max-h-0 opacity-0"
-        } bg-[#181359] backdrop-blur-md border-t border-purple-500/20`}
+        } bg-[#181359] backdrop-blur-md`}
       >
-        <div className="flex flex-col space-y-4">
-          <Link
+        <div className="flex flex-col space-y-4 overflow-y-auto max-h-[calc(100vh-8rem)]">
+          <MobileNavLink
             href="/explore"
-            className="text-sm font-medium py-2 hover:text-purple-400 transition-colors flex items-center gap-2"
+            icon={<Compass className="h-5 w-5" />}
             onClick={() => setIsMenuOpen(false)}
           >
-            <Compass className="h-5 w-5" />
             Explore
-          </Link>
-          <Link
+          </MobileNavLink>
+          <MobileNavLink
             href="/marketplace"
-            className="text-sm font-medium py-2 hover:text-purple-400 transition-colors flex items-center gap-2"
+            icon={<ShoppingBag className="h-5 w-5" />}
             onClick={() => setIsMenuOpen(false)}
           >
-            <ShoppingBag className="h-5 w-5" />
             Marketplace
-          </Link>
-          <Link
+          </MobileNavLink>
+          <MobileNavLink
             href="/artists"
-            className="text-sm font-medium py-2 hover:text-purple-400 transition-colors flex items-center gap-2"
+            icon={<Users className="h-5 w-5" />}
             onClick={() => setIsMenuOpen(false)}
           >
-            <Users className="h-5 w-5" />
             Artists
-          </Link>
-          <Link
+          </MobileNavLink>
+          <MobileNavLink
             href="/vault"
-            className="text-sm font-medium py-2 hover:text-purple-400 transition-colors flex items-center gap-2"
+            icon={<Lock className="h-5 w-5" />}
             onClick={() => setIsMenuOpen(false)}
           >
-            <Lock className="h-5 w-5" />
             Vault
-          </Link>
+          </MobileNavLink>
 
-          {/* Mobile Search */}
-          <div className="mt-4">
-            <ModernSearchInput placeholder="Search" />
+          {/* Mobile Search - Full width */}
+          <div className="mt-2">
+            <ModernSearchInput placeholder="Search..." className="w-full" />
+          </div>
+
+          {/* Mobile Wallet Connect */}
+          <div className="mt-4 sm:hidden">
+            <ConnectWallet fullWidth />
           </div>
 
           {/* Mobile Register Button */}
-          <Button
-            className="w-full rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90 mt-4"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Register
-          </Button>
+          <div className="px-2">
+            <Button
+              className="w-full rounded-full px-6 py-3 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90 mt-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9747ff] focus-visible:outline-offset-2 "
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Register
+            </Button>
+          </div>
         </div>
       </div>
     </header>
   );
 }
+
+// Helper component for desktop nav links
+const NavLink = ({
+  href,
+  icon,
+  children,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) => (
+  <Link
+    href={href}
+    className="text-sm font-medium tracking-wide hover:text-purple-400 transition-colors flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9747ff] focus-visible:outline-offset-2"
+  >
+    {icon}
+    {children}
+  </Link>
+);
+
+// Helper component for mobile nav links
+const MobileNavLink = ({
+  href,
+  icon,
+  children,
+  onClick,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  onClick: () => void;
+}) => (
+  <Link
+    href={href}
+    className="text-base font-medium py-3 px-3 hover:text-purple-400 transition-colors flex items-center gap-3 rounded-lg hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9747ff] focus-visible:outline-offset-2"
+    onClick={onClick}
+  >
+    {icon}
+    {children}
+  </Link>
+);
