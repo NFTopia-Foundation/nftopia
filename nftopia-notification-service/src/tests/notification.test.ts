@@ -269,7 +269,8 @@ describe("Notification Performance Benchmark Tests", () => {
 
       // Find TTL index
       const ttlIndex = indexes.find(
-        (index) => index.key.createdAt === 1 && index.expireAfterSeconds
+        (index: Record<string, any>) =>
+          index.key?.createdAt === 1 && index.expireAfterSeconds
       );
 
       expect(ttlIndex).toBeTruthy();
@@ -283,17 +284,21 @@ describe("Notification Performance Benchmark Tests", () => {
 
       // Check for compound index: { userId: 1, status: 1 }
       const userStatusIndex = indexes.find(
-        (index) => index.key.userId === 1 && index.key.status === 1
+        (index: { key: { userId: number; status: number } }) =>
+          index.key.userId === 1 && index.key.status === 1
       );
       expect(userStatusIndex).toBeTruthy();
 
       // Check for time-based index: { createdAt: -1 }
-      const timeIndex = indexes.find((index) => index.key.createdAt === -1);
+      const timeIndex = indexes.find(
+        (index: { key: { createdAt: number } }) => index.key.createdAt === -1
+      );
       expect(timeIndex).toBeTruthy();
 
       // Check for NFT compound index: { "metadata.nftId": 1, type: 1 }
       const nftIndex = indexes.find(
-        (index) => index.key["metadata.nftId"] === 1 && index.key.type === 1
+        (index: { key: { [x: string]: number; type: number } }) =>
+          index.key["metadata.nftId"] === 1 && index.key.type === 1
       );
       expect(nftIndex).toBeTruthy();
     });
