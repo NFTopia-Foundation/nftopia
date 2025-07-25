@@ -26,11 +26,18 @@ export default function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, minimum-scale=1"
+        />
+      </head>
       <body className={inter.className}>
-        <div className="min-h-screen bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] text-white relative">
+        <div className="min-h-[100dvh] bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] text-white relative contain-layout">
           <StoreProvider>
             <StarknetProvider>
-              <main className="relative z-10">
+              <main className="relative z-10 max-w-screen-xl mx-auto px-2 sm:px-4 md:px-8 lg:px-12 py-4 md:py-8">
+                {/* The contain-layout class should be defined in global CSS for CSS containment */}
                 {!isAuthPage && <Navbar />}
                 {!isAuthPage && <CircuitBackground />}
                 <WebVitals />

@@ -1,6 +1,22 @@
 import { renderHook, act } from "@testing-library/react";
 import { useMediaQuery } from "./useMediaQuery";
 
+beforeAll(() => {
+  if (!window.matchMedia) {
+    window.matchMedia = function (query) {
+      return {
+        matches: false,
+        media: query,
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      };
+    };
+  }
+});
+
 describe("useMediaQuery", () => {
   afterEach(() => {
     jest.restoreAllMocks();

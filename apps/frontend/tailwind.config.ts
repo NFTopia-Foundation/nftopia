@@ -119,7 +119,21 @@ const config: Config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    function ({
+      addUtilities,
+    }: {
+      addUtilities: (utilities: Record<string, any>) => void;
+    }) {
+      addUtilities({
+        ".contain-layout": { contain: "layout" },
+        ".contain-paint": { contain: "paint" },
+        ".contain-content": { contain: "content" },
+        ".contain-strict": { contain: "strict" },
+      });
+    },
+  ],
 };
 
 export default config;

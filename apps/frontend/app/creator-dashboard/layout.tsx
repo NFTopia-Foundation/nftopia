@@ -1,22 +1,26 @@
-import Link from 'next/link';
-import React from 'react';
+import Link from "next/link";
+import React from "react";
 
-export default function CreatorDashboardLayout({ children }: { children: React.ReactNode }) {
+export default function CreatorDashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex min-h-screen mt-8 bg-gray-900">
+    <div className="flex min-h-[100svh] mt-8 bg-gray-900">
       <aside className="w-64 bg-gray-800 text-white p-6">
         <nav>
           <ul className="list-none p-0">
             <li className="mb-6">
-              <Link 
-                href="/creator-dashboard" 
+              <Link
+                href="/creator-dashboard"
                 className="text-purple-400 font-semibold"
               >
                 Dashboard
               </Link>
             </li>
             <li className="mb-4">
-              <Link 
+              <Link
                 href="/creator-dashboard/create-your-collection"
                 className="text-white hover:text-purple-300 transition-colors"
               >
@@ -24,7 +28,7 @@ export default function CreatorDashboardLayout({ children }: { children: React.R
               </Link>
             </li>
             <li className="mb-4">
-              <Link 
+              <Link
                 href="/creator-dashboard/my-nfts"
                 className="text-white hover:text-purple-300 transition-colors"
               >
@@ -32,7 +36,7 @@ export default function CreatorDashboardLayout({ children }: { children: React.R
               </Link>
             </li>
             <li className="mb-4">
-              <Link 
+              <Link
                 href="/creator-dashboard/collections"
                 className="text-white hover:text-purple-300 transition-colors"
               >
@@ -40,7 +44,7 @@ export default function CreatorDashboardLayout({ children }: { children: React.R
               </Link>
             </li>
             <li className="mb-4">
-              <Link 
+              <Link
                 href="/creator-dashboard/sales"
                 className="text-white hover:text-purple-300 transition-colors"
               >
@@ -48,7 +52,7 @@ export default function CreatorDashboardLayout({ children }: { children: React.R
               </Link>
             </li>
             <li className="mb-4">
-              <Link 
+              <Link
                 href="/creator-dashboard/settings"
                 className="text-white hover:text-purple-300 transition-colors"
               >
@@ -63,18 +67,10 @@ export default function CreatorDashboardLayout({ children }: { children: React.R
           </button>
         </Link>
       </aside>
-      <main className="flex-1 p-8">
-        {children}
-      </main>
+      <main className="flex-1 p-8">{children}</main>
     </div>
   );
 }
-
-
-
-
-
-
 
 // import Link from 'next/link';
 // import React from 'react';
@@ -99,4 +95,4 @@ export default function CreatorDashboardLayout({ children }: { children: React.R
 //       <main style={{ flex: 1, padding: 32 }}>{children}</main>
 //     </div>
 //   );
-// } 
+// }

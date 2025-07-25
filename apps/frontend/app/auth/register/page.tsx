@@ -100,7 +100,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen text-white">
+    <div className="min-h-[100svh] text-white">
       <CircuitBackground />
 
       {/* Main Content */}
