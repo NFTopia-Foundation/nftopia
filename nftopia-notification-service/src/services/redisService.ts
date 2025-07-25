@@ -1,8 +1,8 @@
-import { createClient, RedisClientType } from 'redis';
-import { smsConfig } from '../config/sms';
-import { NotificationType, RateLimitInfo, AbuseAlert } from '../types/sms';
+import { createClient, RedisClientType } from "redis";
+import { smsConfig } from "../config/sms";
+import { NotificationType, RateLimitInfo, AbuseAlert } from "../types/sms";
 
-class RedisService {
+export class RedisService {
   private client: RedisClientType;
   private isConnected = false;
 
@@ -11,17 +11,17 @@ class RedisService {
       url: smsConfig.redis.url,
     });
 
-    this.client.on('error', (err) => {
-      console.error('Redis Client Error:', err);
+    this.client.on("error", (err: Error) => {
+      console.error("Redis Client Error:", err);
     });
 
-    this.client.on('connect', () => {
-      console.log('Redis Client Connected');
+    this.client.on("connect", () => {
+      console.log("Redis Client Connected");
       this.isConnected = true;
     });
 
-    this.client.on('disconnect', () => {
-      console.log('Redis Client Disconnected');
+    this.client.on("disconnect", () => {
+      console.log("Redis Client Disconnected");
       this.isConnected = false;
     });
   }
@@ -41,7 +41,10 @@ class RedisService {
   /**
    * Check rate limit for a user and notification type
    */
-  async checkRateLimit(userId: string, notificationType: NotificationType): Promise<RateLimitInfo> {
+  async checkRateLimit(
+    userId: string,
+    notificationType: NotificationType
+  ): Promise<RateLimitInfo> {
     const config = smsConfig.rateLimits[notificationType];
     const key = `${smsConfig.redis.prefix}:limit:${userId}:${notificationType}`;
 
@@ -56,16 +59,16 @@ class RedisService {
     }
 
     const now = Date.now();
-    const windowStart = now - (config.window * 1000);
+    const windowStart = now - config.window * 1000;
 
     // Get current count
-    const currentCount = await this.client.zcount(key, windowStart, '+inf');
+    const currentCount = await this.client.zCount(key, windowStart, "+inf");
 
     // Remove expired entries
-    await this.client.zremrangebyscore(key, '-inf', windowStart - 1);
+    await this.client.zRemRangeByScore(key, "-inf", windowStart - 1);
 
     // Add current request
-    await this.client.zadd(key, now, now.toString());
+    await this.client.zAdd(key, [{ score: now, value: now.toString() }]);
 
     // Set expiry on the key
     await this.client.expire(key, config.window);
@@ -84,7 +87,10 @@ class RedisService {
   /**
    * Check if rate limit is exceeded
    */
-  async isRateLimited(userId: string, notificationType: NotificationType): Promise<boolean> {
+  async isRateLimited(
+    userId: string,
+    notificationType: NotificationType
+  ): Promise<boolean> {
     const rateLimitInfo = await this.checkRateLimit(userId, notificationType);
     const config = smsConfig.rateLimits[notificationType];
 
@@ -98,7 +104,10 @@ class RedisService {
   /**
    * Get rate limit info without incrementing
    */
-  async getRateLimitInfo(userId: string, notificationType: NotificationType): Promise<RateLimitInfo> {
+  async getRateLimitInfo(
+    userId: string,
+    notificationType: NotificationType
+  ): Promise<RateLimitInfo> {
     const config = smsConfig.rateLimits[notificationType];
     const key = `${smsConfig.redis.prefix}:limit:${userId}:${notificationType}`;
 
@@ -113,10 +122,10 @@ class RedisService {
     }
 
     const now = Date.now();
-    const windowStart = now - (config.window * 1000);
+    const windowStart = now - config.window * 1000;
 
     // Get current count without incrementing
-    const currentCount = await this.client.zcount(key, windowStart, '+inf');
+    const currentCount = await this.client.zCount(key, windowStart, "+inf");
 
     return {
       current: currentCount,
@@ -137,18 +146,21 @@ class RedisService {
       timestamp: abuseAlert.timestamp.toISOString(),
     };
 
-    await this.client.lpush(key, JSON.stringify(abuseData));
+    await this.client.lPush(key, JSON.stringify(abuseData));
     await this.client.expire(key, 86400); // Keep for 24 hours
   }
 
   /**
    * Get abuse attempts for a user
    */
-  async getAbuseAttempts(userId: string, notificationType: NotificationType): Promise<AbuseAlert[]> {
+  async getAbuseAttempts(
+    userId: string,
+    notificationType: NotificationType
+  ): Promise<AbuseAlert[]> {
     const key = `${smsConfig.redis.prefix}:abuse:${userId}:${notificationType}`;
-    const attempts = await this.client.lrange(key, 0, -1);
+    const attempts = await this.client.lRange(key, 0, -1);
 
-    return attempts.map(attempt => {
+    return attempts.map((attempt: string) => {
       const data = JSON.parse(attempt);
       return {
         ...data,
@@ -160,20 +172,27 @@ class RedisService {
   /**
    * Health check
    */
-  async healthCheck(): Promise<{ status: 'healthy' | 'unhealthy'; details?: string }> {
+  async healthCheck(): Promise<{
+    status: "healthy" | "unhealthy";
+    details?: string;
+  }> {
     try {
       await this.client.ping();
-      return { status: 'healthy' };
+      return { status: "healthy" };
     } catch (error) {
       return {
-        status: 'unhealthy',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        status: "unhealthy",
+        details: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }
 
   // SMS failure handling methods
-  async set(key: string, value: string, options?: { PX?: number }): Promise<void> {
+  async set(
+    key: string,
+    value: string,
+    options?: { PX?: number }
+  ): Promise<void> {
     if (options?.PX) {
       await this.client.setEx(key, Math.ceil(options.PX / 1000), value);
     } else {
@@ -189,12 +208,22 @@ class RedisService {
     return await this.client.del(key);
   }
 
-  async zAdd(key: string, items: Array<{ score: number; value: string }>): Promise<number> {
-    const args = items.flatMap(item => [item.score, item.value]);
-    return await this.client.zAdd(key, args);
+  async zAdd(
+    key: string,
+    items: Array<{ score: number; value: string }>
+  ): Promise<number> {
+    const formattedItems = items.map((item) => ({
+      score: item.score,
+      value: item.value,
+    }));
+    return await this.client.zAdd(key, formattedItems);
   }
 
-  async zRemRangeByScore(key: string, min: number | string, max: number | string): Promise<number> {
+  async zRemRangeByScore(
+    key: string,
+    min: number | string,
+    max: number | string
+  ): Promise<number> {
     return await this.client.zRemRangeByScore(key, min, max);
   }
 
@@ -211,4 +240,4 @@ class RedisService {
   }
 }
 
-export default new RedisService(); 
+export default new RedisService();
