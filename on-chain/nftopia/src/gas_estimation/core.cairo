@@ -1,15 +1,15 @@
-#[feature("deprecated_legacy_map")]
 #[starknet::contract]
 mod GasEstimator {
     use starknet::ContractAddress;
     use starknet::get_caller_address;
+    use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess, Map};
     use crate::gas_estimation::interfaces::GasEstimatorInterface;
     
     #[storage]
     struct Storage {
-        last_estimations: LegacyMap<felt252, (u128, u128)>,
-        estimation_cache: LegacyMap<felt252, (u128, u128)>,
-        rate_limit: LegacyMap<ContractAddress, u64>,
+        last_estimations: Map<felt252, (u128, u128)>,
+        estimation_cache: Map<felt252, (u128, u128)>,
+        rate_limit: Map<ContractAddress, u64>,
     }
 
     #[constructor]
@@ -20,80 +20,81 @@ mod GasEstimator {
     #[abi(embed_v0)]
     impl GasEstimatorImpl of GasEstimatorInterface<ContractState> {
         fn estimate_auction_bid(
-            self: @ContractState,
+            ref self: ContractState,
             nft_id: felt252,
             bid_amount: u128
         ) -> (u128, u128) {
             let caller = get_caller_address();
-            InternalImpl::_check_rate_limit(self, caller);
-            let cache_key = InternalImpl::_generate_cache_key(self, 'auction_bid', nft_id, bid_amount);
+            InternalImpl::_check_rate_limit(ref self, caller);
+            let cache_key = InternalImpl::_generate_cache_key(@self, 'auction_bid', nft_id, bid_amount);
 
-            match self.estimation_cache.read(cache_key) {
-                Option::Some(value) => value,
-                Option::None => {
-                    let (base_gas, l1_gas) = InternalImpl::_simulate_auction_bid(self, nft_id, bid_amount);
-                    let estimate = InternalImpl::_apply_buffers(self, base_gas, l1_gas);
-                    self.estimation_cache.write(cache_key, estimate);
-                    estimate
-                },
+            let cached_value = self.estimation_cache.read(cache_key);
+            if cached_value != (0, 0) {
+                return cached_value;
             }
+
+            let (base_gas, l1_gas) = InternalImpl::_simulate_auction_bid(@self, nft_id, bid_amount);
+            let estimate = InternalImpl::_apply_buffers(@self, base_gas, l1_gas);
+            self.estimation_cache.write(cache_key, estimate);
+            estimate
         }
 
         fn estimate_batch_purchase(
-            self: @ContractState,
+            ref self: ContractState,
             token_ids: Span<felt252>,
             prices: Span<u128>
         ) -> (u128, u128) {
             let caller = get_caller_address();
-            InternalImpl::_check_rate_limit(self, caller);
+            InternalImpl::_check_rate_limit(ref self, caller);
             let key = InternalImpl::_generate_cache_key(
-                self, 
+                @self, 
                 'batch_purchase', 
                 token_ids.len().into(), 
                 prices.len().into()
             );
 
-            match self.estimation_cache.read(key) {
-                Option::Some(value) => value,
-                Option::None => {
-                    let base_gas = 100000_u128 + (token_ids.len() as u128) * 20000_u128;
-                    let l1_gas = 5000_u128;
-                    let estimate = InternalImpl::_apply_buffers(self, base_gas, l1_gas);
-                    self.estimation_cache.write(key, estimate);
-                    estimate
-                },
+            let cached_value = self.estimation_cache.read(key);
+            if cached_value != (0, 0) {
+                return cached_value;
             }
+
+            let base_gas = 100000_u128 + token_ids.len().into() * 20000_u128;
+            let l1_gas = 5000_u128;
+            let estimate = InternalImpl::_apply_buffers(@self, base_gas, l1_gas);
+            self.estimation_cache.write(key, estimate);
+            estimate
         }
 
         fn estimate_royalty_payment(
-            self: @ContractState,
+            ref self: ContractState,
             token_id: felt252,
             sale_price: u128
         ) -> (u128, u128) {
             let caller = get_caller_address();
-            InternalImpl::_check_rate_limit(self, caller);
-            let key = InternalImpl::_generate_cache_key(self, 'royalty', token_id, sale_price);
+            InternalImpl::_check_rate_limit(ref self, caller);
+            let key = InternalImpl::_generate_cache_key(@self, 'royalty', token_id, sale_price);
 
-            match self.estimation_cache.read(key) {
-                Option::Some(value) => value,
-                Option::None => {
-                    let royalty_gas = InternalImpl::_estimate_royalty_gas(self, token_id, sale_price);
-                    let estimate = InternalImpl::_apply_buffers(self, royalty_gas, 1000_u128);
-                    self.estimation_cache.write(key, estimate);
-                    estimate
-                },
+            let cached_value = self.estimation_cache.read(key);
+            if cached_value != (0, 0) {
+                return cached_value;
             }
+
+            let royalty_gas = InternalImpl::_estimate_royalty_gas(@self, token_id, sale_price);
+            let estimate = InternalImpl::_apply_buffers(@self, royalty_gas, 1000_u128);
+            self.estimation_cache.write(key, estimate);
+            estimate
         }
     }
 
     #[generate_trait]
     impl InternalImpl of InternalTrait {
-        fn _check_rate_limit(self: @ContractState, caller: ContractAddress) {
+        fn _check_rate_limit(ref self: ContractState, caller: ContractAddress) {
             let current_timestamp = starknet::get_block_timestamp();
             let last_call = self.rate_limit.read(caller);
             
-            if last_call.unwrap_or(0_u64) + 60 >= current_timestamp {
-                panic(array!['rate_limit_exceeded']);
+            // If there was a previous call and it's within the rate limit period
+            if last_call != 0 && last_call + 60 >= current_timestamp {
+                assert(false, 'rate_limit_exceeded');
             }
             
             self.rate_limit.write(caller, current_timestamp);
