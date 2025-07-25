@@ -1,16 +1,26 @@
-import { Controller, Post } from "@nestjs/common";
-import { RedisService } from "@/services/redisService";
+import express, { Request, Response } from "express";
+import { redisClient } from "@/config/redisclient";
 
-@Controller("device-token")
-export class DeviceTokensController {
-  constructor(private redisService: RedisService) {}
+const router = express.Router();
 
-  @Post()
-  async registerToken(body: { userId: string; token: string }) {
-    const { userId, token } = body;
-    if (!userId || !token) throw new Error("Missing token or userId");
+router.post("/", async (req: Request, res: Response) => {
+  const { userId, token } = req.body;
 
-    await this.redisService.set(`device-token:${userId}`, token);
-    return { success: true };
+  if (!userId || !token) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Missing token or userId" });
   }
-}
+
+  try {
+    await redisClient.set(`device-token:${userId}`, token);
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Error saving device token:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+});
+
+export default router;
