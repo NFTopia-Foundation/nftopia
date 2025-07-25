@@ -7,6 +7,7 @@ beforeAll(() => {
       return {
         matches: false,
         media: query,
+        onchange: null, // <-- add this line
         addEventListener: jest.fn(),
         removeEventListener: jest.fn(),
         dispatchEvent: jest.fn(),
