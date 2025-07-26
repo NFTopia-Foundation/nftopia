@@ -43,8 +43,7 @@ export function Navbar() {
             />
           </Link>
 
-          
-          <div className="hidden md:flex items-center justify-center absolute left-1/2 transform -translate-x-1/2 space-x-8">
+          <div className="hidden xl:flex items-center justify-center transform  space-x-8">
             <Link
               href="/explore"
               className="text-sm font-medium tracking-wide hover:text-purple-400 transition-colors flex items-center gap-1.5"
@@ -77,20 +76,19 @@ export function Navbar() {
 
           {/* Right Side - Search & Auth */}
           <div className="flex items-center gap-4">
-            <div className="hidden md:block">
+            <div className="hidden xl:block">
               <ModernSearchInput
                 placeholder="Search"
                 className="w-[180px] lg:w-[220px]"
               />
             </div>
-            
+
             {/* Conditional Auth Component */}
-            {!loading && (
-              isAuthenticated ? <UserDropdown /> : <ConnectWallet />
-            )}
+            {!loading &&
+              (isAuthenticated ? <UserDropdown /> : <ConnectWallet />)}
 
             <button
-              className="md:hidden flex items-center justify-center p-2 rounded-full bg-gray-900/40 backdrop-blur-sm border border-gray-800/50"
+              className="xl:hidden flex items-center justify-center p-2 rounded-full bg-gray-900/40 backdrop-blur-sm border border-gray-800/50"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -106,7 +104,7 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       <div
-        className={`md:hidden transition-all duration-300 overflow-hidden ${
+        className={`xl:hidden transition-all duration-300 overflow-hidden ${
           isMenuOpen ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"
         } bg-glass backdrop-blur-md border-t border-purple-500/20`}
       >
@@ -153,8 +151,8 @@ export function Navbar() {
 
           {/* Mobile Auth Actions */}
           <div className="mt-4">
-            {!loading && (
-              isAuthenticated ? (
+            {!loading &&
+              (isAuthenticated ? (
                 <div className="space-y-2">
                   <Link
                     href="/creator-dashboard"
@@ -171,8 +169,7 @@ export function Navbar() {
                 >
                   Register
                 </Button>
-              )
-            )}
+              ))}
           </div>
         </div>
       </div>

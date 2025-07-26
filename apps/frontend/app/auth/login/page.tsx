@@ -156,7 +156,7 @@ export default function LoginPage() {
   }, [authUser, userProfile, nftCount, marketplaceListings]);
 
   return (
-    <div className="min-h-screen text-white">
+    <div className="min-h-[100svh] text-white">
       <CircuitBackground />
 
       <div className="relative z-10 pt-24 pb-16 px-4">
@@ -376,7 +376,7 @@ export default function LoginPage() {
 //   };
 
 //   return (
-//     <div className="min-h-screen text-white">
+//     <div className="min-h-[100svh] text-white">
 //       <CircuitBackground />
 
 //       <div className="relative z-10 pt-24 pb-16 px-4">

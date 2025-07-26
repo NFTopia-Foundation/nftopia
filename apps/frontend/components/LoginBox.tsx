@@ -4,7 +4,7 @@ import Link from "next/link";
 const LoginBox = () => {
   return (
     <div
-      className="flex justify-center items-center min-h-screen bg-cover bg-center"
+      className="flex justify-center items-center min-h-[100svh] bg-cover bg-center"
       style={{
         backgroundImage:
           "url('https://i.pinimg.com/originals/d7/b9/0c/d7b90cc80898e8823455a127945719af.jpg')",

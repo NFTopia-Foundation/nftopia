@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
-import { useTheme } from "@/lib/stores/preferences-store";
-import { useSidebar } from "@/lib/stores/app-store";
-import { cn } from "@/lib/utils";
+import { useTheme } from "../../lib/stores/preferences-store";
+import { useSidebar } from "../../lib/stores/app-store";
+import { cn } from "../../lib/utils";
 
 export interface ClientBodyProps {
   children: React.ReactNode;
@@ -62,7 +62,7 @@ export const ClientBody: React.FC<ClientBodyProps> = ({
   return (
     <div
       className={cn(
-        "min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300",
+        "min-h-[100svh] flex flex-col bg-background text-foreground transition-colors duration-300",
         theme.mode === "dark" ? "dark" : "",
         className
       )}

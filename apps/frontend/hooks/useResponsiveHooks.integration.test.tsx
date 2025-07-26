@@ -1,6 +1,23 @@
 import { renderHook, act } from "@testing-library/react";
 import { useMobile, useMediaQuery } from "./index";
-import { getBreakpointQuery } from "@/utils/breakpoints";
+import { getBreakpointQuery } from "../utils/breakpoints";
+
+beforeAll(() => {
+  if (!window.matchMedia) {
+    window.matchMedia = function (query) {
+      return {
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      };
+    };
+  }
+});
 
 describe("Responsive Hooks Integration", () => {
   afterEach(() => {
