@@ -114,4 +114,53 @@ pub component AccessControl {
         pub proposer: ContractAddress,
         pub executed: bool,
     }
+    
+    #[embeddable_as(AccessControlComponent)]
+    impl AccessControlImpl of IAccessControl<ComponentState<TContractState>> {
+        fn has_role(ref self: ComponentState<TContractState>, role: felt252, account: ContractAddress) -> bool {
+            self.role_member.entry((role, account)).read()
+        }
+
+        fn has_admin_role(ref self: ComponentState<TContractState>, account: ContractAddress) -> bool {
+            self.role_member.entry((DEFAULT_ADMIN_ROLE, account)).read()
+        }
+
+        fn has_moderator_role(ref self: ComponentState<TContractState>, account: ContractAddress) -> bool {
+            self.role_member.entry((MODERATOR_ROLE, account)).read()
+        }
+
+        fn has_treasury_role(ref self: ComponentState<TContractState>, account: ContractAddress) -> bool {
+            self.role_member.entry((TREASURY_ROLE, account)).read()
+        }
+
+        fn has_upgrade_role(ref self: ComponentState<TContractState>, account: ContractAddress) -> bool {
+            self.role_member.entry((UPGRADE_ROLE, account)).read()
+        }
+
+        fn get_roles_members_count(self: @ComponentState<TContractState>, role: felt252) -> u64 {
+            self.role_member_count.entry(role).read()
+        }
+
+        fn get_roles(self: @ComponentState<TContractState>, account: ContractAddress) -> Array<felt252> {
+            let mut roles: Array<felt252> = array![];
+
+            if self.has_admin_role(account) {
+                roles.push(DEFAULT_ADMIN_ROLE);
+            }
+
+            if self.has_moderator_role(account) {
+                roles.push(MODERATOR_ROLE);
+            }
+
+            if self.has_treasury_role(account) {
+                roles.push(TREASURY_ROLE);
+            }
+
+            if self.has_upgrade_role(account) {
+                roles.push(UPGRADE_ROLE);
+            }
+
+            return roles;
+        }
+    }
 }
