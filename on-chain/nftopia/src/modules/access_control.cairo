@@ -162,5 +162,47 @@ pub component AccessControl {
 
             return roles;
         }
+
+        /// Grant a role to an account
+        /// @param role The role to grant
+        /// @param account The account to grant the role to
+        /// @param expiry The expiry time for the role
+        ///
+        /// This function will grant a role to an account.
+
+        fn grant_role(self: @ComponentState<TContractState>, role: felt252, account: ContractAddress, expiry: u64) {
+            let caller = get_caller_address();
+            self.assert_only_admin();
+            if role == DEFAULT_ADMIN_ROLE {
+                self._create_admin_proposal(GRANT_ROLE_ACTION, account);
+            }else{
+                self._grant_role(role, account, expiry);
+            }
+        }
+
+        fn grant_roles(self: @ComponentState<TContractState>, roles: Array<felt252>, account: ContractAddress, expiry: u64) {
+            self.assert_only_admin();
+            for index in 0..roles.len() {
+                self._grant_role(*roles[index], account, expiry);
+            }
+        }
+
+        fn revoke_role(self: @ComponentState<TContractState>, role: felt252, account: ContractAddress) {
+            let caller = get_caller_address();
+            self.assert_only_admin();
+            self._revoke_role(role, account);
+        }
+
+        fn revoke_roles(self: @ComponentState<TContractState>, roles: Array<felt252>, account: ContractAddress) {
+            self.assert_only_admin();
+            for index in 0..roles.len() {
+                self._revoke_role(*roles[index], account);
+            }
+        }
+
+        fn renounce_role(self: @ComponentState<TContractState>, role: felt252) {
+            let caller = get_caller_address();
+            self._revoke_role(role, caller);
+        }
     }
 }
