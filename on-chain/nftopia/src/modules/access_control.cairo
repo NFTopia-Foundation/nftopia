@@ -4,62 +4,25 @@ const DEFAULT_ADMIN_ROLE: felt252 = selector!("DEFAULT_ADMIN_ROLE");
 const MODERATOR_ROLE: felt252 = selector!("MODERATOR_ROLE");
 const TREASURY_ROLE: felt252 = selector!("TREASURY_ROLE");
 const UPGRADE_ROLE: felt252 = selector!("UPGRADE_ROLE");
+const ADMIN_ROLE_TIMELOCK: u64 = 86400;
+const GRANT_ROLE_ACTION: u8 = 1;
+const REVOKE_ROLE_ACTION: u8 = 2;
 
 #[starknet::interface]
 pub trait IAccessControl<TContractState> {
+    fn has_role(ref self: TContractState, role: felt252, account: ContractAddress) -> bool;
     fn has_admin_role(ref self: TContractState, account: ContractAddress) -> bool;
     fn has_moderator_role(ref self: TContractState, account: ContractAddress) -> bool;
     fn has_treasury_role(ref self: TContractState, account: ContractAddress) -> bool;
     fn has_upgrade_role(ref self: TContractState, account: ContractAddress) -> bool;
     fn get_roles(self: @TContractState, account: ContractAddress) -> Array<felt252>;
-}
-
-
-#[starknet::component]  
-pub component AccessControl {
-    use super::*;
-    use starknet::{ContractAddress, get_caller_address};
-    
-    #[storage]
-    pub struct Storage {
-        pub AccessControl_role_admin: Map<felt252, felt252>,
-        pub AccessControl_role_member: Map<(felt252, ContractAddress), bool>,
-    }
-
-    #[event]
-    #[derive(Drop, Debug, PartialEq, starknet::Event)]
-    pub enum Event {
-        RoleGranted: RoleGranted,
-        RoleRevoked: RoleRevoked
-    }
-
-    /// Emitted when `account` is granted `role`.
-    ///
-    /// `sender` is the account that originated the contract call, an account with the admin role
-    /// or the deployer address if `grant_role` is called from the constructor.
-    #[derive(Drop, Debug, PartialEq, starknet::Event)]
-    pub struct RoleGranted {
-        pub role: felt252,
-        pub account: ContractAddress,
-        pub sender: ContractAddress,
-    }
-
-    /// Emitted when `role` is revoked for `account`.
-    ///
-    /// `sender` is the account that originated the contract call:
-    ///   - If using `revoke_role`, it is the admin role bearer.
-    ///   - If using `renounce_role`, it is the role bearer (i.e. `account`).
-    #[derive(Drop, Debug, PartialEq, starknet::Event)]
-    pub struct RoleRevoked {
-        pub role: felt252,
-        pub account: ContractAddress,
-        pub sender: ContractAddress,
-    }
-
-    #[embeddable_as(AccessControlComponent)]
-    impl AccessControlImpl of IAccessControl<ComponentState<TContractState>> {
-        
-    }
-
-
+    fn get_roles_members_count(self: @TContractState, role: felt252) -> u64;
+    fn grant_role(self: @TContractState, role: felt252, account: ContractAddress, expiry: u64);
+    fn update_admin_role_approval_threshold(self: @TContractState, threshold: u64);
+    fn approve_admin_role_proposal(self: @TContractState, proposal_id: u64);
+    fn execute_admin_role_proposal(self: @TContractState, proposal_id: u64);
+    fn grant_roles(self: @TContractState, roles: Array<felt252>, account: ContractAddress, expiry: u64);
+    fn revoke_role(self: @TContractState, role: felt252, account: ContractAddress);
+    fn revoke_roles(self: @TContractState, roles: Array<felt252>, account: ContractAddress);
+    fn renounce_role(self: @TContractState, role: felt252);
 }
