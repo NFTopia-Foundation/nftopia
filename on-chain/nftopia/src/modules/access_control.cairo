@@ -72,6 +72,7 @@ pub component AccessControl {
         pub role: felt252,
         pub account: ContractAddress,
         pub sender: ContractAddress,
+        pub expiry: u64,
     }
 
     /// Emitted when `role` is revoked for `account`.
@@ -171,7 +172,6 @@ pub component AccessControl {
         /// This function will grant a role to an account.
 
         fn grant_role(self: @ComponentState<TContractState>, role: felt252, account: ContractAddress, expiry: u64) {
-            let caller = get_caller_address();
             self.assert_only_admin();
             if role == DEFAULT_ADMIN_ROLE {
                 self._create_admin_proposal(GRANT_ROLE_ACTION, account);
@@ -239,22 +239,23 @@ pub component AccessControl {
         }
 
         fn grant_roles(self: @ComponentState<TContractState>, roles: Array<felt252>, account: ContractAddress, expiry: u64) {
-            self.assert_only_admin();
             for index in 0..roles.len() {
-                self._grant_role(*roles[index], account, expiry);
+                self.grant_role(*roles[index], account, expiry);
             }
         }
 
         fn revoke_role(self: @ComponentState<TContractState>, role: felt252, account: ContractAddress) {
-            let caller = get_caller_address();
             self.assert_only_admin();
-            self._revoke_role(role, account);
+            if role == DEFAULT_ADMIN_ROLE {
+                self._create_admin_proposal(REVOKE_ROLE_ACTION, account);
+            }else{
+                self._revoke_role(role, account);
+            }
         }
 
         fn revoke_roles(self: @ComponentState<TContractState>, roles: Array<felt252>, account: ContractAddress) {
-            self.assert_only_admin();
             for index in 0..roles.len() {
-                self._revoke_role(*roles[index], account);
+                self.revoke_role(*roles[index], account);
             }
         }
 
@@ -296,7 +297,7 @@ pub component AccessControl {
                 if role == DEFAULT_ADMIN_ROLE {
                     self.role_admin_count.write(self.role_admin_count.read() + 1);
                 }
-                self.emit(RoleGranted { role, account, sender: get_caller_address() });
+                self.emit(RoleGranted { role, account, sender: get_caller_address(), expiry });
             }
         }
 
