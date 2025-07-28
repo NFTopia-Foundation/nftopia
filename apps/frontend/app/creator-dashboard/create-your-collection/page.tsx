@@ -143,7 +143,7 @@ export default function CreateYourCollection() {
 
   if (success) {
     return (
-      <div className="min-h-[100svh] bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] flex items-center justify-center p-4">
+      <div className="min-h-[100vh] bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] flex items-center justify-center ">
         <Card className="w-full max-w-md bg-gray-900/60 border-gray-700/40 backdrop-blur-sm">
           <CardContent className="p-8 text-center">
             <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto mb-4" />
@@ -161,7 +161,7 @@ export default function CreateYourCollection() {
   }
 
   return (
-    <div className="min-h-[100svh] mt-20 bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] py-12 px-4">
+    <div className="min-h-[100h] mt-10 bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-4">
@@ -181,7 +181,7 @@ export default function CreateYourCollection() {
           </Alert>
         )}
 
-        <Card className="bg-gray-900/40 border-gray-700/30 backdrop-blur-sm">
+        <div className="bg-gray-900/40 border-gray-700/30 backdrop-blur-sm w-full">
           <CardHeader>
             <CardTitle className="text-white text-2xl">
               Collection Details
@@ -264,7 +264,7 @@ export default function CreateYourCollection() {
               </button>
             </form>
           </CardContent>
-        </Card>
+        </div>
 
         {/* Help Text */}
         <div className="mt-8 text-center">

@@ -100,11 +100,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[100svh] text-white">
+    <div className="h-[500px] text-white">
       <CircuitBackground />
 
       {/* Main Content */}
-      <div className="relative z-10 pt-24 pb-16 px-4">
+      <div className="relative z-10  pb-16 px-4">
         <div className="max-w-md mx-auto">
           <div className="border border-purple-500/20 rounded-xl p-8 bg-glass backdrop-blur-md shadow-lg">
             <h2 className="text-3xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-200">

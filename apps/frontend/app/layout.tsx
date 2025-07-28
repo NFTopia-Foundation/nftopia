@@ -23,6 +23,7 @@ export default function RootLayout({
 }) {
   const pathname = usePathname();
   const isAuthPage = pathname?.includes("/auth/");
+  const isCreatorDashboard = pathname?.includes("/creator-dashboard");
 
   return (
     <html lang="en">
@@ -43,16 +44,24 @@ export default function RootLayout({
         <div className="min-h-screen bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] text-white relative contain-layout">
           <StoreProvider>
             <StarknetProvider>
-              <main className="relative z-10 pt-16 md:pt-20">
-                {/* The contain-layout class should be defined in global CSS for CSS containment */}
-                {!isAuthPage && <Navbar />}
-                {!isAuthPage && <CircuitBackground />}
-                <WebVitals />
-                <div className="container-responsive py-4 md:py-8">
+              {isCreatorDashboard ? (
+                // Creator Dashboard - No navbar, no padding, no footer
+                <main className="relative z-10">
+                  <WebVitals />
                   {children}
-                </div>
-                {!isAuthPage && <Footer />}
-              </main>
+                </main>
+              ) : (
+                // Regular pages with navbar and footer
+                <main className="relative z-10 pt-16 md:pt-20">
+                  {!isAuthPage && <Navbar />}
+                  {!isAuthPage && <CircuitBackground />}
+                  <WebVitals />
+                  <div className="container-responsive py-4 md:py-8">
+                    {children}
+                  </div>
+                  {!isAuthPage && <Footer />}
+                </main>
+              )}
               <Toast />
             </StarknetProvider>
           </StoreProvider>

@@ -156,10 +156,10 @@ export default function LoginPage() {
   }, [authUser, userProfile, nftCount, marketplaceListings]);
 
   return (
-    <div className="min-h-[100svh] text-white">
+    <div className="h-[500px] text-white">
       <CircuitBackground />
 
-      <div className="relative z-10 pt-24 pb-16 px-4">
+      <div className="relative z-10  pb-16 px-4">
         <div className="max-w-md mx-auto">
           <div className="border border-purple-500/20 rounded-xl p-8 bg-glass backdrop-blur-md shadow-lg">
             <div className="flex justify-center mb-8">
