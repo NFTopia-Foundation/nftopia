@@ -36,6 +36,27 @@ The **NFTopia Payment Service** is a Spring Boot microservice handling all payme
 
 ---
 
+## 🛠️ Required Dependencies
+
+- Java 17+
+- PostgreSQL 15+
+- Spring Boot 3.2+
+- Spring Boot Starters:
+  - spring-boot-starter-web
+  - spring-boot-starter-data-jpa
+  - spring-boot-starter-validation
+  - spring-boot-starter-oauth2-resource-server
+- Spring Retry
+- OpenAPI/Swagger (springdoc-openapi)
+- Lombok (for development)
+
+All dependencies are managed in `build.gradle`. If you encounter missing dependency errors, run:
+```bash
+./gradlew build --refresh-dependencies
+```
+
+---
+
 ## 🚀 Quick Start  
 
 ### Prerequisites  

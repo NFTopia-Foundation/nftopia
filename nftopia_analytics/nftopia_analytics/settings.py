@@ -93,6 +93,28 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": ["drf_spectacular.openapi.AutoSchema"],
 }
 
+# Application definition
+
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    # Third-party apps
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    # NFTopia apps
+    "users",
+    "sales",
+    "minting",
+    "marketplace",
+    "analytics",  # New analytics app
+    "authentication",
+    "apps.cache", #New app
+]
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'NFTopia Analytics API',
@@ -248,22 +270,14 @@ LOGGING = {
     },
 }
 
-# Celery Configuration (Modified to fix import-time settings access)
-def get_celery_settings():
-    """
-    Lazy-load Celery configuration to avoid Django settings initialization issues.
-    This function will only be called when Celery actually needs the settings.
-    """
-    from celery.schedules import crontab  # Import moved here to prevent early loading
-    
-    return {
-        'CELERY_BROKER_URL': os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0'),
-        'CELERY_RESULT_BACKEND': os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/1'),
-        'CELERY_ACCEPT_CONTENT': ['json'],
-        'CELERY_TASK_SERIALIZER': 'json',
-        'CELERY_RESULT_SERIALIZER': 'json',
-        'CELERY_TIMEZONE': TIME_ZONE,
-        'CELERY_BEAT_SCHEDULE': {
+
+# Celery Configuration (Simplified to avoid circular imports)
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/1')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
             # Keep all scheduled tasks from both versions
             'update_analytics': {
                 'task': 'analytics.tasks.update_analytics',
