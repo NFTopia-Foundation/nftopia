@@ -25,7 +25,7 @@ export default function CreatorDashboardLayout({
       {/* Mobile Menu Button - Attached to Sidebar */}
       <button
         onClick={toggleSidebar}
-        className="xl:hidden fixed top-3 z-50 p-2 bg-gray-800 rounded-lg text-white hover:bg-gray-700 transition-colors transform transition-transform duration-300 ease-in-out"
+        className="xl:hidden fixed top-3 z-50 p-2 bg-gray-800 rounded-lg text-white hover:bg-gray-700 transition-colors transform  duration-300 ease-in-out"
         style={{
           left: isSidebarOpen ? "13rem" : "1rem", // 16rem = 256px (w-64), 1rem = 16px
         }}
