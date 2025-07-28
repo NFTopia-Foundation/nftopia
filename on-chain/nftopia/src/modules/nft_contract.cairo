@@ -59,11 +59,19 @@ pub mod NftContract {
     use starknet::event::EventEmitter;
     use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess, Map};
     use crate::modules::reentrancy_guard::ReentrancyGuard;
+    use crate::modules::access_control::AccessControl;
 
     use crate::modules::royalty::interfaces::{
         IRoyaltyStandardDispatcher,
         IRoyaltyStandardDispatcherTrait
     };
+
+    component!(path: AccessControl, storage: access_control, event: AccessControlEvent);
+    #[abi(embed_v0)]
+    impl AccessControlImpl = AccessControl::AccessControlComponent<ContractState>;
+    impl AccessControlInternalImpl = AccessControl::InternalImpl<ContractState>;
+
+    
 
     #[external(v0)]
     fn supports_interface(self: @ContractState, interface_id: felt252) -> bool {
@@ -85,6 +93,8 @@ pub mod NftContract {
         Transfer: Transfer,
         Approval: Approval,
         ApprovalForAll: ApprovalForAll,
+        #[flat]
+        AccessControlEvent: AccessControl::Event,
     }
 
     #[storage]
@@ -104,6 +114,8 @@ pub mod NftContract {
         // Token collection mapping: token_id => collection
         collections: Map<u256, ContractAddress>,
         reentrancy_guard: ReentrancyGuard::Storage,
+        #[substorage(v0)]
+        access_control: AccessControl::Storage,
     }
 
     #[generate_trait]
