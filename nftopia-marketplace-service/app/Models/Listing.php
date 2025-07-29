@@ -12,6 +12,8 @@ class Listing extends Model
 {
     use HasFactory;
 
+    protected $table = 'nft_listings';
+
     protected $fillable = [
         'nft_contract_address',
         'token_id',

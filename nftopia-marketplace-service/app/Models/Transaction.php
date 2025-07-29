@@ -11,6 +11,8 @@ class Transaction extends Model
 {
     use HasFactory;
 
+    protected $table = 'transactions';
+
     protected $fillable = [
         'listing_id',
         'buyer_id',

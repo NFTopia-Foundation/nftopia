@@ -11,6 +11,8 @@ class Bid extends Model
 {
     use HasFactory;
 
+    protected $table = 'bids';
+
     protected $fillable = [
         'listing_id',
         'bidder_id',
