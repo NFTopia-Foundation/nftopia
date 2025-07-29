@@ -1,0 +1,15 @@
+groups:
+- name: django
+  rules:
+  - alert: HighErrorRate
+    expr: sum(rate(django_http_requests_total{status=~"5.."}[1m])) by (path) / sum(rate(django_http_requests_total[1m])) by (path) > 0.05
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "High error rate on {{ $labels.path }}"
+  
+  - alert: SlowResponse
+    expr: histogram_quantile(0.9, rate(django_http_requests_latency_seconds_bucket[1m])) > 0.5
+    labels:
+      severity: warning

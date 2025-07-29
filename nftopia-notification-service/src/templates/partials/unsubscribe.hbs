@@ -1,0 +1,14 @@
+{{#unless isCritical}}
+<div class="unsubscribe-footer" style="margin-top: 20px; font-size: 12px; color: #666;">
+  <p>
+    <a href="{{unsubscribeUrl}}" style="color: #6e45e2;">Unsubscribe</a> | 
+    <a href="{{preferenceCenterUrl}}" style="color: #6e45e2;">Manage Preferences</a>
+  </p>
+  {{#if isTransactional}}
+  <p style="font-size: 10px;">
+    You're receiving this email because of your activity on NFTopia. 
+    Critical transaction notifications cannot be unsubscribed.
+  </p>
+  {{/if}}
+</div>
+{{/unless}}

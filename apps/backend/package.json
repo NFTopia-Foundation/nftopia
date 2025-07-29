@@ -7,12 +7,12 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "start": "node -r module-alias/register dist/main.js",
-    "start:dev": "ts-node -r tsconfig-paths/register src/main.ts",
-    "dev": "ts-node -r tsconfig-paths/register src/main.ts",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node -r module-alias/register dist/main.js",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "start": "node dist/main.js",
+    "start:dev": "nest start --watch",
+    "dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -33,6 +33,7 @@
     "@nestjs/platform-socket.io": "^11.1.2",
     "@nestjs/typeorm": "^11.0.0",
     "@nestjs/websockets": "^11.1.2",
+    "@sentry/node": "^9.41.0",
     "@socket.io/redis-adapter": "^8.3.0",
     "@types/helmet": "^0.0.48",
     "class-transformer": "^0.5.1",
@@ -45,7 +46,6 @@
     "firebase-admin": "^13.3.0",
     "helmet": "^8.1.0",
     "joi": "^17.13.3",
-    "module-alias": "^2.2.3",
     "nft.storage": "^7.2.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -65,7 +65,6 @@
     "@types/cookie-parser": "^1.4.8",
     "@types/express": "^5.0.1",
     "@types/jest": "^29.5.2",
-    "@types/mongoose": "^5.11.97",
     "@types/multer": "^1.4.12",
     "@types/node": "^20.3.1",
     "@types/passport-jwt": "^4.0.1",
@@ -84,15 +83,12 @@
     "supertest": "^7.0.0",
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.3",
-    "ts-node": "^10.9.2",
+    "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.1.3"
   },
   "resolutions": {
     "file-type": "16.5.4"
-  },
-  "_moduleAliases": {
-    "src": "dist"
   },
   "jest": {
     "moduleFileExtensions": [

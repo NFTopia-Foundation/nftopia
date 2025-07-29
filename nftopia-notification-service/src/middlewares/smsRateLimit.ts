@@ -8,19 +8,20 @@ interface RateLimitOptions {
 }
 
 /**
- * SMS Rate Limiting Middleware
- * Can be used to add additional rate limiting at the HTTP level
+ * SMS Rate Limiting Middleware Factory
+ * Creates rate limit middleware with proper TypeScript typing
  */
 export const smsRateLimit = (options: RateLimitOptions) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.body.userId || req.params.userId;
       
       if (!userId) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           error: 'User ID is required for rate limiting',
         });
+        return;
       }
 
       // Check if rate limited
@@ -29,13 +30,14 @@ export const smsRateLimit = (options: RateLimitOptions) => {
       if (isRateLimited && !options.bypassable) {
         const rateLimitInfo = await redisService.getRateLimitInfo(userId, options.notificationType);
         
-        return res.status(429).json({
+        res.status(429).json({
           success: false,
           error: 'Rate limit exceeded',
           rateLimited: true,
           remainingQuota: rateLimitInfo.remaining,
           retryAfter: options.notificationType === 'marketing' ? '24 hours' : '1 hour',
         });
+        return;
       }
 
       next();
@@ -48,8 +50,16 @@ export const smsRateLimit = (options: RateLimitOptions) => {
 
 /**
  * Specific rate limit middlewares for different notification types
+ * Now with proper TypeScript return type annotations
  */
-export const bidAlertRateLimit = smsRateLimit({ notificationType: 'bidAlert' });
-export const marketingRateLimit = smsRateLimit({ notificationType: 'marketing' });
-export const twoFARateLimit = smsRateLimit({ notificationType: '2fa', bypassable: true });
-export const nftPurchaseRateLimit = smsRateLimit({ notificationType: 'nftPurchase', bypassable: true }); 
+export const bidAlertRateLimit: (req: Request, res: Response, next: NextFunction) => Promise<void> 
+  = smsRateLimit({ notificationType: 'bidAlert' });
+
+export const marketingRateLimit: (req: Request, res: Response, next: NextFunction) => Promise<void>
+  = smsRateLimit({ notificationType: 'marketing' });
+
+export const twoFARateLimit: (req: Request, res: Response, next: NextFunction) => Promise<void>
+  = smsRateLimit({ notificationType: '2fa', bypassable: true });
+
+export const nftPurchaseRateLimit: (req: Request, res: Response, next: NextFunction) => Promise<void>
+  = smsRateLimit({ notificationType: 'nftPurchase', bypassable: true });

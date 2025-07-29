@@ -35,6 +35,17 @@ export class CollectionsController {
     return { message: 'Collection created successfully', collection };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post("create")
+  async createCollectionJson(
+    @Body() dto: CreateCollectionDto,
+    @Req() req: RequestWithUser,
+  ) {
+    const userId = req.user.sub;
+    const collection = await this.collectionService.createCollectionJson(dto, userId);
+    return { message: 'Collection created successfully', collection };
+  }
+
   // Get all collections
   @Get()
   async getAllCollections() {
