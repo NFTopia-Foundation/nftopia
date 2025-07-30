@@ -1,15 +1,16 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ClientBody, ClientBodyProps } from "./ClientBody";
+import "@testing-library/jest-dom";
 
 // Mock Zustand stores
-jest.mock("@/lib/stores/preferences-store", () => ({
+jest.mock("../../lib/stores/preferences-store", () => ({
   useTheme: () => ({
     theme: { mode: "light" },
     setTheme: jest.fn(),
   }),
 }));
-jest.mock("@/lib/stores/app-store", () => {
+jest.mock("../../lib/stores/app-store", () => {
   let sidebarOpen = false;
   return {
     useSidebar: () => ({
