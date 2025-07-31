@@ -34,4 +34,17 @@ export class FirebaseService {
       blobStream.end(file.buffer);
     });
   }
+
+  async isValidUrl(url: string): Promise<boolean> {
+    try {
+      const parsedUrl = new URL(url);
+      const hasValidProtocol = parsedUrl.protocol === 'https:' || parsedUrl.protocol === 'http:';
+      const isFirebaseUrl = /^(https:\/\/)?(.*\.firebaseio\.com|firebasestorage\.googleapis\.com)/.test(url);
+      return hasValidProtocol && isFirebaseUrl;
+    } catch (_) {
+      return false;
+    }
+  }
 }
+
+
