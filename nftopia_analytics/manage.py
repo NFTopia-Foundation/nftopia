@@ -7,6 +7,12 @@ import sys
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nftopia_analytics.settings')
+    
+    # Add the current directory to Python path to resolve 'apps' imports
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    if current_dir not in sys.path:
+        sys.path.insert(0, current_dir)
+    
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
