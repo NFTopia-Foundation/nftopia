@@ -7,10 +7,13 @@ import { ModernSearchInput } from "@/components/ui/modern-search-input";
 import { Menu, X, Compass, ShoppingBag, Users, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import ConnectWallet from "./ConnectWallet";
+import { UserDropdown } from "./user-dropdown";
+import { useAuth } from "@/lib/stores/auth-store";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { isAuthenticated, loading } = useAuth();
 
   // Handle scroll effect for navbar
   useEffect(() => {
@@ -40,8 +43,7 @@ export function Navbar() {
             />
           </Link>
 
-          
-          <div className="hidden md:flex items-center justify-center absolute left-1/2 transform -translate-x-1/2 space-x-8">
+          <div className="hidden xl:flex items-center justify-center transform  space-x-8">
             <Link
               href="/explore"
               className="text-sm font-medium tracking-wide hover:text-purple-400 transition-colors flex items-center gap-1.5"
@@ -72,20 +74,21 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Rest of the navbar remains unchanged */}
-          {/* Right Side - Search & Register */}
+          {/* Right Side - Search & Auth */}
           <div className="flex items-center gap-4">
-            <div className="hidden md:block">
+            <div className="hidden xl:block">
               <ModernSearchInput
                 placeholder="Search"
                 className="w-[180px] lg:w-[220px]"
               />
             </div>
-            
-              <ConnectWallet />
+
+            {/* Conditional Auth Component */}
+            {!loading &&
+              (isAuthenticated ? <UserDropdown /> : <ConnectWallet />)}
 
             <button
-              className="md:hidden flex items-center justify-center p-2 rounded-full bg-gray-900/40 backdrop-blur-sm border border-gray-800/50"
+              className="xl:hidden flex items-center justify-center p-2 rounded-full bg-gray-900/40 backdrop-blur-sm border border-gray-800/50"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -101,7 +104,7 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       <div
-        className={`md:hidden transition-all duration-300 overflow-hidden ${
+        className={`xl:hidden transition-all duration-300 overflow-hidden ${
           isMenuOpen ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"
         } bg-glass backdrop-blur-md border-t border-purple-500/20`}
       >
@@ -146,14 +149,28 @@ export function Navbar() {
             <ModernSearchInput placeholder="Search" />
           </div>
 
-          {/* Mobile Register Button */}
-          <Button
-            className="w-full rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90 mt-4"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Register
-          </Button>
-          
+          {/* Mobile Auth Actions */}
+          <div className="mt-4">
+            {!loading &&
+              (isAuthenticated ? (
+                <div className="space-y-2">
+                  <Link
+                    href="/creator-dashboard"
+                    className="block w-full text-center rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                </div>
+              ) : (
+                <Button
+                  className="w-full rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Register
+                </Button>
+              ))}
+          </div>
         </div>
       </div>
     </header>

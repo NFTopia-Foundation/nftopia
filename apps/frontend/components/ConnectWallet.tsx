@@ -24,7 +24,7 @@ export default function ConnectWallet() {
     return (
       <button
         onClick={connectWallet}
-        className=" hidden md:block rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90"
+        className=" hidden xl:block rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90"
       >
         Connect Wallet
       </button>
@@ -38,7 +38,7 @@ export default function ConnectWallet() {
       </div>
       <button
         onClick={() => disconnect()}
-        className=" md:block rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90"
+        className=" lg:block rounded-full px-6 py-2 bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white hover:opacity-90"
       >
         Disconnect
       </button>

@@ -2,11 +2,28 @@
 /// Includes purchase history tracking, price recording, and ownership status management
 
 /// Event emitted when an NFT transaction is recorded
+use crate::modules::marketplace::settlement::IMarketplaceSettlementDispatcher;
+
+
 #[derive(Drop, starknet::Event)]
 pub struct TransactionRecorded {
     pub buyer: starknet::ContractAddress,
     pub token_id: u256,
     pub amount: u256,
+}
+
+
+#[external(v0)]
+fn complete_sale(
+    ref self: ContractState,
+    token_id: u256,
+    price: u256,
+    seller: ContractAddress
+) {
+    let settlement = IMarketplaceSettlementDispatcher { 
+        contract_address: self.marketplace_address.read() 
+    };
+    settlement.distribute_payment(token_id, price, seller, self.nft_address.read());
 }
 
 /// Interface for the Transaction Module
@@ -25,8 +42,8 @@ pub trait ITransactionModule<TContractState> {
 #[feature("deprecated_legacy_map")]
 pub mod TransactionModule {
     use starknet::storage::StorageMapWriteAccess;
-use starknet::storage::StorageMapReadAccess;
-use starknet::{ContractAddress, get_caller_address};
+    use starknet::storage::StorageMapReadAccess;
+    use starknet::{ContractAddress, get_caller_address};
     use core::num::traits::Zero;
     use core::traits::Into;
     use core::traits::TryInto;
@@ -35,20 +52,20 @@ use starknet::{ContractAddress, get_caller_address};
     struct TransactionRecorded {
         buyer: ContractAddress,
         token_id: u256,
-        amount: u256
+        amount: u256,
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
-        TransactionRecorded: super::TransactionRecorded
+        TransactionRecorded: super::TransactionRecorded,
     }
 
     #[storage]
     struct Storage {
         user_purchases: LegacyMap<(felt252, felt252), felt252>,
         token_prices: LegacyMap<felt252, felt252>,
-        token_sold_status: LegacyMap<felt252, felt252>
+        token_sold_status: LegacyMap<felt252, felt252>,
     }
 
     #[generate_trait]
@@ -86,7 +103,12 @@ use starknet::{ContractAddress, get_caller_address};
             self.user_purchases.write(purchase_key, 1);
 
             // Emit event
-            self.emit(Event::TransactionRecorded(super::TransactionRecorded { buyer: caller, token_id, amount }));
+            self
+                .emit(
+                    Event::TransactionRecorded(
+                        super::TransactionRecorded { buyer: caller, token_id, amount },
+                    ),
+                );
         }
 
         fn has_user_purchased(self: @ContractState, user: ContractAddress, token_id: u256) -> bool {

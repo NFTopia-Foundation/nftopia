@@ -11,13 +11,17 @@ import {
 } from './interceptors';
 import { ConfigService } from '@nestjs/config';
 import { RedisIoAdapter } from './redis/redis.adapter';
-import { connectWithRetry } from './utils/mongoConnection'; // ⬅️ import retry logic
+import { paymentQueue } from './queues/payment.queue';
+import { notificationsQueue } from './queues/notifications.queue';
+import { onchainQueue } from './queues/onchain.queue';
+import './queues/onchain.worker';
+import metricsHandler from './metrics/queue_metrics';
 
-async function bootstrap() {
 
-  await connectWithRetry();
+async function bootstrap() {  
   
   const app = await NestFactory.create(AppModule);
+
   const configService = app.get(ConfigService);
 
   const redisAdapter = new RedisIoAdapter(app);
@@ -58,6 +62,35 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
   });
+
+  try {
+    await Promise.all([
+      paymentQueue.waitUntilReady(),
+      notificationsQueue.waitUntilReady(),
+      onchainQueue.waitUntilReady(),
+    ]);
+    console.log('All queues are live');
+
+    // Add a sample metrics logger for pending/failed jobs
+    setInterval(async () => {
+      const jobCounts = await Promise.all([
+        paymentQueue.getJobCounts(),
+        notificationsQueue.getJobCounts(),
+        onchainQueue.getJobCounts(),
+      ]);
+
+      console.log('Queue Metrics:', {
+        payment: jobCounts[0],
+        notifications: jobCounts[1],
+        onchain: jobCounts[2],
+      });
+    }, 60000); // log every 60 seconds
+
+    // Continue bootstrapping app...
+  } catch (err) {
+    console.error('Queue initialization failed', err);
+    process.exit(1);
+  }
 
   await app.listen(process.env.PORT ?? 9000);
 }

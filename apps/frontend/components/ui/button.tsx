@@ -1,24 +1,24 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "../../lib/utils";
 
 // Declare JSX namespace to fix TypeScript errors
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      [elemName: string]: any
+      [elemName: string]: any;
     }
   }
 }
 
 type ButtonLoadingState = {
-  loading?: boolean
-  loadingText?: string
-}
+  loading?: boolean;
+  loadingText?: string;
+};
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-[clamp(1rem,2vw,1.1rem)] font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 min-h-[48px] min-w-[48px]",
   {
     variants: {
       variant: {
@@ -30,15 +30,18 @@ const buttonVariants = cva(
           "border-2 border-input/80 bg-background/80 backdrop-blur-sm shadow-inner hover:border-primary/50 hover:bg-accent/20 hover:text-accent-foreground active:scale-[0.98]",
         secondary:
           "bg-gradient-to-br from-secondary/90 to-secondary text-secondary-foreground shadow-lg shadow-secondary/20 dark:shadow-secondary/10 hover:scale-[1.02] hover:shadow-xl hover:shadow-secondary/30 dark:hover:shadow-secondary/20 active:scale-[0.98]",
-        ghost: "hover:bg-accent/20 hover:text-accent-foreground active:scale-[0.98]",
+        ghost:
+          "hover:bg-accent/20 hover:text-accent-foreground active:scale-[0.98]",
         link: "text-primary underline-offset-4 hover:underline active:text-primary/80",
-        cosmic: "bg-gradient-to-br from-purple-600/90 to-purple-700 text-white shadow-lg shadow-purple-500/20 dark:shadow-purple-500/10 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/30 dark:hover:shadow-purple-500/20 active:scale-[0.98] border border-purple-400/20"
+        cosmic:
+          "bg-gradient-to-br from-purple-600/90 to-purple-700 text-white shadow-lg shadow-purple-500/20 dark:shadow-purple-500/10 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/30 dark:hover:shadow-purple-500/20 active:scale-[0.98] border border-purple-400/20",
       },
       size: {
-        default: "h-10 px-5 py-2",
-        sm: "h-9 rounded-md px-4 text-xs",
-        lg: "h-12 rounded-lg px-8 text-base",
-        icon: "h-10 w-10",
+        default:
+          "h-12 px-6 py-3 min-h-[48px] min-w-[48px] text-[clamp(1rem,2vw,1.1rem)]",
+        sm: "h-10 rounded-md px-4 text-xs min-h-[48px] min-w-[48px] text-[clamp(0.95rem,2vw,1.05rem)]",
+        lg: "h-14 rounded-lg px-8 text-base min-h-[48px] min-w-[48px] text-[clamp(1.05rem,2vw,1.2rem)]",
+        icon: "h-12 w-12 min-h-[48px] min-w-[48px] text-[clamp(1rem,2vw,1.1rem)]",
       },
     },
     defaultVariants: {
@@ -46,28 +49,31 @@ const buttonVariants = cva(
       size: "default",
     },
   }
-)
+);
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants>,
     ButtonLoadingState {
-  asChild?: boolean
-  children?: React.ReactNode
+  asChild?: boolean;
+  children?: React.ReactNode;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ 
-    className, 
-    variant, 
-    size, 
-    asChild = false, 
-    loading = false,
-    loadingText,
-    children,
-    ...props 
-  }, ref) => {
-    const Comp = asChild ? Slot : "button"
+  (
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      loading = false,
+      loadingText,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const Comp = asChild ? Slot : "button";
     return (
       <Comp
         className={cn(
@@ -107,9 +113,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           children
         )}
       </Comp>
-    )
+    );
   }
-)
-Button.displayName = "Button"
+);
+Button.displayName = "Button";
 
-export { Button, buttonVariants }
+export { Button, buttonVariants };
