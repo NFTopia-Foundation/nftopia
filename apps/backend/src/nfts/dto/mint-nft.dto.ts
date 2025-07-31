@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsUrl } from 'class-validator';
 
 export class MintNftDto {
   @IsString()
@@ -13,4 +13,9 @@ export class MintNftDto {
   @IsOptional()
   @IsString()
   currency?: string;
+}
+
+export class CreateNftFromUrlDto extends MintNftDto {
+  @IsUrl()
+  imageUrl: string;
 }
