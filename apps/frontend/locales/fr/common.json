@@ -21,7 +21,9 @@
     "rememberMe": "Se souvenir de moi",
     "alreadyHaveAccount": "Vous avez déjà un compte ?",
     "dontHaveAccount": "Vous n'avez pas de compte ?",
-    "createAccount": "Créer un compte"
+    "createAccount": "Créer un compte",
+    "login": "Connexion",
+    "username": "Nom d'utilisateur"
   },
   "homepage": {
     "hero": {
@@ -147,5 +149,131 @@
     "title": "NFTopia - Découvrez, Collectez et Échangez de l'Art Numérique Unique",
     "description": "Le marché NFT principal sur Starknet. Découvrez, collectez et échangez de l'art numérique unique avec des transactions sécurisées, rapides et abordables.",
     "keywords": "NFT, art numérique, blockchain, Starknet, marché, collections"
+  },
+  "footer": {
+    "description": "Découvrez, collectez et échangez des actifs numériques uniques sur le marché NFT le plus avancé.",
+    "quickLinks": "Liens rapides",
+    "sitemap": "Plan du site",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions d'utilisation",
+    "support": "Support",
+    "contactUs": "Nous contacter",
+    "officialShop": "Boutique officielle",
+    "helpCenter": "Centre d'aide",
+    "connect": "Se connecter",
+    "copyright": "© {year} NFTopia, Inc. Tous droits réservés."
+  },
+  "liveAuctions": {
+    "title": "Enchères en direct",
+    "exploreMore": "EXPLORER PLUS",
+    "currentBid": "Enchère actuelle",
+    "bid": "ENCHÉRIR",
+    "previousPage": "Page précédente",
+    "nextPage": "Page suivante",
+    "goToPage": "Aller à la page {page}"
+  },
+  "todaysPicks": {
+    "title": "Sélections du jour",
+    "category": "Catégorie",
+    "priceRange": "Fourchette de prix",
+    "saleType": "Type de vente",
+    "blockchain": "Blockchain",
+    "sortBy": "Trier par : Récemment ajouté",
+    "comingSoon": "Bientôt disponible",
+    "onSale": "En vente",
+    "placeBid": "Placer une enchère",
+    "viewHistory": "Voir l'historique",
+    "loadMore": "Charger plus"
+  },
+  "topSellers": {
+    "title": "Meilleurs vendeurs",
+    "scrollLeft": "Défiler vers la gauche",
+    "scrollRight": "Défiler vers la droite"
+  },
+  "exploreCategories": {
+    "title": "Explorer les œuvres d'art",
+    "categories": {
+      "abstract": "Abstrait",
+      "3d": "Art 3D",
+      "modern": "Art moderne",
+      "game": "Jeu",
+      "graffiti": "Graffiti",
+      "watercolor": "Aquarelle"
+    }
+  },
+  "popularCollection": {
+    "title": "Collection populaire",
+    "exploreMore": "EXPLORER PLUS"
+  },
+  "notFound": {
+    "title": "Oups !",
+    "message": "Nous ne trouvons pas la page que vous recherchez.",
+    "errorCode": "Code d'erreur : 404",
+    "backToHome": "Retour à l'accueil"
+  },
+  "connectWallet": {
+    "connect": "Connecter le portefeuille",
+    "connected": "Connecté",
+    "disconnect": "Déconnecter"
+  },
+  "creatorDashboard": {
+    "totalNFTs": "Total NFTs",
+    "sales7d": "Ventes (7j)",
+    "royalties": "Revenus",
+    "followers": "Abonnés",
+    "recentActivity": "Activité récente",
+    "viewAll": "Voir tout",
+    "quickActions": "Actions rapides",
+    "mintNewNFT": "Minter un nouveau NFT",
+    "singleOrBatch": "Téléchargement unique ou par lot",
+    "goToMint": "Aller au mint"
+  },
+  "mintNFT": {
+    "title": "Minter un NFT",
+    "collection": "Collection",
+    "title": "Titre",
+    "description": "Description",
+    "price": "Prix",
+    "currency": "Devise",
+    "nftImage": "Image NFT",
+    "dragDropText": "Glissez et déposez l'image NFT ici",
+    "selected": "Sélectionné",
+    "minting": "Mint en cours...",
+    "mintNFT": "Minter le NFT",
+    "errors": {
+      "userNotAuthenticated": "Utilisateur non authentifié",
+      "uploadImage": "Veuillez télécharger une image",
+      "selectCollection": "Veuillez sélectionner une collection",
+      "mintingFailed": "Échec du mint",
+      "errorMinting": "Erreur lors du mint du NFT"
+    }
+  },
+  "createCollection": {
+    "title": "Créer votre collection",
+    "subtitle": "Présentez vos NFTs dans une belle collection",
+    "collectionDetails": "Détails de la collection",
+    "collectionName": "Nom de la collection",
+    "collectionNamePlaceholder": "Entrez le nom de la collection",
+    "description": "Description",
+    "descriptionPlaceholder": "Décrivez votre collection...",
+    "uploadBannerImage": "Télécharger l'image de bannière",
+    "createCollection": "Créer la collection",
+    "creating": "Création...",
+    "collectionCreated": "Collection créée !",
+    "collectionCreatedMessage": "Votre collection a été créée avec succès. Redirection vers les collections...",
+    "needHelp": "Besoin d'aide ? Consultez notre",
+    "collectionGuide": "guide de création de collection",
+    "characters": "caractères",
+    "errors": {
+      "nameRequired": "Le nom de la collection est requis",
+      "nameMinLength": "Le nom de la collection doit contenir au moins 3 caractères",
+      "nameMaxLength": "Le nom de la collection doit contenir moins de 50 caractères",
+      "descriptionRequired": "La description est requise",
+      "descriptionMinLength": "La description doit contenir au moins 10 caractères",
+      "descriptionMaxLength": "La description doit contenir moins de 500 caractères",
+      "waitForUpload": "Veuillez attendre que le téléchargement de l'image soit terminé",
+      "failedToCreate": "Échec de la création de la collection"
+    },
+    "success": "Collection créée avec succès !"
   }
 }

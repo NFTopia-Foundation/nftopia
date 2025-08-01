@@ -11,9 +11,11 @@ import { CircuitBackground } from "@/components/circuit-background";
 import { StarknetProvider } from "@/components/StarknetProvider";
 import { StoreProvider } from "@/lib/stores/store-provider";
 import { Toast } from "@/components/ui/toast";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const NotFound = () => {
   const isMobile = useMobile();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] text-white relative contain-layout">
@@ -42,28 +44,28 @@ const NotFound = () => {
                         : "text-6xl mt-5 font-bold text-white"
                     }
                   >
-                    Oops!
+                    {t("notFound.title")}
                   </h1>
                   <p
                     className={`${
                       isMobile ? "text-lg" : "text-2xl"
                     } text-white`}
                   >
-                    We can't seem to find the page you're looking for.
+                    {t("notFound.message")}
                   </p>
                   <p
                     className={`${
                       isMobile ? "text-lg" : "text-2xl"
                     } text-white`}
                   >
-                    Error code: 404
+                    {t("notFound.errorCode")}
                   </p>
                   <Link href="/en">
                     <Button
                       size={isMobile ? "sm" : "lg"}
                       className="rounded-xl bg-gradient-to-r from-[#4e3bff] to-[#9747ff] text-white mt-2"
                     >
-                      Back to Homepage
+                      {t("notFound.backToHome")}
                     </Button>
                   </Link>
                 </div>

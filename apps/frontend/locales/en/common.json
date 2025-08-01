@@ -21,7 +21,9 @@
     "rememberMe": "Remember Me",
     "alreadyHaveAccount": "Already have an account?",
     "dontHaveAccount": "Don't have an account?",
-    "createAccount": "Create Account"
+    "createAccount": "Create Account",
+    "login": "Login",
+    "username": "Username"
   },
   "homepage": {
     "hero": {
@@ -147,5 +149,131 @@
     "title": "NFTopia - Discover, Collect & Trade Unique Digital Art",
     "description": "The premier NFT marketplace on Starknet. Discover, collect, and trade unique digital art with secure, fast, and affordable transactions.",
     "keywords": "NFT, digital art, blockchain, Starknet, marketplace, collectibles"
+  },
+  "footer": {
+    "description": "Discover, collect, and trade unique digital assets on the most advanced NFT marketplace.",
+    "quickLinks": "Quick Links",
+    "sitemap": "Sitemap",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "support": "Support",
+    "contactUs": "Contact Us",
+    "officialShop": "Official Shop",
+    "helpCenter": "Help Center",
+    "connect": "Connect",
+    "copyright": "© {year} NFTopia, Inc. All rights reserved."
+  },
+  "liveAuctions": {
+    "title": "Live Auctions",
+    "exploreMore": "EXPLORE MORE",
+    "currentBid": "Current Bid",
+    "bid": "BID",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "goToPage": "Go to page {page}"
+  },
+  "todaysPicks": {
+    "title": "Today's Picks",
+    "category": "Category",
+    "priceRange": "Price range",
+    "saleType": "Sale type",
+    "blockchain": "Blockchain",
+    "sortBy": "Sort By: Recently Added",
+    "comingSoon": "Coming Soon",
+    "onSale": "On Sale",
+    "placeBid": "Place Bid",
+    "viewHistory": "View History",
+    "loadMore": "Load More"
+  },
+  "topSellers": {
+    "title": "Top Sellers",
+    "scrollLeft": "Scroll left",
+    "scrollRight": "Scroll right"
+  },
+  "exploreCategories": {
+    "title": "Explore Artworks",
+    "categories": {
+      "abstract": "Abstract",
+      "3d": "3D Art",
+      "modern": "Modern Art",
+      "game": "Game",
+      "graffiti": "Graffiti",
+      "watercolor": "Watercolor"
+    }
+  },
+  "popularCollection": {
+    "title": "Popular Collection",
+    "exploreMore": "EXPLORE MORE"
+  },
+  "notFound": {
+    "title": "Oops!",
+    "message": "We can't seem to find the page you're looking for.",
+    "errorCode": "Error code: 404",
+    "backToHome": "Back to Homepage"
+  },
+  "connectWallet": {
+    "connect": "Connect Wallet",
+    "connected": "Connected",
+    "disconnect": "Disconnect"
+  },
+  "creatorDashboard": {
+    "totalNFTs": "Total NFTs",
+    "sales7d": "Sales (7d)",
+    "royalties": "Royalties",
+    "followers": "Followers",
+    "recentActivity": "Recent Activity",
+    "viewAll": "View All",
+    "quickActions": "Quick Actions",
+    "mintNewNFT": "Mint New NFT",
+    "singleOrBatch": "Single or batch upload",
+    "goToMint": "Go to Mint"
+  },
+  "mintNFT": {
+    "title": "Mint NFT",
+    "collection": "Collection",
+    "title": "Title",
+    "description": "Description",
+    "price": "Price",
+    "currency": "Currency",
+    "nftImage": "NFT Image",
+    "dragDropText": "Drag & drop NFT image here",
+    "selected": "Selected",
+    "minting": "Minting...",
+    "mintNFT": "Mint NFT",
+    "errors": {
+      "userNotAuthenticated": "User not authenticated",
+      "uploadImage": "Please upload an image",
+      "selectCollection": "Please select a collection",
+      "mintingFailed": "Minting failed",
+      "errorMinting": "Error minting NFT"
+    }
+  },
+  "createCollection": {
+    "title": "Create Your Collection",
+    "subtitle": "Showcase your NFTs in a beautiful collection",
+    "collectionDetails": "Collection Details",
+    "collectionName": "Collection Name",
+    "collectionNamePlaceholder": "Enter collection name",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe your collection...",
+    "uploadBannerImage": "Upload Banner Image",
+    "createCollection": "Create Collection",
+    "creating": "Creating...",
+    "collectionCreated": "Collection Created!",
+    "collectionCreatedMessage": "Your collection has been successfully created. Redirecting to collections...",
+    "needHelp": "Need help? Check out our",
+    "collectionGuide": "collection creation guide",
+    "characters": "characters",
+    "errors": {
+      "nameRequired": "Collection name is required",
+      "nameMinLength": "Collection name must be at least 3 characters",
+      "nameMaxLength": "Collection name must be less than 50 characters",
+      "descriptionRequired": "Description is required",
+      "descriptionMinLength": "Description must be at least 10 characters",
+      "descriptionMaxLength": "Description must be less than 500 characters",
+      "waitForUpload": "Please wait for image upload to complete",
+      "failedToCreate": "Failed to create collection"
+    },
+    "success": "Collection created successfully!"
   }
 }

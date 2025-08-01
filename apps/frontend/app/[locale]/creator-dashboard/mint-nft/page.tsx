@@ -10,8 +10,10 @@ import { getCookie } from "@/lib/CSRFTOKEN";
 import { Collection } from "@/lib/interfaces";
 import { API_CONFIG } from "@/lib/config";
 import { useAuthStore } from "@/lib/stores/auth-store";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function MintNFTPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
   const [title, setTitle] = useState("");
@@ -49,15 +51,15 @@ export default function MintNFTPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!user?.sub) {
-      setError("User not authenticated");
+      setError(t("mintNFT.errors.userNotAuthenticated"));
       return;
     }
     if (files.length === 0) {
-      setError("Please upload an image");
+      setError(t("mintNFT.errors.uploadImage"));
       return;
     }
     if (!selectedCollectionId) {
-      setError("Please select a collection");
+      setError(t("mintNFT.errors.selectCollection"));
       return;
     }
 
@@ -97,13 +99,15 @@ export default function MintNFTPage() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || "Minting failed");
+        throw new Error(errorData.message || t("mintNFT.errors.mintingFailed"));
       }
 
       router.push("/collections");
     } catch (err) {
       console.error("Mint error:", err);
-      setError(err instanceof Error ? err.message : "Error minting NFT");
+      setError(
+        err instanceof Error ? err.message : t("mintNFT.errors.errorMinting")
+      );
     } finally {
       setLoading(false);
     }
@@ -120,7 +124,7 @@ export default function MintNFTPage() {
         className="bg-[#100026] p-8 rounded-2xl shadow-lg w-full max-w-md border border-purple-800"
       >
         <h1 className="text-3xl font-bold text-center text-white mb-6">
-          Mint NFT
+          {t("mintNFT.title")}
         </h1>
 
         {error && (
@@ -132,7 +136,7 @@ export default function MintNFTPage() {
         {collections.length > 0 && (
           <div className="mb-4">
             <label className="block text-sm text-purple-300 mb-1">
-              Collection
+              {t("mintNFT.collection")}
             </label>
             <select
               value={selectedCollectionId}
@@ -150,7 +154,9 @@ export default function MintNFTPage() {
         )}
 
         <div className="mb-4">
-          <label className="block text-sm text-purple-300 mb-1">Title</label>
+          <label className="block text-sm text-purple-300 mb-1">
+            {t("mintNFT.title")}
+          </label>
           <input
             type="text"
             value={title}
@@ -162,7 +168,7 @@ export default function MintNFTPage() {
 
         <div className="mb-4">
           <label className="block text-sm text-purple-300 mb-1">
-            Description
+            {t("mintNFT.description")}
           </label>
           <textarea
             value={description}
@@ -175,7 +181,9 @@ export default function MintNFTPage() {
 
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm text-purple-300 mb-1">Price</label>
+            <label className="block text-sm text-purple-300 mb-1">
+              {t("mintNFT.price")}
+            </label>
             <input
               type="number"
               step="0.01"
@@ -188,7 +196,7 @@ export default function MintNFTPage() {
           </div>
           <div>
             <label className="block text-sm text-purple-300 mb-1">
-              Currency
+              {t("mintNFT.currency")}
             </label>
             <select
               value={currency}
@@ -204,19 +212,19 @@ export default function MintNFTPage() {
 
         <div className="mb-6">
           <label className="block text-sm text-purple-300 mb-2">
-            NFT Image
+            {t("mintNFT.nftImage")}
           </label>
           <FileDropZone
             onFilesSelected={setFiles}
             accept={["image/*"]}
             maxSizeMB={10}
             className="border border-purple-600 rounded-lg bg-[#1e1e2f] hover:border-purple-500 transition-colors"
-            dropZoneText="Drag & drop NFT image here"
+            dropZoneText={t("mintNFT.dragDropText")}
             dropZoneTextClass="text-purple-300"
           />
           {files.length > 0 && (
             <p className="mt-2 text-xs text-purple-400">
-              Selected: {files[0].file.name} (
+              {t("mintNFT.selected")}: {files[0].file.name} (
               {(files[0].file.size / 1024 / 1024).toFixed(2)} MB)
             </p>
           )}
@@ -233,7 +241,7 @@ export default function MintNFTPage() {
           className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white py-2 px-4 rounded-lg hover:opacity-90 transition disabled:opacity-50"
         >
           <UploadCloud size={18} />
-          {loading ? "Minting..." : "Mint NFT"}
+          {loading ? t("mintNFT.minting") : t("mintNFT.mintNFT")}
         </button>
       </form>
     </div>
