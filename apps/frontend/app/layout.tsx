@@ -1,15 +1,5 @@
-"use client";
-
 import { Inter } from "next/font/google";
-import { Navbar } from "@/components/navbar";
 import "./globals.css";
-import Footer from "@/components/Footer";
-import { CircuitBackground } from "@/components/circuit-background";
-import { WebVitals } from "@/components/web-vitals";
-import { StarknetProvider } from "@/components/StarknetProvider";
-import { StoreProvider } from "@/lib/stores/store-provider";
-import { Toast } from "@/components/ui/toast";
-import { usePathname } from "next/navigation";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,10 +11,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const isAuthPage = pathname?.includes("/auth/");
-  const isCreatorDashboard = pathname?.includes("/creator-dashboard");
-
   return (
     <html lang="en">
       <head>
@@ -40,33 +26,7 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#181359" />
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
-      <body className={inter.className}>
-        <div className="min-h-screen bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] text-white relative contain-layout">
-          <StoreProvider>
-            <StarknetProvider>
-              {isCreatorDashboard ? (
-                // Creator Dashboard - No navbar, no padding, no footer
-                <main className="relative z-10">
-                  <WebVitals />
-                  {children}
-                </main>
-              ) : (
-                // Regular pages with navbar and footer
-                <main className="relative z-10 pt-16 md:pt-20">
-                  {!isAuthPage && <Navbar />}
-                  {!isAuthPage && <CircuitBackground />}
-                  <WebVitals />
-                  <div className="container-responsive py-4 md:py-8">
-                    {children}
-                  </div>
-                  {!isAuthPage && <Footer />}
-                </main>
-              )}
-              <Toast />
-            </StarknetProvider>
-          </StoreProvider>
-        </div>
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }

@@ -2,32 +2,34 @@
 
 import { Button } from "@/components/ui/button";
 import { Vault } from "@/components/Vault";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export function MainHero() {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col  lg:flex-row gap-8 items-center py-8 sm:py-12 md:py-16 px-4 sm:px-8 lg:px-0 mt-8 sm:mt-12 md:mt-16">
       {/* Left Section */}
       <div className="w-full flex flex-col md:justify-center md:items-center lg:items-start lg:justify-start lg:w-1/2 space-y-6 md:space-y-8 pt-4 md:pt-0">
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white font-display tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-200 mb-2">
-          Decentralized
+          {t("homepage.hero.titlePart1")}
           <br />
           <span className="text-4xl sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-[#4e3bff] to-[#9747ff] block mt-1 mb-1">
-            NFT Storage
+            {t("homepage.hero.titlePart2")}
           </span>
           <span className="tracking-tight block mt-1 text-white">
-            Management
+            {t("homepage.hero.titlePart3")}
           </span>
         </h1>
         <p className="text-gray-400 text-base sm:text-lg max-w-md">
-          Securely store, manage, and showcase your unique digital assets on
-          Starknet blockchain with unparalleled security and true ownership.
+          {t("homepage.hero.subtitle")}
         </p>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2 sm:pt-4">
           <Button
             size="lg"
             className="bg-gradient-to-r from-[#4e3bff] via-[#9747ff] to-[#6d3bff] hover:opacity-90 rounded-full px-6 sm:px-8 py-4 sm:py-6 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300 text-sm sm:text-base font-semibold"
           >
-            Start Creating
+            {t("homepage.hero.cta")}
           </Button>
           <Button
             size="lg"
@@ -38,7 +40,7 @@ export function MainHero() {
             <span className="absolute inset-0 rounded-full border-2 border-[#ec796b] opacity-70 group-hover:opacity-100 transition-all duration-300 shadow-[0_0_15px_rgba(236,121,107,0.5)] group-hover:shadow-[0_0_20px_rgba(236,121,107,0.7)]"></span>
             <span className="absolute -inset-px rounded-full bg-[#181359] border border-gray-700"></span>
             <span className="relative z-10 flex items-center justify-center">
-              <span className="mr-2">Explore NFTs</span>
+              <span className="mr-2">{t("homepage.hero.learnMore")}</span>
               <svg
                 width="16"
                 height="16"
@@ -80,7 +82,7 @@ export function MainHero() {
               100%
             </div>
             <div className="text-xs sm:text-sm text-purple-400 font-medium">
-              On-Chain
+              {t("homepage.features.onChain")}
             </div>
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/50 to-transparent"></div>
           </div>
@@ -95,10 +97,10 @@ export function MainHero() {
               <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0-15v5l4.5 2.5"></path>
             </svg>
             <div className="text-xl sm:text-2xl font-bold text-white mb-1 truncate">
-              Starknet
+              {t("homepage.features.starknet")}
             </div>
             <div className="text-xs sm:text-sm text-purple-400 font-medium">
-              Ecosystem
+              {t("homepage.features.ecosystem")}
             </div>
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/50 to-transparent"></div>
           </div>
@@ -113,10 +115,10 @@ export function MainHero() {
               <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0-15v5l4.5 2.5"></path>
             </svg>
             <div className="text-xl sm:text-2xl font-bold text-white mb-1">
-              Secure
+              {t("homepage.features.secure")}
             </div>
             <div className="text-xs sm:text-sm text-purple-400 font-medium">
-              Storage
+              {t("homepage.features.storage")}
             </div>
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/50 to-transparent"></div>
           </div>
