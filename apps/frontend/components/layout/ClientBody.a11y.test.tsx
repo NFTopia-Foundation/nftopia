@@ -6,13 +6,13 @@ import { ClientBody, ClientBodyProps } from "./ClientBody";
 expect.extend(toHaveNoViolations);
 
 // Mock Zustand stores
-jest.mock("@/lib/stores/preferences-store", () => ({
+jest.mock("../../lib/stores/preferences-store", () => ({
   useTheme: () => ({
     theme: { mode: "light" },
     setTheme: jest.fn(),
   }),
 }));
-jest.mock("@/lib/stores/app-store", () => {
+jest.mock("../../lib/stores/app-store", () => {
   let sidebarOpen = false;
   return {
     useSidebar: () => ({

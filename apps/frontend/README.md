@@ -51,6 +51,12 @@ src/
 └── stores/
 ```
 
+## 📝 QA & Responsiveness Checklist
+
+For a comprehensive checklist covering responsive design, accessibility, and cross-device QA, see:
+
+[QA-RESPONSIVENESS-CHECKLIST.md](./QA-RESPONSIVENESS-CHECKLIST.md)
+
 ## 🤝 Contributing
 
 1. **Fork the repository**

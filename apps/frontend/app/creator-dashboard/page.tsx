@@ -10,7 +10,7 @@ const dashboardCards = [
 export default function CreatorDashboardPage() {
   return (
     <div className="p-12">
-      <div className="flex gap-6 mb-8">
+      <div className="flex flex-col lg:flex-row gap-6 mb-8">
         {dashboardCards.map(card => (
           <div 
             key={card.label} 

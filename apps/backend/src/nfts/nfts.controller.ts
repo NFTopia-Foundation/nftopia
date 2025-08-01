@@ -7,6 +7,9 @@ import {
   UseInterceptors,
   HttpStatus,
   HttpException,
+  Query,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -14,6 +17,10 @@ import { NftsService } from './nfts.service';
 import { MintNftDto } from './dto/mint-nft.dto';
 import { NftStorageService } from '../nftstorage/nftstorage.service';
 import { Logger } from '@nestjs/common';
+import { CreateNftFromUrlDto, MintNftDto } from './dto/mint-nft.dto';
+import { User } from 'src/users/entities/user.entity';
+import { JwtAuthGuard } from 'src/auth/jwt.guard';
+import { RequestWithUser } from 'src/types/RequestWithUser';
 
 @Controller('nfts')
 export class NftsController {
@@ -104,4 +111,16 @@ export class NftsController {
       );
     }
   }
+}
+
+  @UseGuards(JwtAuthGuard)
+  @Post('mint/from-url')
+  async mintFromUrl(
+    @Body() dto: CreateNftFromUrlDto,
+    @Req() req: RequestWithUser,
+    @Query('collectionId') collectionId: string
+  ) {
+    return this.nftService.mintNftFromUrl(dto, req.user.sub, collectionId);
+  }
+
 }

@@ -33,7 +33,7 @@ interface FormErrors {
 export default function CreateYourCollection() {
   const router = useRouter();
   const { showSuccess, showError } = useToast();
-  
+
   const [form, setForm] = useState<CreateCollectionForm>({
     name: "",
     description: "",
@@ -71,50 +71,52 @@ export default function CreateYourCollection() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = (field: keyof CreateCollectionForm, value: string) => {
+  const handleInputChange = (
+    field: keyof CreateCollectionForm,
+    value: string
+  ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
-
   const handleSubmit = async (e: React.FormEvent) => {
-
     e.preventDefault();
 
-    if (!validateForm())  return;
+    if (!validateForm()) return;
 
     if (isUploadingImage) {
-          setErrors({ general: "Please wait for image upload to complete" });
-          return;
-        }
+      setErrors({ general: "Please wait for image upload to complete" });
+      return;
+    }
 
     setErrors({});
     setIsLoading(true);
 
     try {
       const csrfToken = await getCookie();
-      console.log(csrfToken)
-      const res = await uploadToFirebase(selectedFiles[0].file).then((firebaseUrl: string) => {
-        return fetch(`${API_CONFIG.baseUrl}/collections/create`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': csrfToken,
-          },
-          body: JSON.stringify({ ...form, bannerImage: firebaseUrl }),
+      console.log(csrfToken);
+      const res = await uploadToFirebase(selectedFiles[0].file)
+        .then((firebaseUrl: string) => {
+          return fetch(`${API_CONFIG.baseUrl}/collections/create`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRF-Token": csrfToken,
+            },
+            body: JSON.stringify({ ...form, bannerImage: firebaseUrl }),
+          });
+        })
+        .finally(() => {
+          setIsUploadingImage(true);
         });
-      }).finally(() => {
-        setIsUploadingImage(true);
-      });
 
-      if (!res.ok) throw new Error('Failed to create collection');
+      if (!res.ok) throw new Error("Failed to create collection");
 
       setSuccess(true);
       showSuccess("Collection created successfully!");
-
 
       setForm({
         name: "",
@@ -130,23 +132,27 @@ export default function CreateYourCollection() {
       }, 2000);
     } catch (error) {
       console.error("Error creating collection:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to create collection";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create collection";
       setErrors({ general: errorMessage });
       showError(errorMessage);
     } finally {
       setIsLoading(false);
-      }
+    }
   };
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] flex items-center justify-center p-4">
+      <div className="min-h-[100vh] bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] flex items-center justify-center ">
         <Card className="w-full max-w-md bg-gray-900/60 border-gray-700/40 backdrop-blur-sm">
           <CardContent className="p-8 text-center">
             <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">Collection Created!</h2>
+            <h2 className="text-2xl font-bold text-white mb-2">
+              Collection Created!
+            </h2>
             <p className="text-gray-300 mb-4">
-              Your collection has been successfully created. Redirecting to collections...
+              Your collection has been successfully created. Redirecting to
+              collections...
             </p>
           </CardContent>
         </Card>
@@ -155,23 +161,31 @@ export default function CreateYourCollection() {
   }
 
   return (
-    <div className="min-h-screen mt-20 bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] py-12 px-4">
+    <div className="min-h-[100h] mt-10 bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">Create Your Collection</h1>
-          <p className="text-gray-300 text-lg">Showcase your NFTs in a beautiful collection</p>
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Create Your Collection
+          </h1>
+          <p className="text-gray-300 text-lg">
+            Showcase your NFTs in a beautiful collection
+          </p>
         </div>
 
         {errors.general && (
           <Alert className="mb-6 border-red-500/50 bg-red-500/10">
             <AlertCircle className="h-4 w-4 text-red-400" />
-            <AlertDescription className="text-red-200">{errors.general}</AlertDescription>
+            <AlertDescription className="text-red-200">
+              {errors.general}
+            </AlertDescription>
           </Alert>
         )}
 
-        <Card className="bg-gray-900/40 border-gray-700/30 backdrop-blur-sm">
+        <div className="bg-gray-900/40 border-gray-700/30 backdrop-blur-sm w-full">
           <CardHeader>
-            <CardTitle className="text-white text-2xl">Collection Details</CardTitle>
+            <CardTitle className="text-white text-2xl">
+              Collection Details
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -193,8 +207,12 @@ export default function CreateYourCollection() {
                   )}
                   maxLength={50}
                 />
-                {errors.name && <p className="text-red-300 text-sm">{errors.name}</p>}
-                <p className="text-gray-400 text-xs">{form.name.length}/50 characters</p>
+                {errors.name && (
+                  <p className="text-red-300 text-sm">{errors.name}</p>
+                )}
+                <p className="text-gray-400 text-xs">
+                  {form.name.length}/50 characters
+                </p>
               </div>
 
               {/* Description */}
@@ -206,43 +224,56 @@ export default function CreateYourCollection() {
                   id="description"
                   placeholder="Describe your collection..."
                   value={form.description}
-                  onChange={(e) => handleInputChange("description", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
                   className={cn(
                     "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400",
                     "focus:border-gray-500 focus:ring-gray-500/20 min-h-[120px]",
-                    errors.description && "border-red-500/70 focus:border-red-400"
+                    errors.description &&
+                      "border-red-500/70 focus:border-red-400"
                   )}
                   maxLength={500}
                 />
-                {errors.description && <p className="text-red-300 text-sm">{errors.description}</p>}
-                <p className="text-gray-400 text-xs">{form.description.length}/500 characters</p>
+                {errors.description && (
+                  <p className="text-red-300 text-sm">{errors.description}</p>
+                )}
+                <p className="text-gray-400 text-xs">
+                  {form.description.length}/500 characters
+                </p>
               </div>
 
               <div className="mb-6">
-                <label className="block text-sm text-white font-medium mb-2">Upload Banner Image</label>
-                  <FileDropZone
-                    onFilesSelected={setSelectedFiles}
-                    accept={['image/*']}
-                    maxSizeMB={10}
-                  />
+                <label className="block text-sm text-white font-medium mb-2">
+                  Upload Banner Image
+                </label>
+                <FileDropZone
+                  onFilesSelected={setSelectedFiles}
+                  accept={["image/*"]}
+                  maxSizeMB={10}
+                />
               </div>
-               <button
-        onClick={handleSubmit}
-        disabled={!form.name && !form.description && selectedFiles.length === 0}
-        className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold hover:from-purple-600 hover:to-blue-600 transition duration-200 disabled:opacity-50"
-      >
-        {isLoading ? 'Creating...' : 'Create Collection'}
-      </button>
-
+              <button
+                onClick={handleSubmit}
+                disabled={
+                  !form.name && !form.description && selectedFiles.length === 0
+                }
+                className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold hover:from-purple-600 hover:to-blue-600 transition duration-200 disabled:opacity-50"
+              >
+                {isLoading ? "Creating..." : "Create Collection"}
+              </button>
             </form>
           </CardContent>
-        </Card>
+        </div>
 
         {/* Help Text */}
         <div className="mt-8 text-center">
           <p className="text-gray-400 text-sm">
             Need help? Check out our{" "}
-            <a href="#" className="text-purple-400 hover:text-purple-300 underline transition-colors">
+            <a
+              href="#"
+              className="text-purple-400 hover:text-purple-300 underline transition-colors"
+            >
               collection creation guide
             </a>
           </p>
