@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter, usePathname } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import enCommon from "@/locales/en/common.json";

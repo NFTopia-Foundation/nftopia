@@ -182,7 +182,7 @@ const Footer = () => {
         {/* Copyright Notice */}
         <div className="border-t border-purple-500/20 pt-6">
           <p className="text-center text-sm sm:text-base text-gray-400 leading-relaxed">
-            {t("footer.copyright", { year: new Date().getFullYear() })}
+            {t("footer.copyright")}
           </p>
         </div>
       </div>
