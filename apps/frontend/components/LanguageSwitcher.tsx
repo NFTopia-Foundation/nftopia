@@ -70,10 +70,10 @@ export function LanguageSwitcher() {
   return (
     <div className="relative" ref={dropdownRef}>
       <Button
-        variant="ghost"
+        variant="outline"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white hover:text-purple-400 hover:bg-purple-500/10 transition-colors rounded-lg"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white border-purple-500/30 bg-transparent hover:text-purple-400 hover:bg-purple-500/10 hover:border-purple-400/50 transition-colors rounded-lg"
         aria-label="Select language"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
@@ -89,15 +89,15 @@ export function LanguageSwitcher() {
       </Button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-glass backdrop-blur-md border border-purple-500/20 rounded-lg shadow-lg z-50">
+        <div className="absolute right-0 mt-2 w-48 bg-[#181359]/95 backdrop-blur-md border border-purple-500/20 rounded-lg shadow-lg z-50">
           <div className="py-1" role="listbox">
             {languages.map((language) => (
               <button
                 key={language.code}
                 onClick={() => handleLanguageChange(language.code)}
-                className={`w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-purple-500/10 transition-colors ${
+                className={`w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-purple-500/10 transition-colors rounded-md ${
                   locale === language.code
-                    ? "text-purple-400 bg-purple-500/5"
+                    ? "text-purple-400 bg-purple-500/10"
                     : "text-white"
                 }`}
                 role="option"
@@ -136,10 +136,10 @@ export function MobileLanguageSwitcher() {
   return (
     <div className="relative">
       <Button
-        variant="ghost"
+        variant="outline"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white hover:text-purple-400 hover:bg-purple-500/10 transition-colors rounded-lg"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white border-purple-500/30 bg-transparent hover:text-purple-400 hover:bg-purple-500/10 hover:border-purple-400/50 transition-colors rounded-lg"
         aria-label="Select language"
       >
         <Globe className="h-4 w-4" />
@@ -152,15 +152,15 @@ export function MobileLanguageSwitcher() {
       </Button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-40 bg-glass backdrop-blur-md border border-purple-500/20 rounded-lg shadow-lg z-50">
+        <div className="absolute right-0 mt-2 w-40 bg-[#181359]/95 backdrop-blur-md border border-purple-500/20 rounded-lg shadow-lg z-50">
           <div className="py-1">
             {languages.map((language) => (
               <button
                 key={language.code}
                 onClick={() => handleLanguageChange(language.code)}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-purple-500/10 transition-colors ${
+                className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-purple-500/10 transition-colors rounded-md ${
                   locale === language.code
-                    ? "text-purple-400 bg-purple-500/5"
+                    ? "text-purple-400 bg-purple-500/10"
                     : "text-white"
                 }`}
               >
