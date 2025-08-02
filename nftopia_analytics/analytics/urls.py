@@ -16,6 +16,14 @@ from .views_dir.marketplace_health_views import (
     generate_health_snapshot,
     collection_liquidity_analysis
 )
+from .views_dir.rarity_views import (
+    CollectionRarityAnalysisView,
+    NFTRarityScoreView,
+    RarityRefreshView,
+    RarityJobStatusView,
+    RarityDashboardView,
+    RarityMetricsView
+)
 from .views import UserSegmentViewSet, UserSegmentationView, AnalyzeMetadataView
 
 app_name = "analytics"
@@ -64,4 +72,12 @@ urlpatterns = [
     path('marketplace-health/snapshots/', MarketplaceHealthSnapshotListView.as_view(), name='health-snapshots'),
     path('marketplace-health/generate-snapshot/', generate_health_snapshot, name='generate-health-snapshot'),
     path('marketplace-health/collection/<int:collection_id>/liquidity/', collection_liquidity_analysis, name='collection-liquidity-analysis'),
+    
+    # NFT Rarity Analysis URLs
+    path('api/rarity/<str:collection_address>/', CollectionRarityAnalysisView.as_view(), name='collection-rarity-analysis'),
+    path('api/rarity/<int:nft_id>/score/', NFTRarityScoreView.as_view(), name='nft-rarity-score'),
+    path('api/rarity/refresh/<str:collection_address>/', RarityRefreshView.as_view(), name='rarity-refresh'),
+    path('api/rarity/job/<str:job_id>/status/', RarityJobStatusView.as_view(), name='rarity-job-status'),
+    path('api/rarity/dashboard/', RarityDashboardView.as_view(), name='rarity-dashboard'),
+    path('api/rarity/metrics/', RarityMetricsView.as_view(), name='rarity-metrics'),
 ]

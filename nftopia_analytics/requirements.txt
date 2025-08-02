@@ -33,4 +33,7 @@ numpy==1.24.3
 pandas-ta==0.3.14b0
 drf-spectacular>=0.27.1
 
+# NFT Rarity Analysis
+scipy==1.11.4
+
 ipfshttpclient>=0.8.0
