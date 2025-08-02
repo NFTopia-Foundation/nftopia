@@ -2,12 +2,19 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ListingController;
 use App\Http\Controllers\Api\BidController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\AuthController;
+ use App\Http\Controllers\AdminUserController;
 
-//Route::get('/user', function () {
-//    return $request()->user();
-//})->middleware('auth:sanctum');
-//});
+Route::post('/login', [AuthController::class, 'login']);
 
+
+Route::group(['middleware' => ['auth:sanctum', 'throttle:60,1']], function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'user']);
+    Route::post('/admin/users/{user}/revoke-tokens', [AdminUserController::class, 'revokeTokens'])->middleware('can:revoke-user-tokens'); 
+
+});
 
 Route::middleware(['auth:sanctum', 'throttle:100,1'])->prefix('listings')->group(function () {
     Route::get('/', [ListingController::class, 'index']);
