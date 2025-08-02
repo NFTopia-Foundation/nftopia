@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface Category {
   id: string;
@@ -11,10 +12,12 @@ interface Category {
 }
 
 function ExploreCategories() {
+  const { t } = useTranslation();
+
   const categories: Category[] = [
     {
       id: "abstract",
-      name: "Abstract",
+      name: t("exploreCategories.categories.abstract"),
       count: 3025,
       images: [
         "/categories/abstract-1.jpg",
@@ -25,7 +28,7 @@ function ExploreCategories() {
     },
     {
       id: "3d",
-      name: "3D Art",
+      name: t("exploreCategories.categories.3d"),
       count: 4103,
       images: [
         "/categories/3d-1.jpg",
@@ -36,7 +39,7 @@ function ExploreCategories() {
     },
     {
       id: "modern",
-      name: "Modern Art",
+      name: t("exploreCategories.categories.modern"),
       count: 2789,
       images: [
         "/categories/modern-1.jpg",
@@ -47,7 +50,7 @@ function ExploreCategories() {
     },
     {
       id: "game",
-      name: "Game",
+      name: t("exploreCategories.categories.game"),
       count: 1826,
       images: [
         "/categories/game-1.jpg",
@@ -58,7 +61,7 @@ function ExploreCategories() {
     },
     {
       id: "graffiti",
-      name: "Graffiti",
+      name: t("exploreCategories.categories.graffiti"),
       count: 2154,
       images: [
         "/categories/graffiti-1.jpg",
@@ -69,7 +72,7 @@ function ExploreCategories() {
     },
     {
       id: "watercolor",
-      name: "Watercolor",
+      name: t("exploreCategories.categories.watercolor"),
       count: 1932,
       images: [
         "/categories/watercolor-1.jpg",
@@ -92,7 +95,7 @@ function ExploreCategories() {
         <div className="flex flex-col items-center mb-16">
           <div className="inline-block relative">
             <h2 className="text-4xl font-bold text-center text-white tracking-wider font-display">
-              Explore Artworks
+              {t("exploreCategories.title")}
             </h2>
             <div className="absolute -bottom-3 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
             <div className="absolute -bottom-5 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>

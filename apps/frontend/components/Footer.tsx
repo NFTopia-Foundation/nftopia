@@ -10,8 +10,10 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const Footer = () => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [language, setLanguage] = useState("English");
 
@@ -39,64 +41,69 @@ const Footer = () => {
               />
             </Link>
             <p className="text-sm text-gray-300 text-center md:text-left max-w-xs">
-              Discover, collect, and trade unique digital assets on the most
-              advanced NFT marketplace.
+              {t("footer.description")}
             </p>
           </div>
 
           {/* Quick Links */}
           <div className="flex flex-col items-center md:items-start space-y-4">
-            <h3 className="text-lg font-semibold text-white">Quick Links</h3>
+            <h3 className="text-lg font-semibold text-white">
+              {t("footer.quickLinks")}
+            </h3>
             <nav className="flex flex-col space-y-2 text-sm">
               <Link
                 href="/sitemap"
                 className="hover:text-gray-300 transition-colors"
               >
-                Sitemap
+                {t("footer.sitemap")}
               </Link>
               <Link
                 href="/privacy-policy"
                 className="hover:text-gray-300 transition-colors"
               >
-                Privacy Policy
+                {t("footer.privacyPolicy")}
               </Link>
               <Link
                 href="/terms-of-service"
                 className="hover:text-gray-300 transition-colors"
               >
-                Terms of Service
+                {t("footer.termsOfService")}
               </Link>
             </nav>
           </div>
 
           {/* Support Links */}
           <div className="flex flex-col items-center md:items-start space-y-4">
-            <h3 className="text-lg font-semibold text-white">Support</h3>
+            <h3 className="text-lg font-semibold text-white">
+              {t("footer.support")}
+            </h3>
             <nav className="flex flex-col space-y-2 text-sm">
               <Link
                 href="/contact"
                 className="hover:text-gray-300 transition-colors"
               >
-                Contact Us
+                {t("footer.contactUs")}
               </Link>
               <Link
                 href="/shop"
                 className="hover:text-gray-300 transition-colors"
               >
-                Official Shop
+                {t("footer.officialShop")}
               </Link>
               <Link
                 href="/help"
                 className="hover:text-gray-300 transition-colors"
               >
-                Help Center
+                {t("footer.helpCenter")}
               </Link>
             </nav>
           </div>
 
           {/* Language Selector and Social */}
           <div className="flex flex-col items-center md:items-start space-y-4">
-            <h3 className="text-lg font-semibold text-white">Connect</h3>
+            <h3 className="text-lg font-semibold text-white">
+              {t("footer.connect")}
+            </h3>
 
             {/* Language Selector */}
             <div className="relative">
@@ -175,7 +182,7 @@ const Footer = () => {
         {/* Copyright Notice */}
         <div className="border-t border-purple-500/20 pt-6">
           <p className="text-center text-sm sm:text-base text-gray-400 leading-relaxed">
-            © {new Date().getFullYear()} NFTopia, Inc. All rights reserved.
+            {t("footer.copyright")}
           </p>
         </div>
       </div>

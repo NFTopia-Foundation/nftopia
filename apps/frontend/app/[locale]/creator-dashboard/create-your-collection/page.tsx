@@ -16,6 +16,7 @@ import { uploadToFirebase } from "@/lib/firebase/uploadtofirebase";
 import { getCookie } from "@/lib/CSRFTOKEN";
 import { FileDropZone } from "@/lib";
 import type { FileWithMeta } from "@/lib/interfaces";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CreateCollectionForm {
   name: string;
@@ -31,6 +32,7 @@ interface FormErrors {
 }
 
 export default function CreateYourCollection() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { showSuccess, showError } = useToast();
 
@@ -53,19 +55,19 @@ export default function CreateYourCollection() {
     const newErrors: FormErrors = {};
 
     if (!form.name.trim()) {
-      newErrors.name = "Collection name is required";
+      newErrors.name = t("createCollection.errors.nameRequired");
     } else if (form.name.trim().length < 3) {
-      newErrors.name = "Collection name must be at least 3 characters";
+      newErrors.name = t("createCollection.errors.nameMinLength");
     } else if (form.name.trim().length > 50) {
-      newErrors.name = "Collection name must be less than 50 characters";
+      newErrors.name = t("createCollection.errors.nameMaxLength");
     }
 
     if (!form.description.trim()) {
-      newErrors.description = "Description is required";
+      newErrors.description = t("createCollection.errors.descriptionRequired");
     } else if (form.description.trim().length < 10) {
-      newErrors.description = "Description must be at least 10 characters";
+      newErrors.description = t("createCollection.errors.descriptionMinLength");
     } else if (form.description.trim().length > 500) {
-      newErrors.description = "Description must be less than 500 characters";
+      newErrors.description = t("createCollection.errors.descriptionMaxLength");
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -87,7 +89,7 @@ export default function CreateYourCollection() {
     if (!validateForm()) return;
 
     if (isUploadingImage) {
-      setErrors({ general: "Please wait for image upload to complete" });
+      setErrors({ general: t("createCollection.errors.waitForUpload") });
       return;
     }
 
@@ -113,10 +115,10 @@ export default function CreateYourCollection() {
           setIsUploadingImage(true);
         });
 
-      if (!res.ok) throw new Error("Failed to create collection");
+      if (!res.ok) throw new Error(t("createCollection.errors.failedToCreate"));
 
       setSuccess(true);
-      showSuccess("Collection created successfully!");
+      showSuccess(t("createCollection.success"));
 
       setForm({
         name: "",
@@ -133,7 +135,9 @@ export default function CreateYourCollection() {
     } catch (error) {
       console.error("Error creating collection:", error);
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to create collection";
+        error instanceof Error
+          ? error.message
+          : t("createCollection.errors.failedToCreate");
       setErrors({ general: errorMessage });
       showError(errorMessage);
     } finally {
@@ -148,11 +152,10 @@ export default function CreateYourCollection() {
           <CardContent className="p-8 text-center">
             <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-2">
-              Collection Created!
+              {t("createCollection.collectionCreated")}
             </h2>
             <p className="text-gray-300 mb-4">
-              Your collection has been successfully created. Redirecting to
-              collections...
+              {t("createCollection.collectionCreatedMessage")}
             </p>
           </CardContent>
         </Card>
@@ -165,10 +168,10 @@ export default function CreateYourCollection() {
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-4">
-            Create Your Collection
+            {t("createCollection.title")}
           </h1>
           <p className="text-gray-300 text-lg">
-            Showcase your NFTs in a beautiful collection
+            {t("createCollection.subtitle")}
           </p>
         </div>
 
@@ -184,7 +187,7 @@ export default function CreateYourCollection() {
         <div className="bg-gray-900/40 border-gray-700/30 backdrop-blur-sm w-full">
           <CardHeader>
             <CardTitle className="text-white text-2xl">
-              Collection Details
+              {t("createCollection.collectionDetails")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -192,12 +195,12 @@ export default function CreateYourCollection() {
               {/* Collection Name */}
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-white font-medium">
-                  Collection Name *
+                  {t("createCollection.collectionName")} *
                 </Label>
                 <Input
                   id="name"
                   type="text"
-                  placeholder="Enter collection name"
+                  placeholder={t("createCollection.collectionNamePlaceholder")}
                   value={form.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   className={cn(
@@ -211,18 +214,18 @@ export default function CreateYourCollection() {
                   <p className="text-red-300 text-sm">{errors.name}</p>
                 )}
                 <p className="text-gray-400 text-xs">
-                  {form.name.length}/50 characters
+                  {form.name.length}/50 {t("createCollection.characters")}
                 </p>
               </div>
 
               {/* Description */}
               <div className="space-y-2">
                 <Label htmlFor="description" className="text-white font-medium">
-                  Description *
+                  {t("createCollection.description")} *
                 </Label>
                 <Textarea
                   id="description"
-                  placeholder="Describe your collection..."
+                  placeholder={t("createCollection.descriptionPlaceholder")}
                   value={form.description}
                   onChange={(e) =>
                     handleInputChange("description", e.target.value)
@@ -239,13 +242,14 @@ export default function CreateYourCollection() {
                   <p className="text-red-300 text-sm">{errors.description}</p>
                 )}
                 <p className="text-gray-400 text-xs">
-                  {form.description.length}/500 characters
+                  {form.description.length}/500{" "}
+                  {t("createCollection.characters")}
                 </p>
               </div>
 
               <div className="mb-6">
                 <label className="block text-sm text-white font-medium mb-2">
-                  Upload Banner Image
+                  {t("createCollection.uploadBannerImage")}
                 </label>
                 <FileDropZone
                   onFilesSelected={setSelectedFiles}
@@ -260,7 +264,9 @@ export default function CreateYourCollection() {
                 }
                 className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold hover:from-purple-600 hover:to-blue-600 transition duration-200 disabled:opacity-50"
               >
-                {isLoading ? "Creating..." : "Create Collection"}
+                {isLoading
+                  ? t("createCollection.creating")
+                  : t("createCollection.createCollection")}
               </button>
             </form>
           </CardContent>
@@ -269,12 +275,12 @@ export default function CreateYourCollection() {
         {/* Help Text */}
         <div className="mt-8 text-center">
           <p className="text-gray-400 text-sm">
-            Need help? Check out our{" "}
+            {t("createCollection.needHelp")}{" "}
             <a
               href="#"
               className="text-purple-400 hover:text-purple-300 underline transition-colors"
             >
-              collection creation guide
+              {t("createCollection.collectionGuide")}
             </a>
           </p>
         </div>

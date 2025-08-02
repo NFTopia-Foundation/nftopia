@@ -4,12 +4,14 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function CreatorDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { t, locale } = useTranslation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -54,7 +56,7 @@ export default function CreatorDashboardLayout({
         <div className="flex flex-col h-full">
           {/* Logo Section */}
           <div className="p-6 border-b border-gray-700">
-            <Link href="/" className="flex items-center">
+            <Link href={`/${locale}`} className="flex items-center">
               <Image
                 src="/nftopia-04.svg"
                 alt="NFTopia Logo"
@@ -70,56 +72,56 @@ export default function CreatorDashboardLayout({
             <ul className="list-none p-0 space-y-4">
               <li>
                 <Link
-                  href="/creator-dashboard"
+                  href={`/${locale}/creator-dashboard`}
                   className="text-purple-400 font-semibold block py-2"
                   onClick={closeSidebar}
                 >
-                  Dashboard
+                  {t("navigation.dashboard")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/creator-dashboard/create-your-collection"
+                  href={`/${locale}/creator-dashboard/create-your-collection`}
                   className="text-white hover:text-purple-300 transition-colors block py-2"
                   onClick={closeSidebar}
                 >
-                  Create Collection
+                  {t("creator.createNFT")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/creator-dashboard/my-nfts"
+                  href={`/${locale}/creator-dashboard/my-nfts`}
                   className="text-white hover:text-purple-300 transition-colors block py-2"
                   onClick={closeSidebar}
                 >
-                  My NFTs
+                  {t("profile.myNFTs")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/creator-dashboard/collections"
+                  href={`/${locale}/creator-dashboard/collections`}
                   className="text-white hover:text-purple-300 transition-colors block py-2"
                   onClick={closeSidebar}
                 >
-                  Collections
+                  {t("profile.myCollections")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/creator-dashboard/sales"
+                  href={`/${locale}/creator-dashboard/sales`}
                   className="text-white hover:text-purple-300 transition-colors block py-2"
                   onClick={closeSidebar}
                 >
-                  Sales
+                  {t("creator.earnings")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/creator-dashboard/settings"
+                  href={`/${locale}/creator-dashboard/settings`}
                   className="text-white hover:text-purple-300 transition-colors block py-2"
                   onClick={closeSidebar}
                 >
-                  Settings
+                  {t("profile.settings")}
                 </Link>
               </li>
             </ul>
@@ -127,9 +129,12 @@ export default function CreatorDashboardLayout({
 
           {/* Mint Button */}
           <div className="p-6 border-t border-gray-700">
-            <Link href="/creator-dashboard/mint-nft" onClick={closeSidebar}>
+            <Link
+              href={`/${locale}/creator-dashboard/mint-nft`}
+              onClick={closeSidebar}
+            >
               <button className="w-full py-3 bg-gradient-to-r from-purple-400 to-blue-500 text-white border-none rounded-lg font-semibold hover:opacity-90 transition-opacity">
-                Mint New NFT
+                {t("creator.mint")}
               </button>
             </Link>
           </div>

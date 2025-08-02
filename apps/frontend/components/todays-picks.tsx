@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Clock, Heart } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type NFTItem = {
   id: string;
@@ -16,6 +17,8 @@ type NFTItem = {
 };
 
 export function TodaysPicks() {
+  const { t } = useTranslation();
+
   const nftItems: NFTItem[] = [
     {
       id: "1",
@@ -95,7 +98,7 @@ export function TodaysPicks() {
   return (
     <section className="py-16 relative">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl font-bold">Today's Picks</h2>
+        <h2 className="text-2xl font-bold">{t("todaysPicks.title")}</h2>
         <div className="flex gap-4">
           <div className="flex gap-2">
             <Button
@@ -103,28 +106,28 @@ export function TodaysPicks() {
               size="sm"
               className="rounded-full bg-[#1E1A45] border-purple-900/30 hover:bg-purple-900/40 hover:border-purple-500 hover:text-white text-sm transition-colors"
             >
-              Category
+              {t("todaysPicks.category")}
             </Button>
             <Button
               variant="outline"
               size="sm"
               className="rounded-full bg-[#1E1A45] border-purple-900/30 hover:bg-purple-900/40 hover:border-purple-500 hover:text-white text-sm transition-colors"
             >
-              Price range
+              {t("todaysPicks.priceRange")}
             </Button>
             <Button
               variant="outline"
               size="sm"
               className="rounded-full bg-[#1E1A45] border-purple-900/30 hover:bg-purple-900/40 hover:border-purple-500 hover:text-white text-sm transition-colors"
             >
-              Sale type
+              {t("todaysPicks.saleType")}
             </Button>
             <Button
               variant="outline"
               size="sm"
               className="rounded-full bg-[#1E1A45] border-purple-900/30 hover:bg-purple-900/40 hover:border-purple-500 hover:text-white text-sm transition-colors"
             >
-              Blockchain
+              {t("todaysPicks.blockchain")}
             </Button>
           </div>
           <Button
@@ -132,7 +135,7 @@ export function TodaysPicks() {
             size="sm"
             className="rounded-full bg-[#1E1A45] border-purple-900/30 hover:bg-purple-900/40 hover:border-purple-500 hover:text-white text-sm transition-colors"
           >
-            Sort By: Recently Added
+            {t("todaysPicks.sortBy")}
           </Button>
         </div>
       </div>
@@ -146,9 +149,11 @@ export function TodaysPicks() {
             <div className="relative">
               <div className="absolute top-3 left-3 z-10 bg-black/70 rounded-full px-3 py-1 text-xs font-medium">
                 {item.isFeatured ? (
-                  <span className="text-yellow-400">Coming Soon</span>
+                  <span className="text-yellow-400">
+                    {t("todaysPicks.comingSoon")}
+                  </span>
                 ) : (
-                  <span>On Sale</span>
+                  <span>{t("todaysPicks.onSale")}</span>
                 )}
               </div>
               <div className="absolute top-3 right-3 z-10 bg-black/70 rounded-full px-3 py-1 text-xs font-medium">
@@ -191,14 +196,14 @@ export function TodaysPicks() {
                   variant="ghost"
                   className="text-purple-400 hover:bg-transparent hover:text-purple-300 rounded-full px-4 py-1 text-xs"
                 >
-                  Place Bid
+                  {t("todaysPicks.placeBid")}
                 </Button>
                 <Button
                   size="sm"
                   variant="ghost"
                   className="text-purple-400 hover:bg-transparent hover:text-purple-300 rounded-full px-4 py-1 text-xs"
                 >
-                  View History
+                  {t("todaysPicks.viewHistory")}
                 </Button>
               </div>
             </div>
@@ -211,7 +216,7 @@ export function TodaysPicks() {
           variant="ghost"
           className="text-purple-400 hover:bg-transparent hover:text-purple-300 rounded-full px-8"
         >
-          Load More
+          {t("todaysPicks.loadMore")}
         </Button>
       </div>
     </section>

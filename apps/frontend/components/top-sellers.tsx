@@ -5,6 +5,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface Seller {
   id: string;
@@ -16,6 +17,7 @@ interface Seller {
 }
 
 export function TopSellers() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const isMarketplacePage = pathname === "/marketplace";
   const [showNavButtons, setShowNavButtons] = useState(false);
@@ -169,20 +171,20 @@ export function TopSellers() {
     return (
       <section className="py-12 relative">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Top Sellers</h2>
+          <h2 className="text-2xl font-bold">{t("topSellers.title")}</h2>
           {showNavButtons && (
             <div className="flex gap-2">
               <button
                 onClick={() => scroll("left")}
                 className="bg-gray-800/50 hover:bg-gray-700/70 text-white p-2 rounded-full"
-                aria-label="Scroll left"
+                aria-label={t("topSellers.scrollLeft")}
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <button
                 onClick={() => scroll("right")}
                 className="bg-gray-800/50 hover:bg-gray-700/70 text-white p-2 rounded-full"
-                aria-label="Scroll right"
+                aria-label={t("topSellers.scrollRight")}
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -235,7 +237,7 @@ export function TopSellers() {
         <div className="flex flex-col items-center mb-16">
           <div className="inline-block relative">
             <h2 className="text-4xl font-bold text-center text-white tracking-wider font-display">
-              Top Sellers
+              {t("topSellers.title")}
             </h2>
             <div className="absolute -bottom-3 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
             <div className="absolute -bottom-5 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>

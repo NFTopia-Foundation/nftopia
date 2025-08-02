@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Clock, ChevronRight, ChevronLeft } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type AuctionItem = {
   id: string;
@@ -17,6 +18,8 @@ type AuctionItem = {
 };
 
 export function LiveAuctions() {
+  const { t } = useTranslation();
+
   const auctionItems: AuctionItem[] = [
     {
       id: "1",
@@ -130,12 +133,12 @@ export function LiveAuctions() {
   return (
     <section className="py-16 relative">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl font-bold">Live Auctions</h2>
+        <h2 className="text-2xl font-bold">{t("liveAuctions.title")}</h2>
         <Button
           variant="link"
           className="text-[#9398a8] hover:text-purple-300 flex items-center gap-1 text-xs"
         >
-          EXPLORE MORE
+          {t("liveAuctions.exploreMore")}
           <ChevronRight className="h-3.5 w-3.5" />
         </Button>
       </div>
@@ -144,7 +147,7 @@ export function LiveAuctions() {
       <button
         onClick={prevPage}
         className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full -ml-4 lg:ml-0"
-        aria-label="Previous page"
+        aria-label={t("liveAuctions.previousPage")}
       >
         <ChevronLeft className="h-5 w-5" />
       </button>
@@ -152,7 +155,7 @@ export function LiveAuctions() {
       <button
         onClick={nextPage}
         className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full -mr-4 lg:mr-0"
-        aria-label="Next page"
+        aria-label={t("liveAuctions.nextPage")}
       >
         <ChevronRight className="h-5 w-5" />
       </button>
@@ -200,14 +203,16 @@ export function LiveAuctions() {
 
               <div className="flex justify-between items-center pt-2 border-t border-purple-900/30">
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-400">Current Bid</span>
+                  <span className="text-xs text-gray-400">
+                    {t("liveAuctions.currentBid")}
+                  </span>
                   <span className="text-xs font-medium">{item.bidCount}</span>
                 </div>
                 <Button
                   size="sm"
                   className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-4 py-1 text-xs"
                 >
-                  BID
+                  {t("liveAuctions.bid")}
                 </Button>
               </div>
             </div>
@@ -223,7 +228,7 @@ export function LiveAuctions() {
             className={`h-2 rounded-full transition-all ${
               currentPage === i ? "w-6 bg-purple-500" : "w-2 bg-gray-600"
             }`}
-            aria-label={`Go to page ${i + 1}`}
+            aria-label={t("liveAuctions.goToPage", { page: i + 1 })}
           />
         ))}
       </div>
