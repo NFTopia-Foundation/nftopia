@@ -3,6 +3,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ListingController;
 use App\Http\Controllers\Api\BidController;
 
+//Route::get('/user', function () {
+//    return $request()->user();
+//})->middleware('auth:sanctum');
+//});
+
+
 Route::middleware(['auth:sanctum', 'throttle:100,1'])->prefix('listings')->group(function () {
     Route::get('/', [ListingController::class, 'index']);
     Route::post('/', [ListingController::class, 'store']);
