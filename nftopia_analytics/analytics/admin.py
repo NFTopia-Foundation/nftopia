@@ -18,6 +18,12 @@ from .models_dir.marketplace_health import (
     MarketplaceHealthSnapshot,
     CollectionWatchlist
 )
+from .models_dir.rarity_analysis import (
+    NFTTrait,
+    NFTRarityScore,
+    CollectionRarityMetrics,
+    RarityAnalysisJob
+)
 
 
 @admin.register(NFTMetadata)
@@ -373,3 +379,116 @@ class CollectionWatchlistAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'collection__name']
     readonly_fields = ['added_at', 'removed_at']
     date_hierarchy = 'added_at'
+
+
+# Rarity Analysis Admin Models
+@admin.register(NFTTrait)
+class NFTTraitAdmin(admin.ModelAdmin):
+    list_display = [
+        'nft_display',
+        'trait_type',
+        'trait_value',
+        'rarity_score',
+        'frequency',
+        'frequency_percentage',
+        'created_at'
+    ]
+    list_filter = ['trait_type', 'created_at', 'rarity_score']
+    search_fields = ['nft__token_id', 'trait_type', 'trait_value']
+    readonly_fields = ['created_at', 'updated_at']
+    date_hierarchy = 'created_at'
+
+    def nft_display(self, obj):
+        return f"{obj.nft.collection.name} #{obj.nft.token_id}"
+    nft_display.short_description = "NFT"
+
+
+@admin.register(NFTRarityScore)
+class NFTRarityScoreAdmin(admin.ModelAdmin):
+    list_display = [
+        'nft_display',
+        'total_rarity_score',
+        'rarity_rank',
+        'percentile',
+        'trait_count',
+        'calculation_method',
+        'last_calculated'
+    ]
+    list_filter = ['calculation_method', 'last_calculated', 'total_rarity_score']
+    search_fields = ['nft__token_id', 'nft__collection__name']
+    readonly_fields = ['last_calculated', 'calculation_duration']
+    date_hierarchy = 'last_calculated'
+
+    def nft_display(self, obj):
+        return f"{obj.nft.collection.name} #{obj.nft.token_id}"
+    nft_display.short_description = "NFT"
+
+    actions = ['recalculate_scores']
+
+    def recalculate_scores(self, request, queryset):
+        from .tasks import process_collection_rarity_analysis
+        collections = set(score.nft.collection for score in queryset)
+        for collection in collections:
+            process_collection_rarity_analysis.delay(collection.id, force_refresh=True)
+        self.message_user(request, f"Scheduled recalculation for {len(collections)} collections")
+
+
+@admin.register(CollectionRarityMetrics)
+class CollectionRarityMetricsAdmin(admin.ModelAdmin):
+    list_display = [
+        'collection',
+        'total_nfts',
+        'nfts_with_traits',
+        'average_rarity_score',
+        'rare_holders_count',
+        'analysis_status',
+        'last_analyzed'
+    ]
+    list_filter = ['analysis_status', 'last_analyzed']
+    search_fields = ['collection__name']
+    readonly_fields = ['last_analyzed', 'analysis_duration', 'error_message']
+    date_hierarchy = 'last_analyzed'
+
+    actions = ['reanalyze_collections']
+
+    def reanalyze_collections(self, request, queryset):
+        from .tasks import process_collection_rarity_analysis
+        for metrics in queryset:
+            process_collection_rarity_analysis.delay(metrics.collection.id, force_refresh=True)
+        self.message_user(request, f"Scheduled reanalysis for {queryset.count()} collections")
+
+
+@admin.register(RarityAnalysisJob)
+class RarityAnalysisJobAdmin(admin.ModelAdmin):
+    list_display = [
+        'collection',
+        'job_type',
+        'status',
+        'created_at',
+        'duration_display',
+        'nfts_processed',
+        'nfts_with_scores',
+        'errors_count'
+    ]
+    list_filter = ['job_type', 'status', 'created_at', 'calculation_method']
+    search_fields = ['collection__name']
+    readonly_fields = [
+        'id', 'created_at', 'started_at', 'completed_at', 'duration',
+        'nfts_processed', 'nfts_with_scores', 'errors_count', 'error_details'
+    ]
+    date_hierarchy = 'created_at'
+
+    def duration_display(self, obj):
+        if obj.duration:
+            return f"{obj.duration:.2f}s"
+        return "-"
+    duration_display.short_description = "Duration"
+
+    actions = ['retry_failed_jobs']
+
+    def retry_failed_jobs(self, request, queryset):
+        from .tasks import process_collection_rarity_analysis
+        failed_jobs = queryset.filter(status='failed')
+        for job in failed_jobs:
+            process_collection_rarity_analysis.delay(job.collection.id, force_refresh=True)
+        self.message_user(request, f"Retried {failed_jobs.count()} failed jobs")

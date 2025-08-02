@@ -1,0 +1,195 @@
+{% extends "admin_dir/analytics_dashboard.html" %} {% load static %} {% block
+title %}NFT Rarity Analysis Dashboard{% endblock %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'admin_dir/css/rarity.css' %}" />
+{% endblock %} {% block content %}
+<div class="rarity-dashboard">
+    <div class="dashboard-header">
+        <h1>NFT Rarity Analysis Dashboard</h1>
+        <div class="dashboard-controls">
+            <button id="refresh-analysis" class="btn btn-primary">
+                Refresh Analysis
+            </button>
+            <button id="export-data" class="btn btn-secondary">
+                Export Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="overview-cards">
+        <div class="card">
+            <div class="card-header">
+                <h3>Total Collections</h3>
+            </div>
+            <div class="card-body">
+                <div class="metric-value" id="total-collections">-</div>
+                <div class="metric-label">Collections Analyzed</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Analysis Coverage</h3>
+            </div>
+            <div class="card-body">
+                <div class="metric-value" id="analysis-coverage">-</div>
+                <div class="metric-label">% of Collections</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Total NFTs Scored</h3>
+            </div>
+            <div class="card-body">
+                <div class="metric-value" id="total-nfts-scored">-</div>
+                <div class="metric-label">NFTs with Rarity Scores</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Average Processing Time</h3>
+            </div>
+            <div class="card-body">
+                <div class="metric-value" id="avg-processing-time">-</div>
+                <div class="metric-label">Seconds per Collection</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Rarity Distribution Heatmap</h3>
+                <select id="collection-selector">
+                    <option value="">Select Collection</option>
+                </select>
+            </div>
+            <div class="chart-body">
+                <div id="rarity-heatmap" class="chart"></div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Top 10 Rarest NFTs</h3>
+                <div class="chart-controls">
+                    <button id="refresh-rarest" class="btn btn-sm btn-outline">
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="chart-body">
+                <div id="rarest-nfts-table" class="table-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Diamond Hands Section -->
+    <div class="diamond-hands-section">
+        <div class="section-header">
+            <h3>Diamond Hands Detection</h3>
+            <p>Holders with rare NFTs (rarity score ≥ 90)</p>
+        </div>
+        <div class="diamond-hands-grid" id="diamond-hands-container">
+            <!-- Diamond hands cards will be populated here -->
+        </div>
+    </div>
+
+    <!-- Price Correlation Section -->
+    <div class="correlation-section">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Rarity-Price Correlation</h3>
+                <select id="correlation-collection-selector">
+                    <option value="">Select Collection</option>
+                </select>
+            </div>
+            <div class="chart-body">
+                <div id="rarity-price-scatter" class="chart"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Jobs Section -->
+    <div class="recent-jobs-section">
+        <div class="section-header">
+            <h3>Recent Analysis Jobs</h3>
+        </div>
+        <div class="jobs-table-container">
+            <table class="jobs-table" id="recent-jobs-table">
+                <thead>
+                    <tr>
+                        <th>Collection</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Duration</th>
+                        <th>NFTs Processed</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Jobs will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Metrics Section -->
+    <div class="metrics-section">
+        <div class="section-header">
+            <h3>Performance Metrics</h3>
+        </div>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h4>Job Success Rate</h4>
+                <div class="metric-value" id="job-success-rate">-</div>
+            </div>
+            <div class="metric-card">
+                <h4>Cache Hit Ratio</h4>
+                <div class="metric-value" id="cache-hit-ratio">-</div>
+            </div>
+            <div class="metric-card">
+                <h4>API Requests Today</h4>
+                <div class="metric-value" id="api-requests-today">-</div>
+            </div>
+            <div class="metric-card">
+                <h4>Average Response Time</h4>
+                <div class="metric-value" id="avg-response-time">-</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Collection Analysis -->
+<div class="modal" id="collection-analysis-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Collection Rarity Analysis</h3>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="collection-analysis-content">
+                <!-- Collection analysis details will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner -->
+<div class="loading-spinner" id="loading-spinner" style="display: none">
+    <div class="spinner"></div>
+    <p>Processing rarity analysis...</p>
+</div>
+{% endblock %} {% block extra_js %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="{% static 'admin_dir/js/rarity-dashboard.js' %}"></script>
+<script>
+    // Initialize dashboard
+    document.addEventListener("DOMContentLoaded", function () {
+        RarityDashboard.init();
+    });
+</script>
+{% endblock %}
