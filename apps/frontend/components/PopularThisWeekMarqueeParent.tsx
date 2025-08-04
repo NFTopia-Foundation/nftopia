@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import PopularThisWeek from "./PopularThisWeek";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export type NFTItem = {
   id: number;
@@ -52,6 +53,8 @@ const nftItems: NFTItem[] = [
 export const PopularThisWeekMarqueeParent: React.FC = () => {
   const [hoveredCardId, setHoveredCardId] = useState<number | null>(null);
 
+  const { t } = useTranslation();
+
   return (
     <div className="relative z-10 flex flex-col gap-4 sm:gap-6 lg:gap-8 items-center overflow-hidden px-4 sm:px-6 lg:px-8">
       {/* Header Section */}
@@ -59,14 +62,13 @@ export const PopularThisWeekMarqueeParent: React.FC = () => {
         <div className="flex flex-col items-center text-center">
           <div className="inline-block relative">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center text-white tracking-wider font-display">
-              Popular this week
+              {t("homepage.popularThisWeek.title")}
             </h2>
             <div className="absolute -bottom-2 sm:-bottom-3 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
             <div className="absolute -bottom-4 sm:-bottom-5 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
           </div>
           <p className="text-gray-400 mt-3 sm:mt-4 text-center max-w-xs sm:max-w-md lg:max-w-lg text-sm sm:text-base">
-            Explore the most coveted digital masterpieces shaping the future of
-            art
+            {t("homepage.popularThisWeek.message")}
           </p>
         </div>
       </div>

@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const locales = ["en", "fr"];
+const locales = ["en", "fr", "es", "de"]; 
 const defaultLocale = "en";
 
-// Get the preferred locale from the request
 function getLocale(request: NextRequest): string {
-  // Check for locale in the URL path
   const pathname = request.nextUrl.pathname;
+
   const pathnameLocale = locales.find(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );
@@ -15,7 +14,6 @@ function getLocale(request: NextRequest): string {
     return pathnameLocale;
   }
 
-  // Check for locale in Accept-Language header
   const acceptLanguage = request.headers.get("accept-language");
   if (acceptLanguage) {
     const preferredLocale = acceptLanguage
@@ -28,7 +26,6 @@ function getLocale(request: NextRequest): string {
     }
   }
 
-  // Check for locale in cookie
   const localeCookie = request.cookies.get("NEXT_LOCALE");
   if (localeCookie && locales.includes(localeCookie.value)) {
     return localeCookie.value;
@@ -40,7 +37,7 @@ function getLocale(request: NextRequest): string {
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // Skip middleware for static files and API routes
+  // Skip static and API
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
@@ -55,18 +52,16 @@ export function middleware(request: NextRequest) {
     (loc) => pathname.startsWith(`/${loc}/`) || pathname === `/${loc}`
   );
 
-  // Redirect to locale-prefixed URL if no locale in pathname
   if (!pathnameHasLocale) {
     const newUrl = new URL(`/${locale}${pathname}`, request.url);
     newUrl.search = request.nextUrl.search;
     return NextResponse.redirect(newUrl);
   }
 
-  // Set locale cookie for future requests
   const response = NextResponse.next();
   response.cookies.set("NEXT_LOCALE", locale, {
     path: "/",
-    maxAge: 60 * 60 * 24 * 365, // 1 year
+    maxAge: 60 * 60 * 24 * 365,
     httpOnly: false,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -77,14 +72,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
     "/((?!api|_next/static|_next/image|favicon.ico|public).*)",
   ],
 };
+

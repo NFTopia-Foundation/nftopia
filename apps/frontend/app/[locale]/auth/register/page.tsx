@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { connect } from "@argent/get-starknet";
+import { connect } from "get-starknet";
 import { API_CONFIG } from "@/lib/config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CircuitBackground } from "@/components/circuit-background";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -14,6 +15,9 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const { t, locale } = useTranslation();
 
   const connectWallet = async () => {
     try {
@@ -85,8 +89,12 @@ export default function RegisterPage() {
       const userData = await response.json();
       console.log("Registration successful:", userData);
 
-      // Redirect to login or dashboard after successful registration
-      router.push("/auth/login");
+      setSuccess("Registration was successful");
+
+      setTimeout(() => {
+        window.location.href = `/${locale}/auth/login`;
+      }, 3000);
+
     } catch (err) {
       console.error(err);
       setError(
@@ -94,6 +102,9 @@ export default function RegisterPage() {
           ? err.message
           : "Registration failed. Please try again."
       );
+      setTimeout(() => {
+        window.location.href = `/${locale}/auth/login`;
+      }, 3000);
     } finally {
       setLoading(false);
     }
@@ -108,7 +119,7 @@ export default function RegisterPage() {
         <div className="max-w-md mx-auto">
           <div className="border border-purple-500/20 rounded-xl p-8 bg-glass backdrop-blur-md shadow-lg">
             <h2 className="text-3xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-200">
-              Create Account
+              {t("register.title")}
             </h2>
 
             {error && (
@@ -117,30 +128,36 @@ export default function RegisterPage() {
               </div>
             )}
 
+            {success && (
+              <div className="mb-4 p-3 bg-green-900/50 text-green-300 rounded-lg border border-green-500/30">
+                {success}
+              </div>
+            )}
+
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-300">
-                  Wallet Address
+                  {t("register.walletAddress")}
                 </label>
                 <Input
                   type="text"
                   value={walletAddress}
                   readOnly
                   className="w-full bg-gray-800/50 border border-purple-500/20 rounded-lg px-4 py-3 text-sm"
-                  placeholder="Connect your wallet to see address"
+                  placeholder={t("register.inputPlaceholderOne")}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-300">
-                  Username (optional)
+                  {t("register.userName")}
                 </label>
                 <Input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full bg-gray-800/50 border border-purple-500/20 rounded-lg px-4 py-3 text-sm"
-                  placeholder="coolcollector123"
+                  placeholder={t("register.inputPlaceholderTwo")}
                   maxLength={50}
                 />
               </div>
@@ -152,10 +169,10 @@ export default function RegisterPage() {
                   className="w-full py-3 px-4 rounded-lg font-medium transition bg-gradient-to-r from-[#4e3bff] to-[#9747ff] hover:opacity-90"
                 >
                   {loading && !walletAddress
-                    ? "Connecting..."
+                    ? t("register.connecting")
                     : walletAddress
-                    ? "✓ Wallet Connected"
-                    : "Connect Wallet"}
+                    ? t("register.walletConnected")
+                    : t("register.connectWallet")}
                 </Button>
 
                 <Button
@@ -168,8 +185,8 @@ export default function RegisterPage() {
                   }`}
                 >
                   {loading && walletAddress
-                    ? "Creating Account..."
-                    : "Complete Registration"}
+                    ? t("register.creatingAccount")
+                    : t("register.completeRegistration")}
                 </Button>
               </div>
             </div>
@@ -177,15 +194,15 @@ export default function RegisterPage() {
 
           <div className="mt-8 text-center text-sm text-gray-400">
             <p>
-              Already have an account?{" "}
+              {t("register.alreadyHave")}{" "}
               <a
-                href="/auth/login"
+                href={`/${locale}/auth/login`}
                 className="text-purple-400 hover:text-purple-300"
               >
-                Sign in
+                {t("register.signIn")}
               </a>
             </p>
-            <p className="mt-2">100% Starknet Secure</p>
+            <p className="mt-2">{t("register.starknetSecure")}</p>
           </div>
         </div>
       </div>

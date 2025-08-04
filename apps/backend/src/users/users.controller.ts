@@ -12,6 +12,7 @@ import {
   import { CreateUserDto } from './dto/create-user.dto';
   import { UpdateUserDto } from './dto/create-user.dto';
   import { UserResponseDto } from './dto/create-user.dto';
+import { isInstance } from 'class-validator';
   
   @Controller('users')
   export class UsersController {
@@ -20,7 +21,7 @@ import {
     @Post()
     async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
       const user = await this.usersService.create(createUserDto);
-      return this.toResponseDto(user);
+      return this.toResponseDto(user);    
     }
   
     @Get()
@@ -63,7 +64,7 @@ import {
       return this.usersService.remove(id);
     }
   
-    private toResponseDto(user: User): UserResponseDto {
+    private toResponseDto(user: User ): UserResponseDto {
       return {
         id: user.id,
         walletAddress: user.walletAddress,

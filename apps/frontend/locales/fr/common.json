@@ -35,6 +35,10 @@
       "cta": "Commencer à créer",
       "learnMore": "Explorer les NFTs"
     },
+    "popularThisWeek": {
+      "title": "Populaire cette semaine",
+      "message": "Découvrez les chefs-d'œuvre numériques les plus convoités qui façonnent l'avenir de l'art"
+    },
     "features": {
       "title": "Pourquoi choisir NFTopia",
       "secure": "Sécurisé",
@@ -161,7 +165,7 @@
     "officialShop": "Boutique officielle",
     "helpCenter": "Centre d'aide",
     "connect": "Se connecter",
-    "copyright": "© 2025 NFTopia, Inc. Tous droits réservés."
+    "copyright": "© {YEAR} NFTopia, Inc. Tous droits réservés."
   },
   "liveAuctions": {
     "title": "Enchères en direct",
@@ -216,6 +220,31 @@
     "connected": "Connecté",
     "disconnect": "Déconnecter"
   },
+    "register": {
+      "title": "Créer un compte",
+      "walletAddress": "Adresse du portefeuille",
+      "userName": "Nom d'utilisateur (optionnel)",
+      "alreadyHave": "Vous avez déjà un compte ?",
+      "signIn": "Se connecter",
+      "starknetSecure": "100% sécurisé par Starknet",
+      "inputPlaceholderOne": "Connectez votre portefeuille pour voir l'adresse",
+      "inputPlaceholderTwo": "collectionneurcool123",
+      "connecting": "Connexion en cours...",
+      "walletConnected": "✓ Portefeuille connecté",
+      "connectWallet": "Connecter le portefeuille",
+      "creatingAccount": "Création du compte en cours...",
+      "completeRegistration": "Finaliser l'inscription"
+    },
+    "login": {
+      "walletAddress": "Adresse du portefeuille",
+      "connectWallet": "Connecter le portefeuille Starknet",
+      "getNonce": "Obtenir un nonce",
+      "dontHave": "Vous n'avez pas de compte ?",
+      "registerWith": "S'inscrire avec Starknet",
+      "signingIn": "Connexion en cours...",
+      "signAndLogin": "Signer et se connecter",
+      "inputPlaceholder": "Connectez votre portefeuille pour afficher l'adresse"
+    },
   "creatorDashboard": {
     "totalNFTs": "Total NFTs",
     "sales7d": "Ventes (7j)",
@@ -231,7 +260,6 @@
   "mintNFT": {
     "title": "Minter un NFT",
     "collection": "Collection",
-    "title": "Titre",
     "description": "Description",
     "price": "Prix",
     "currency": "Devise",

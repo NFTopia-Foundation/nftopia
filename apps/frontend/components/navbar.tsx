@@ -30,8 +30,8 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 
-      bg-[#181359] shadow-md border-b border-purple-500/20`}
+      className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 
+      bg-[#181359] shadow-md border-t-0 mt-[-80px] border-b border-purple-500/20`}
     >
       <div className="max-w-7xl mx-auto px-4">
         <nav className="flex items-center justify-between h-16 md:h-20 relative">
