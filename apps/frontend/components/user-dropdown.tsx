@@ -5,6 +5,7 @@ import { ChevronDown, User, LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/lib/stores/auth-store";
 import { useToast } from "@/lib/stores";
 import Link from "next/link";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export function UserDropdown() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -15,6 +16,8 @@ export function UserDropdown() {
   if (!isAuthenticated || !user) {
     return null;
   }
+
+  const { t, locale } = useTranslation();
 
   const handleLogout = async () => {
     const confirmed = window.confirm(

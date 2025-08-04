@@ -2,31 +2,26 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Globe, Check } from "lucide-react";
-import { useTranslation } from "@/hooks/useTranslation";
+import { useTranslation, Locale } from "@/hooks/useTranslation";
 import { Button } from "@/components/ui/button";
 
 interface LanguageOption {
-  code: string;
+  code: Locale;
   name: string;
   flag: string;
   nativeName: string;
 }
 
 const languages: LanguageOption[] = [
-  {
-    code: "en",
-    name: "English",
-    flag: "🇺🇸",
-    nativeName: "English",
-  },
-  {
-    code: "fr",
-    name: "French",
-    flag: "🇫🇷",
-    nativeName: "Français",
-  },
+  { code: "en", name: "English", flag: "🇺🇸", nativeName: "English" },
+  { code: "fr", name: "French", flag: "🇫🇷", nativeName: "Français" },
+  { code: "es", name: "Spanish", flag: "🇪🇸", nativeName: "Español" },
+  { code: "de", name: "German", flag: "🇩🇪", nativeName: "Deutsch" },
 ];
 
+// -------------------------
+// Desktop Language Switcher
+// -------------------------
 export function LanguageSwitcher() {
   const { locale, changeLocale } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -38,14 +33,10 @@ export function LanguageSwitcher() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -53,17 +44,14 @@ export function LanguageSwitcher() {
   // Close dropdown when pressing Escape
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
+      if (event.key === "Escape") setIsOpen(false);
     };
-
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, []);
 
-  const handleLanguageChange = (languageCode: string) => {
-    changeLocale(languageCode as "en" | "fr");
+  const handleLanguageChange = (languageCode: Locale) => {
+    changeLocale(languageCode);
     setIsOpen(false);
   };
 
@@ -81,11 +69,7 @@ export function LanguageSwitcher() {
         <Globe className="h-4 w-4" />
         <span className="hidden sm:inline">{currentLanguage.flag}</span>
         <span className="hidden md:inline">{currentLanguage.nativeName}</span>
-        <ChevronDown
-          className={`h-4 w-4 transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
+        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </Button>
 
       {isOpen && (
@@ -96,9 +80,7 @@ export function LanguageSwitcher() {
                 key={language.code}
                 onClick={() => handleLanguageChange(language.code)}
                 className={`w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-purple-500/10 transition-colors rounded-md ${
-                  locale === language.code
-                    ? "text-purple-400 bg-purple-500/10"
-                    : "text-white"
+                  locale === language.code ? "text-purple-400 bg-purple-500/10" : "text-white"
                 }`}
                 role="option"
                 aria-selected={locale === language.code}
@@ -108,9 +90,7 @@ export function LanguageSwitcher() {
                   <span className="font-medium">{language.nativeName}</span>
                   <span className="text-xs text-gray-400">{language.name}</span>
                 </div>
-                {locale === language.code && (
-                  <Check className="h-4 w-4 ml-auto text-purple-400" />
-                )}
+                {locale === language.code && <Check className="h-4 w-4 ml-auto text-purple-400" />}
               </button>
             ))}
           </div>
@@ -120,7 +100,9 @@ export function LanguageSwitcher() {
   );
 }
 
-// Mobile version for smaller screens
+// -------------------------
+// Mobile Language Switcher
+// -------------------------
 export function MobileLanguageSwitcher() {
   const { locale, changeLocale } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -128,8 +110,8 @@ export function MobileLanguageSwitcher() {
   const currentLanguage =
     languages.find((lang) => lang.code === locale) || languages[0];
 
-  const handleLanguageChange = (languageCode: string) => {
-    changeLocale(languageCode as "en" | "fr");
+  const handleLanguageChange = (languageCode: Locale) => {
+    changeLocale(languageCode);
     setIsOpen(false);
   };
 
@@ -144,11 +126,7 @@ export function MobileLanguageSwitcher() {
       >
         <Globe className="h-4 w-4" />
         <span>{currentLanguage.flag}</span>
-        <ChevronDown
-          className={`h-4 w-4 transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
+        <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </Button>
 
       {isOpen && (
@@ -159,16 +137,12 @@ export function MobileLanguageSwitcher() {
                 key={language.code}
                 onClick={() => handleLanguageChange(language.code)}
                 className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-purple-500/10 transition-colors rounded-md ${
-                  locale === language.code
-                    ? "text-purple-400 bg-purple-500/10"
-                    : "text-white"
+                  locale === language.code ? "text-purple-400 bg-purple-500/10" : "text-white"
                 }`}
               >
                 <span className="text-base">{language.flag}</span>
                 <span>{language.nativeName}</span>
-                {locale === language.code && (
-                  <Check className="h-4 w-4 ml-auto text-purple-400" />
-                )}
+                {locale === language.code && <Check className="h-4 w-4 ml-auto text-purple-400" />}
               </button>
             ))}
           </div>

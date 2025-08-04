@@ -11,7 +11,6 @@ import { StoreProvider } from "@/lib/stores/store-provider";
 import { Toast } from "@/components/ui/toast";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "@/hooks/useTranslation";
-import Head from "next/head";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,21 +26,21 @@ interface LocaleLayoutProps {
 
 export default function LocaleLayout({ children, params }: LocaleLayoutProps) {
   const pathname = usePathname();
-  const { t, locale } = useTranslation();
+  const { t, locales } = useTranslation();
   const isAuthPage = pathname?.includes("/auth/");
   const isCreatorDashboard = pathname?.includes("/creator-dashboard");
 
-  // Generate hreflang URLs
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   const currentPath = pathname?.replace(/^\/[a-z]{2}/, "") || "";
 
-  const hreflangUrls = {
-    en: `${baseUrl}/en${currentPath}`,
-    fr: `${baseUrl}/fr${currentPath}`,
-  };
+  // Generate hreflang URLs dynamically based on available locales
+  const hreflangUrls = locales.reduce((acc, loc) => {
+    acc[loc] = `${baseUrl}/${loc}${currentPath}`;
+    return acc;
+  }, {} as Record<string, string>);
 
   return (
-    <html lang={locale}>
+    <html lang={params.locale}>
       <head>
         <meta
           name="viewport"
@@ -55,27 +54,27 @@ export default function LocaleLayout({ children, params }: LocaleLayoutProps) {
         <meta name="msapplication-TileColor" content="#181359" />
         <meta name="msapplication-tap-highlight" content="no" />
 
-        {/* SEO Meta Tags */}
         <title>{t("seo.title")}</title>
         <meta name="description" content={t("seo.description")} />
         <meta name="keywords" content={t("seo.keywords")} />
 
-        {/* Hreflang Tags for SEO */}
-        <link rel="alternate" hrefLang="en" href={hreflangUrls.en} />
-        <link rel="alternate" hrefLang="fr" href={hreflangUrls.fr} />
+        {/* Hreflang Tags */}
+        {Object.entries(hreflangUrls).map(([lang, url]) => (
+          <link key={lang} rel="alternate" hrefLang={lang} href={url} />
+        ))}
         <link rel="alternate" hrefLang="x-default" href={hreflangUrls.en} />
 
-        {/* Open Graph Tags */}
+        <link rel="icon" href="/nftopia-03.svg" id="favicon" />
+
         <meta property="og:title" content={t("seo.title")} />
         <meta property="og:description" content={t("seo.description")} />
         <meta property="og:type" content="website" />
-        <meta property="og:locale" content={locale} />
-        <meta
-          property="og:locale:alternate"
-          content={locale === "en" ? "fr" : "en"}
-        />
-
-        {/* Twitter Card Tags */}
+        <meta property="og:locale" content={params.locale} />
+        {locales
+          .filter((loc) => loc !== params.locale)
+          .map((alt) => (
+            <meta key={alt} property="og:locale:alternate" content={alt} />
+          ))}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={t("seo.title")} />
         <meta name="twitter:description" content={t("seo.description")} />
@@ -85,13 +84,11 @@ export default function LocaleLayout({ children, params }: LocaleLayoutProps) {
           <StoreProvider>
             <StarknetProvider>
               {isCreatorDashboard ? (
-                // Creator Dashboard - No navbar, no padding, no footer
                 <main className="relative z-10">
                   <WebVitals />
                   {children}
                 </main>
               ) : (
-                // Regular pages with navbar and footer
                 <main className="relative z-10 pt-16 md:pt-20">
                   {!isAuthPage && <Navbar />}
                   {!isAuthPage && <CircuitBackground />}

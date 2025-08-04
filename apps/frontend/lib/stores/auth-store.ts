@@ -6,6 +6,7 @@ import { API_CONFIG } from '../config';
 import { getCookie } from '../CSRFTOKEN';
 import { NextRouter } from 'next/router';
 
+
 const initialState = {
   user: null,
   loading: true,
@@ -80,9 +81,11 @@ export const useAuthStore = create<AuthStore>()(
         walletAddress: string,
         signature: [string, string],
         nonce: string,
-        walletType: 'argentx' | 'braavos'
+        walletType: 'argentx' | 'braavos',
+        locale: string
       ) => {
         set({ loading: true });
+
         try {
           const csrfToken = await getCookie();
           const res = await fetch(`${API_CONFIG.baseUrl}/auth/verify-signature`, {
@@ -117,6 +120,7 @@ export const useAuthStore = create<AuthStore>()(
             loading: false,
             error: null,
           });
+          window.location.href = `/${locale}/creator-dashboard`;
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Verification failed';
           set({ error: message, loading: false });

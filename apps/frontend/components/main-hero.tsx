@@ -3,9 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { Vault } from "@/components/Vault";
 import { useTranslation } from "@/hooks/useTranslation";
+import Link from "next/link";
 
 export function MainHero() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   return (
     <div className="flex flex-col  lg:flex-row gap-8 items-center py-8 sm:py-12 md:py-16 px-4 sm:px-8 lg:px-0 mt-8 sm:mt-12 md:mt-16">
@@ -25,47 +26,51 @@ export function MainHero() {
           {t("homepage.hero.subtitle")}
         </p>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2 sm:pt-4">
-          <Button
-            size="lg"
-            className="bg-gradient-to-r from-[#4e3bff] via-[#9747ff] to-[#6d3bff] hover:opacity-90 rounded-full px-6 sm:px-8 py-4 sm:py-6 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300 text-sm sm:text-base font-semibold"
-          >
-            {t("homepage.hero.cta")}
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="relative border-2 border-transparent text-white hover:bg-gray-800/30 rounded-full px-6 sm:px-8 py-4 sm:py-6 group overflow-hidden transition-all duration-300 text-sm sm:text-base font-semibold"
-          >
-            <span className="absolute inset-0 rounded-full bg-gradient-to-r from-[#4e3bff] to-[#9747ff] opacity-20 group-hover:opacity-30 transition-opacity"></span>
-            <span className="absolute inset-0 rounded-full border-2 border-[#ec796b] opacity-70 group-hover:opacity-100 transition-all duration-300 shadow-[0_0_15px_rgba(236,121,107,0.5)] group-hover:shadow-[0_0_20px_rgba(236,121,107,0.7)]"></span>
-            <span className="absolute -inset-px rounded-full bg-[#181359] border border-gray-700"></span>
-            <span className="relative z-10 flex items-center justify-center">
-              <span className="mr-2">{t("homepage.hero.learnMore")}</span>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="transition-transform group-hover:translate-x-1"
-              >
-                <path
-                  d="M3.33337 8H12.6667"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M8 3.33331L12.6667 7.99998L8 12.6666"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
-          </Button>
+          <Link href={`/${locale}/auth/register`}>
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-[#4e3bff] via-[#9747ff] to-[#6d3bff] hover:opacity-90 rounded-full px-6 sm:px-8 py-4 sm:py-6 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all duration-300 text-sm sm:text-base font-semibold"
+            >
+              {t("homepage.hero.cta")}
+            </Button>
+          </Link>
+          <Link href={`/${locale}/marketplace`}>
+            <Button
+              size="lg"
+              variant="outline"
+              className="relative border-2 border-transparent text-white hover:bg-gray-800/30 rounded-full px-6 sm:px-8 py-4 sm:py-6 group overflow-hidden transition-all duration-300 text-sm sm:text-base font-semibold"
+            >
+              <span className="absolute inset-0 rounded-full bg-gradient-to-r from-[#4e3bff] to-[#9747ff] opacity-20 group-hover:opacity-30 transition-opacity"></span>
+              <span className="absolute inset-0 rounded-full border-2 border-[#ec796b] opacity-70 group-hover:opacity-100 transition-all duration-300 shadow-[0_0_15px_rgba(236,121,107,0.5)] group-hover:shadow-[0_0_20px_rgba(236,121,107,0.7)]"></span>
+              <span className="absolute -inset-px rounded-full bg-[#181359] border border-gray-700"></span>
+              <span className="relative z-10 flex items-center justify-center">
+                <span className="mr-2">{t("homepage.hero.learnMore")}</span>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="transition-transform group-hover:translate-x-1"
+                >
+                  <path
+                    d="M3.33337 8H12.6667"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M8 3.33331L12.6667 7.99998L8 12.6666"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            </Button>
+          </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 pt-6 sm:pt-8 max-w-sm sm:max-w-md">
           <div className="relative bg-[#181359]/40 p-3 sm:p-4 rounded-xl text-center backdrop-blur-md border border-purple-500/20 shadow-lg hover:shadow-purple-500/20 transition-all duration-300 overflow-hidden group">

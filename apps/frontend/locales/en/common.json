@@ -35,6 +35,10 @@
       "cta": "Start Creating",
       "learnMore": "Explore NFTs"
     },
+    "popularThisWeek": {
+      "title": "Popular this week",
+      "message": "Explore the most coveted digital masterpieces shaping the future of art"
+    },
     "features": {
       "title": "Why Choose NFTopia",
       "secure": "Secure",
@@ -161,7 +165,7 @@
     "officialShop": "Official Shop",
     "helpCenter": "Help Center",
     "connect": "Connect",
-    "copyright": "© 2025 NFTopia, Inc. All rights reserved."
+    "copyright": "© {YEAR} NFTopia, Inc. All rights reserved."
   },
   "liveAuctions": {
     "title": "Live Auctions",
@@ -216,6 +220,31 @@
     "connected": "Connected",
     "disconnect": "Disconnect"
   },
+  "register": {
+    "title": "Create Account",
+    "walletAddress": "Wallet Address",
+    "userName": "Username (optional)",
+    "alreadyHave": "Already have an account?",
+    "signIn": "Sign in",
+    "starknetSecure": "100% Starknet Secure",
+    "inputPlaceholderOne": "Connect your wallet to see address",
+    "inputPlaceholderTwo": "coolcollector123",
+    "connecting": "Connecting...",
+    "walletConnected": "✓ Wallet Connected",
+    "connectWallet": "Connect Wallet",
+    "creatingAccount": "Creating Account...",
+    "completeRegistration": "Complete Registration"
+  },
+  "login": {
+    "walletAddress": "Wallet Address",
+    "connectWallet": "Connect Starknet Wallet",
+    "getNonce": "Get Nonce",
+    "dontHave": "Don't have an account?",
+    "registerWith": "Register with Starknet",
+    "signingIn": "Signing in...",
+    "signAndLogin": "Sign & Login",
+    "inputPlaceholder": "Connect your wallet to display address"
+  },
   "creatorDashboard": {
     "totalNFTs": "Total NFTs",
     "sales7d": "Sales (7d)",
@@ -231,7 +260,6 @@
   "mintNFT": {
     "title": "Mint NFT",
     "collection": "Collection",
-    "title": "Title",
     "description": "Description",
     "price": "Price",
     "currency": "Currency",

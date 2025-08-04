@@ -12,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="mt-0 pt-0 border-t-0">
       <head>
         <meta
           name="viewport"
