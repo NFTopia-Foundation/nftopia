@@ -58,19 +58,26 @@ pub mod NftContract {
     use core::traits::Into;
     use starknet::event::EventEmitter;
     use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess, Map};
-    use crate::modules::reentrancy_guard::ReentrancyGuard;
+    use crate::modules::reentrancy_guard::{ ReentrancyGuardComponent, IReentrancyGuardDispatcher, IReentrancyGuardDispatcherTrait };
     use crate::modules::access_control::AccessControl;
 
-    use crate::modules::royalty::interfaces::{
-        IRoyaltyStandardDispatcher,
-        IRoyaltyStandardDispatcherTrait
-    };
+    // use crate::modules::royalty::interfaces::{
+    //     IRoyaltyStandardDispatcher,
+    //     IRoyaltyStandardDispatcherTrait
+    // };
 
+    component!(path: ReentrancyGuardComponent, storage: reentrancy_storage, event: ReentrancyGuardEvent);
     component!(path: AccessControl, storage: access_control, event: AccessControlEvent);
     #[abi(embed_v0)]
     impl AccessControlImpl = AccessControl::AccessControlComponent<ContractState>;
     impl AccessControlInternalImpl = AccessControl::InternalImpl<ContractState>;
 
+    #[abi(embed_v0)]
+    impl ReentrancyGuardComponentImpl = ReentrancyGuardComponent::ReentrancyGuard<ContractState>;
+    impl ReentrancyGuardComponentInternalImpl = ReentrancyGuardComponent::InternalImpl<ContractState>;
+
+
+    const ROYALTY_STANDARD_INTERFACE_ID: felt252 = 0x2a55205a; // Example (replace with real value)
     
 
     #[external(v0)]
@@ -78,6 +85,8 @@ pub mod NftContract {
         if interface_id == ROYALTY_STANDARD_INTERFACE_ID {
             return true;
         }
+
+        return false;
     }
 
     // Import event types
@@ -95,6 +104,7 @@ pub mod NftContract {
         ApprovalForAll: ApprovalForAll,
         #[flat]
         AccessControlEvent: AccessControl::Event,
+        ReentrancyGuardEvent: ReentrancyGuardComponent::Event
     }
 
     #[storage]
@@ -113,7 +123,8 @@ pub mod NftContract {
         creators: Map<u256, ContractAddress>,
         // Token collection mapping: token_id => collection
         collections: Map<u256, ContractAddress>,
-        reentrancy_guard: ReentrancyGuard::Storage,
+        #[substorage(v0)]
+        reentrancy_storage: ReentrancyGuardComponent::Storage,
         #[substorage(v0)]
         access_control: AccessControl::Storage,
     }
@@ -143,8 +154,12 @@ pub mod NftContract {
             ref self: ContractState, from: ContractAddress, to: ContractAddress, token_id: u256,
         ) {
 
-            self.reentrancy_guard._assert_non_reentrant();
-            self.reentrancy_guard._lock();
+            let reentrancy_guard_dispatcher = IReentrancyGuardDispatcher{ contract_address: to };
+
+            let to_address: Option<ContractAddress> = Option::Some(to);
+
+            reentrancy_guard_dispatcher.assert_non_reentrant(to_address);
+            reentrancy_guard_dispatcher.lock();
                         
                         
             // Validate addresses
@@ -169,7 +184,7 @@ pub mod NftContract {
             // Emit transfer event
             self.emit(Event::Transfer(Transfer { from, to, token_id }));
 
-            self.reentrancy_guard._unlock();
+            reentrancy_guard_dispatcher.unlock();
         }
     }
 

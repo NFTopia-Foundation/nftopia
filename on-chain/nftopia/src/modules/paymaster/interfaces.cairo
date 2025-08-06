@@ -1,5 +1,7 @@
+use starknet::ContractAddress;
+
 #[starknet::interface]
-trait IPaymaster<TContractState> {
+pub trait IPaymaster<TContractState> {
     fn sponsor_transaction(
         self: @TContractState,
         user: ContractAddress,
@@ -22,7 +24,7 @@ trait IPaymaster<TContractState> {
 }
 
 #[starknet::interface]
-trait ISRC20<TContractState> {
+pub trait ISRC20<TContractState> {
     fn transferFrom(
         self: @TContractState,
         from: ContractAddress,

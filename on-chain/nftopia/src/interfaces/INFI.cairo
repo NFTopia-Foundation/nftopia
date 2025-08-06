@@ -1,8 +1,7 @@
 #[starknet::contract]
-#[feature("deprecated_legacy_map")]
 mod Infi {
     use starknet::{
-        ContractAddress, get_caller_address, storage::{StorageMapReadAccess, StorageMapWriteAccess},
+        ContractAddress, get_caller_address, storage::{StorageMapReadAccess, StorageMapWriteAccess, Map},
     };
     use core::traits::Into;
     use core::traits::Default;
@@ -40,9 +39,9 @@ mod Infi {
 
     #[storage]
     struct Storage {
-        token_owner: LegacyMap<u256, ContractAddress>,
-        token_uri: LegacyMap<u256, felt252>,
-        token_collection: LegacyMap<u256, ContractAddress>,
+        token_owner: Map<u256, ContractAddress>,
+        token_uri: Map<u256, felt252>,
+        token_collection: Map<u256, ContractAddress>,
     }
 
 

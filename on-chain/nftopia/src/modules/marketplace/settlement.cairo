@@ -2,7 +2,7 @@ use starknet::ContractAddress;
 
 // Define the interface trait outside the contract module
 #[starknet::interface]
-trait IMarketplaceSettlement<TContractState> {
+pub trait IMarketplaceSettlement<TContractState> {
     fn distribute_payment(
         ref self: TContractState,
         token_id: u256,
@@ -15,7 +15,7 @@ trait IMarketplaceSettlement<TContractState> {
 }
 
 #[starknet::contract]
-mod MarketplaceSettlement {
+pub mod MarketplaceSettlement {
     use starknet::{ContractAddress, get_caller_address};
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
     use core::num::traits::Zero;
@@ -72,7 +72,7 @@ mod MarketplaceSettlement {
     }
 
     #[abi(embed_v0)]
-    impl MarketplaceSettlementImpl of super::IMarketplaceSettlement<ContractState> {
+    pub impl MarketplaceSettlementImpl of super::IMarketplaceSettlement<ContractState> {
         fn distribute_payment(
             ref self: ContractState,
             token_id: u256,

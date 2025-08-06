@@ -3,8 +3,6 @@ use starknet::get_caller_address;
 use starknet::get_block_timestamp;
 use core::traits::Into;
 
-// Import from NFTOPIA module hierarchy
-use nftopia::modules::reentrancy_guard::ReentrancyGuard;
 
 // Simple Escrow Contract for NFT/STRK swaps
 #[starknet::contract]

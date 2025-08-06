@@ -2,7 +2,6 @@
 /// Includes purchase history tracking, price recording, and ownership status management
 
 /// Event emitted when an NFT transaction is recorded
-use crate::modules::marketplace::settlement::IMarketplaceSettlementDispatcher;
 
 
 #[derive(Drop, starknet::Event)]
@@ -13,18 +12,6 @@ pub struct TransactionRecorded {
 }
 
 
-#[external(v0)]
-fn complete_sale(
-    ref self: ContractState,
-    token_id: u256,
-    price: u256,
-    seller: ContractAddress
-) {
-    let settlement = IMarketplaceSettlementDispatcher { 
-        contract_address: self.marketplace_address.read() 
-    };
-    settlement.distribute_payment(token_id, price, seller, self.nft_address.read());
-}
 
 /// Interface for the Transaction Module
 use starknet::ContractAddress;
@@ -39,14 +26,15 @@ pub trait ITransactionModule<TContractState> {
 
 /// Implementation of the Transaction Module
 #[starknet::contract]
-#[feature("deprecated_legacy_map")]
 pub mod TransactionModule {
-    use starknet::storage::StorageMapWriteAccess;
-    use starknet::storage::StorageMapReadAccess;
+    use starknet::storage::StoragePointerReadAccess;
+use starknet::storage::{ StorageMapWriteAccess, StorageMapReadAccess, Map };
     use starknet::{ContractAddress, get_caller_address};
     use core::num::traits::Zero;
     use core::traits::Into;
     use core::traits::TryInto;
+    use crate::modules::marketplace::settlement::{ IMarketplaceSettlementDispatcher, IMarketplaceSettlementDispatcherTrait };
+
 
     #[derive(Drop, starknet::Event)]
     struct TransactionRecorded {
@@ -63,10 +51,27 @@ pub mod TransactionModule {
 
     #[storage]
     struct Storage {
-        user_purchases: LegacyMap<(felt252, felt252), felt252>,
-        token_prices: LegacyMap<felt252, felt252>,
-        token_sold_status: LegacyMap<felt252, felt252>,
+        user_purchases: Map<(felt252, felt252), felt252>,
+        token_prices: Map<felt252, felt252>,
+        token_sold_status: Map<felt252, felt252>,
+        marketplace_address: ContractAddress,
     }
+
+
+    #[external(v0)]
+    pub fn complete_sale(
+    ref self: ContractState,
+    token_id: u256,
+    price: u256,
+    seller: ContractAddress, 
+    nft_contract: ContractAddress
+    ) {
+    let settlement = IMarketplaceSettlementDispatcher { 
+                    contract_address: self.marketplace_address.read()
+            };
+        settlement.distribute_payment(token_id, price, seller, nft_contract);
+    }
+
 
     #[generate_trait]
     impl InternalImpl of InternalTrait {

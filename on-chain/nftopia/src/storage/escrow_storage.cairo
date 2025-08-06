@@ -1,5 +1,6 @@
 // Swap status enum
 #[derive(Drop, starknet::Store, Copy)]
+#[allow(starknet::store_no_default_variant)]
 enum SwapStatus {
     Created,
     Completed,

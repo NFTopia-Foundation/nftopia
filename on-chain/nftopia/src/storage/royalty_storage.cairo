@@ -2,7 +2,6 @@
 #[starknet::contract]
 mod RoyaltyStorage {
     use starknet::ContractAddress;
-    use starknet::get_caller_address;
 
 
 struct RoyaltySnapshot {

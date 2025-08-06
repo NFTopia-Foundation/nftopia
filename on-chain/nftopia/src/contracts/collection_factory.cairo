@@ -38,9 +38,7 @@ pub mod CollectionFactory {
     impl CollectionFactoryImpl of ICollectionFactory<ContractState> {
         fn create_collection(ref self: ContractState) -> ContractAddress {
             let caller = get_caller_address();
-            let collection_address = contract_address_const::<
-                0x1234,
-            >(); // Dummy value, to be replaced
+            let collection_address = contract_address_const::<0x1234>(); // Dummy value, to be replaced
 
             self.collections.write(collection_address, true);
             // Map::write(self.collections, collection_address, true);
