@@ -83,6 +83,16 @@ const config: Config = {
           light: "rgba(26, 9, 66, 0.4)",
           border: "rgba(255, 100, 255, 0.2)",
         },
+        // NFTOPIA Harmonized Color Scheme
+        nftopia: {
+          background: "#1E1E2D",
+          card: "#25253D",
+          primary: "#3A7BFA",
+          text: "#FFFFFF",
+          subtext: "#A0A0C0",
+          border: "#3A7BFA",
+          hover: "#2A5C8A",
+        },
       },
       keyframes: {
         "accordion-down": {
