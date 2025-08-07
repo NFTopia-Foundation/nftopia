@@ -1,83 +1,235 @@
-// SPDX-License-Identifier: MIT
-// Escrow contract tests for NFT/STRK swaps
-
-use starknet::testing::contract_address;
-use starknet::testing::deploy_contract;
-use starknet::testing::call_contract;
-use starknet::testing::invoke_contract;
-use starknet::testing::get_balance;
-use starknet::testing::set_block_timestamp;
-use starknet::contract_address::ContractAddress;
-use core::integer::u256_from_felt252;
-use core::integer::u256_add;
-use core::integer::u256_eq;
-use core::array::ArrayTrait;
-use snforge_std::{ContractClassTrait, DeclareResultTrait, declare};
-use nftopia::IEscrowDispatcher;
-
-const ESCROW_CONTRACT_PATH: felt252 = 'src/contracts/escrow_contract.cairo';
-
 #[cfg(test)]
 mod tests {
-    use snforge_std::{declare, ContractClassTrait, deploy, Contract, assert};
-    use starknet::contract_address::ContractAddress;
+    use nftopia::contracts::escrow_contract::{
+        IEscrowDispatcher,
+        IEscrowDispatcherTrait,
+        IAdminDispatcher,
+        IAdminDispatcherTrait
+    };
+    use starknet::ContractAddress;
+    use starknet::contract_address::contract_address_const;
+    // use core::num::u256;
+    use snforge_std::{declare, ContractClassTrait, DeclareResultTrait};
+    use core::array::ArrayTrait;
+    use starknet::get_caller_address;
+
+
+
+    fn deploy_escrow() -> ContractAddress {
+        let contract = declare("EscrowContract").unwrap().contract_class();
+        let (contract_address, _) = contract.deploy(@ArrayTrait::new()).unwrap();
+        contract_address
+    }
 
     #[test]
-    fn test_create_swap() {
-        let contract_address = deploy_contract("EscrowContract");
-        let dispatcher = IEscrowDispatcher { contract_address };
+    fn test_constructor_and_admin_functions() {
+        let contract_address = deploy_escrow();
+        let admin_dispatcher = IAdminDispatcher { contract_address };
 
-        // Prepare test data
-        let nft_contract = ContractAddress::from(1234);
-        let nft_id = 1;
-        let price = 100;
-        let expiry = 5000;
+        let TEST_ADMIN: ContractAddress = contract_address_const::<0x1234>();
+        let TEST_USER: ContractAddress = contract_address_const::<0x5678>();
 
-        // Call create_swap
-        let swap_id = dispatcher.create_swap(nft_contract, nft_id, price, expiry);
+        // Verify initial admin
+        let admin = admin_dispatcher.get_admin();
+        assert(admin == TEST_ADMIN, 'Incorrect initial admin');
 
-        // Check swap count
-        let swap_count = dispatcher.get_swap_count();
-        assert(swap_count == 1, 'Swap count should be 1');
+        // Test pause/unpause
+        admin_dispatcher.pause();
+        assert(admin_dispatcher.is_paused(), 'Contract should be paused');
+        admin_dispatcher.unpause();
+        assert(!admin_dispatcher.is_paused(), 'Contract should be unpaused');
+
+        // Test moderator setting
+        admin_dispatcher.set_moderator(TEST_USER);
+        let moderator = admin_dispatcher.get_moderator();
+        assert(moderator == TEST_USER, 'Moderator not set correctly');
+    }
+
+    #[test]
+    fn test_swap_creation() {
+        let contract_address = deploy_escrow();
+        let escrow_dispatcher = IEscrowDispatcher { contract_address };
+        let TEST_NFT_CONTRACT: ContractAddress = contract_address_const::<0x9abc>();
+        let TEST_NFT_ID: u256 = u256 { low: 1, high: 0 };
+        let TEST_PRICE: u256 = u256 { low: 100, high: 0 };
+        let TEST_EXPIRY_OFFSET: u64 = 3600 * 2; // 2 hours
+        
+        let current_time = starknet::get_block_timestamp();
+        let expiry = current_time + TEST_EXPIRY_OFFSET;
+
+        // Create swap
+        let swap_id = escrow_dispatcher.create_swap(
+            TEST_NFT_CONTRACT,
+            TEST_NFT_ID,
+            TEST_PRICE,
+            expiry
+        );
+
+        // Verify swap details
+        let (creator, nft_contract, nft_id, price, swap_expiry, status) = 
+            escrow_dispatcher.get_swap(swap_id);
+        
+        assert(creator == get_caller_address(), 'Wrong creator');
+        assert(nft_contract == TEST_NFT_CONTRACT, 'Wrong NFT contract');
+        assert(nft_id == TEST_NFT_ID, 'Wrong NFT ID');
+        assert(price == TEST_PRICE, 'Wrong price');
+        assert(swap_expiry == expiry, 'Wrong expiry');
+        assert(status == 0, 'Wrong initial status');
+
+        // Verify stats
+        assert(escrow_dispatcher.get_swap_count() == swap_id + 1, 'Wrong swap count');
+        assert(escrow_dispatcher.get_total_swaps_created() == 1, 'Wrong created count');
+    }
+
+    #[test]
+    fn test_swap_acceptance() {
+        let contract_address = deploy_escrow();
+        let escrow_dispatcher = IEscrowDispatcher { contract_address };
+
+        let TEST_NFT_CONTRACT: ContractAddress = contract_address_const::<0x9abc>();
+        let TEST_NFT_ID: u256 = u256 { low: 1, high: 0 };
+        let TEST_PRICE: u256 = u256 { low: 100, high: 0 };
+        let TEST_EXPIRY_OFFSET: u64 = 3600 * 2; // 2 hours
+        
+        // Create swap
+        let expiry = starknet::get_block_timestamp() + TEST_EXPIRY_OFFSET;
+        let swap_id = escrow_dispatcher.create_swap(
+            TEST_NFT_CONTRACT,
+            TEST_NFT_ID,
+            TEST_PRICE,
+            expiry
+        );
+
+        // Accept swap
+        escrow_dispatcher.accept_swap(swap_id);
+
+        // Verify status and stats
+        let (_, _, _, _, _, status) = escrow_dispatcher.get_swap(swap_id);
+        assert(status == 1, 'Swap should be accepted');
+        assert(escrow_dispatcher.get_total_swaps_completed() == 1, 'Wrong completed count');
+        assert(escrow_dispatcher.get_total_volume() == TEST_PRICE, 'Wrong volume');
+    }
+
+    #[test]
+    fn test_swap_cancellation() {
+        let contract_address = deploy_escrow();
+        let escrow_dispatcher = IEscrowDispatcher { contract_address };
+
+        let TEST_NFT_CONTRACT: ContractAddress = contract_address_const::<0x9abc>();
+        let TEST_NFT_ID: u256 = u256 { low: 1, high: 0 };
+        let TEST_PRICE: u256 = u256 { low: 100, high: 0 };
+        let TEST_EXPIRY_OFFSET: u64 = 3600 * 2; // 2 hours
+        
+        // Create swap
+        let expiry = starknet::get_block_timestamp() + TEST_EXPIRY_OFFSET;
+        let swap_id = escrow_dispatcher.create_swap(
+            TEST_NFT_CONTRACT,
+            TEST_NFT_ID,
+            TEST_PRICE,
+            expiry
+        );
+
+        // Cancel swap
+        escrow_dispatcher.cancel_swap(swap_id);
+
+        // Verify status
+        let (_, _, _, _, _, status) = escrow_dispatcher.get_swap(swap_id);
+        assert(status == 2, 'Swap should be cancelled');
+    }
+
+    #[test]
+    fn test_swap_dispute() {
+        let contract_address = deploy_escrow();
+        let escrow_dispatcher = IEscrowDispatcher { contract_address };
+        let TEST_NFT_CONTRACT: ContractAddress = contract_address_const::<0x9abc>();
+        let TEST_NFT_ID: u256 = u256 { low: 1, high: 0 };
+        let TEST_PRICE: u256 = u256 { low: 100, high: 0 };
+        let TEST_EXPIRY_OFFSET: u64 = 3600 * 2; // 2 hours
+        
+        // Create swap
+        let expiry = starknet::get_block_timestamp() + TEST_EXPIRY_OFFSET;
+        let swap_id = escrow_dispatcher.create_swap(
+            TEST_NFT_CONTRACT,
+            TEST_NFT_ID,
+            TEST_PRICE,
+            expiry
+        );
+
+        // Dispute swap
+        escrow_dispatcher.dispute_swap(swap_id);
+
+        // Verify status
+        let (_, _, _, _, _, status) = escrow_dispatcher.get_swap(swap_id);
+        assert(status == 3, 'Swap should be disputed');
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_expired_swap_acceptance() {
+        let contract_address = deploy_escrow();
+        let escrow_dispatcher = IEscrowDispatcher { contract_address };
+
+        let TEST_NFT_CONTRACT: ContractAddress = contract_address_const::<0x9abc>();
+        let TEST_NFT_ID: u256 = u256 { low: 1, high: 0 };
+        let TEST_PRICE: u256 = u256 { low: 100, high: 0 };
+        
+        // Create swap with immediate expiry
+        let swap_id = escrow_dispatcher.create_swap(
+            TEST_NFT_CONTRACT,
+            TEST_NFT_ID,
+            TEST_PRICE,
+            starknet::get_block_timestamp() - 1 // Already expired
+        );
+
+        // This should panic
+        escrow_dispatcher.accept_swap(swap_id);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_self_acceptance() {
+        let contract_address = deploy_escrow();
+        let escrow_dispatcher = IEscrowDispatcher { contract_address };
+
+        let TEST_NFT_CONTRACT: ContractAddress = contract_address_const::<0x9abc>();
+        let TEST_NFT_ID: u256 = u256 { low: 1, high: 0 };
+        let TEST_PRICE: u256 = u256 { low: 100, high: 0 };
+        let TEST_EXPIRY_OFFSET: u64 = 3600 * 2; // 2 hours
+        
+        // Create swap
+        let expiry = starknet::get_block_timestamp() + TEST_EXPIRY_OFFSET;
+        let swap_id = escrow_dispatcher.create_swap(
+            TEST_NFT_CONTRACT,
+            TEST_NFT_ID,
+            TEST_PRICE,
+            expiry
+        );
+
+        // This should panic (can't accept your own swap)
+        escrow_dispatcher.accept_swap(swap_id);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_paused_operations() {
+        let contract_address = deploy_escrow();
+        let escrow_dispatcher = IEscrowDispatcher { contract_address };
+        let admin_dispatcher = IAdminDispatcher { contract_address };
+
+        let TEST_NFT_CONTRACT: ContractAddress = contract_address_const::<0x9abc>();
+        let TEST_NFT_ID: u256 = u256 { low: 1, high: 0 };
+        let TEST_PRICE: u256 = u256 { low: 100, high: 0 };
+        let TEST_EXPIRY_OFFSET: u64 = 3600 * 2; // 2 hours
+
+        // Pause contract
+        admin_dispatcher.pause();
+
+        // This should panic (operations paused)
+        escrow_dispatcher.create_swap(
+            TEST_NFT_CONTRACT,
+            TEST_NFT_ID,
+            TEST_PRICE,
+            starknet::get_block_timestamp() + TEST_EXPIRY_OFFSET
+        );
     }
 }
-
-#[test]
-fn test_accept_swap() {
-    let (escrow_addr, _) = deploy_contract(ESCROW_CONTRACT_PATH, (), ());
-    set_block_timestamp(1000);
-    let nft_contract = contract_address(1234);
-    let nft_id = 1_u256;
-    let price = 100_u256;
-    let expiry = 1000_u64 + 4000_u64;
-    let (swap_id,) = call_contract(escrow_addr, 'create_swap', (nft_contract, nft_id, price, expiry));
-    // Accept swap as a different caller
-    // (simulate by changing caller context if needed)
-    let _ = invoke_contract(escrow_addr, 'accept_swap', (swap_id,));
-    // Check status
-    let (creator, nft_contract, nft_id, price, expiry, status) = call_contract(escrow_addr, 'get_swap', (swap_id,));
-    assert(status == 1, 'Swap should be completed');
-}
-
-#[test]
-fn test_cancel_swap() {
-    let (escrow_addr, _) = deploy_contract(ESCROW_CONTRACT_PATH, (), ());
-    set_block_timestamp(1000);
-    let nft_contract = contract_address(1234);
-    let nft_id = 1_u256;
-    let price = 100_u256;
-    let expiry = 1000_u64 + 4000_u64;
-    let (swap_id,) = call_contract(escrow_addr, 'create_swap', (nft_contract, nft_id, price, expiry));
-    // Cancel swap
-    let _ = invoke_contract(escrow_addr, 'cancel_swap', (swap_id,));
-    // Check status
-    let (creator, nft_contract, nft_id, price, expiry, status) = call_contract(escrow_addr, 'get_swap', (swap_id,));
-    assert(status == 2, 'Swap should be cancelled');
-}
-
-// Helper function to deploy the contract
-fn deploy_contract(name: felt252) -> ContractAddress {
-    let contract = declare(name).unwrap().contract_class();
-    let (contract_address, _) = contract.deploy(@ArrayTrait::new()).unwrap();
-    contract_address
-} 

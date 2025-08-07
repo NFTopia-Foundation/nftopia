@@ -50,14 +50,14 @@ mod RoyaltyComponent {
         DefaultRoyaltyUpdated: DefaultRoyaltyUpdated
     }
 
-    #[derive(Drop, Serde, starknet::Event)]
+    #[derive(Drop, starknet::Event)]
     struct RoyaltyInfoUpdated {
         token_id: u256,
         receiver: ContractAddress,
         basis_points: u64
     }
 
-    #[derive(Drop, Serde, starknet::Event)]
+    #[derive(Drop, starknet::Event)]
     struct DefaultRoyaltyUpdated {
         receiver: ContractAddress,
         basis_points: u64

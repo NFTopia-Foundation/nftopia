@@ -8,20 +8,20 @@ pub enum PaymasterEvents {
     FeesWithdrawn: FeesWithdrawn
 }
 
-#[derive(Drop, Serde, starknet::Event)]
+#[derive(Drop, starknet::Event)]
 pub struct TransactionSponsored {
     user: ContractAddress,
     token: ContractAddress,
     amount: u256
 }
 
-#[derive(Drop, Serde, starknet::Event)]
+#[derive(Drop, starknet::Event)]
 pub struct RateUpdated {
     token: ContractAddress,
     new_rate: u256
 }
 
-#[derive(Drop, Serde, starknet::Event)]
+#[derive(Drop, starknet::Event)]
 pub struct FeesWithdrawn {
     token: ContractAddress,
     amount: u256,

@@ -109,7 +109,7 @@ pub mod AccessControl {
         pub proposal_id: u64,
         pub caller: ContractAddress,
     }
-    #[derive(Drop, Serde, starknet::Store)]
+    #[derive(Drop, starknet::Store)]
     pub struct AdminRoleProposal {
         pub account: ContractAddress,
         pub action: u8, // 1 = grant, 2 = revoke

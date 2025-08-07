@@ -4,9 +4,43 @@ use starknet::get_block_timestamp;
 use core::traits::Into;
 
 
+// Main escrow interface
+#[starknet::interface]
+pub trait IEscrow<TContractState> {
+    fn create_swap(
+        ref self: TContractState,
+        nft_contract: ContractAddress,
+        nft_id: u256,
+        price: u256,
+        expiry: u64,
+    ) -> u256;
+    fn accept_swap(ref self: TContractState, swap_id: u256);
+    fn cancel_swap(ref self: TContractState, swap_id: u256);
+    fn dispute_swap(ref self: TContractState, swap_id: u256);
+    fn get_swap(self: @TContractState, swap_id: u256) -> (ContractAddress, ContractAddress, u256, u256, u64, u8);
+    fn get_swap_count(self: @TContractState) -> u256;
+    fn get_total_swaps_created(self: @TContractState) -> u256;
+    fn get_total_swaps_completed(self: @TContractState) -> u256;
+    fn get_total_volume(self: @TContractState) -> u256;
+}
+
+// Admin interface
+#[starknet::interface]
+pub trait IAdmin<TContractState> {
+    fn set_admin(ref self: TContractState, new_admin: ContractAddress);
+    fn set_moderator(ref self: TContractState, new_moderator: ContractAddress);
+    fn pause(ref self: TContractState);
+    fn unpause(ref self: TContractState);
+    fn get_admin(self: @TContractState) -> ContractAddress;
+    fn get_moderator(self: @TContractState) -> ContractAddress;
+    fn is_paused(self: @TContractState) -> bool;
+}
+
+
+
 // Simple Escrow Contract for NFT/STRK swaps
 #[starknet::contract]
-mod EscrowContract {
+pub mod EscrowContract {
     use super::*;
     use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess, Map};
 
@@ -37,7 +71,7 @@ mod EscrowContract {
 
     #[event]
     #[derive(Drop, starknet::Event)]
-    enum Event {
+    pub enum Event {
         SwapCreated: SwapCreated,
         SwapAccepted: SwapAccepted,
         SwapCancelled: SwapCancelled,
@@ -45,8 +79,8 @@ mod EscrowContract {
         ReentrancyGuard: ReentrancyGuardEvent,
     }
 
-    #[derive(Drop, starknet::Event)]
-    struct SwapCreated {
+    #[derive(Drop, Serde, starknet::Event)]
+    pub struct SwapCreated {
         #[key]
         swap_id: u256,
         #[key]
@@ -57,8 +91,8 @@ mod EscrowContract {
         expiry: u64,
     }
 
-    #[derive(Drop, starknet::Event)]
-    struct SwapAccepted {
+    #[derive(Drop, Serde, starknet::Event)]
+    pub struct SwapAccepted {
         #[key]
         swap_id: u256,
         #[key]
@@ -66,8 +100,8 @@ mod EscrowContract {
         accepted_at: u64,
     }
 
-    #[derive(Drop, starknet::Event)]
-    struct SwapCancelled {
+    #[derive(Drop, Serde, starknet::Event)]
+    pub struct SwapCancelled {
         #[key]
         swap_id: u256,
         #[key]
@@ -75,8 +109,8 @@ mod EscrowContract {
         cancelled_at: u64,
     }
 
-    #[derive(Drop, starknet::Event)]
-    struct SwapDisputed {
+    #[derive(Drop, Serde, starknet::Event)]
+    pub struct SwapDisputed {
         #[key]
         swap_id: u256,
         #[key]
@@ -84,8 +118,8 @@ mod EscrowContract {
         disputed_at: u64,
     }
 
-    #[derive(Drop, starknet::Event)]
-    struct ReentrancyGuardEvent {
+    #[derive(Drop, Serde, starknet::Event)]
+    pub struct ReentrancyGuardEvent {
         locked: bool,
     }
 
@@ -106,54 +140,22 @@ mod EscrowContract {
         self.total_swaps_completed.write(0, 0);
         self.total_volume.write(0, 0);
     }
-
-    // Main escrow interface
-    #[starknet::interface]
-    trait IEscrow<TContractState> {
-        fn create_swap(
-            ref self: TContractState,
-            nft_contract: ContractAddress,
-            nft_id: u256,
-            price: u256,
-            expiry: u64,
-        ) -> u256;
-        fn accept_swap(ref self: TContractState, swap_id: u256);
-        fn cancel_swap(ref self: TContractState, swap_id: u256);
-        fn dispute_swap(ref self: TContractState, swap_id: u256);
-        fn get_swap(self: @TContractState, swap_id: u256) -> (ContractAddress, ContractAddress, u256, u256, u64, u8);
-        fn get_swap_count(self: @TContractState) -> u256;
-        fn get_total_swaps_created(self: @TContractState) -> u256;
-        fn get_total_swaps_completed(self: @TContractState) -> u256;
-        fn get_total_volume(self: @TContractState) -> u256;
-    }
-
-    // Admin interface
-    #[starknet::interface]
-    trait IAdmin<TContractState> {
-        fn set_admin(ref self: TContractState, new_admin: ContractAddress);
-        fn set_moderator(ref self: TContractState, new_moderator: ContractAddress);
-        fn pause(ref self: TContractState);
-        fn unpause(ref self: TContractState);
-        fn get_admin(self: @TContractState) -> ContractAddress;
-        fn get_moderator(self: @TContractState) -> ContractAddress;
-        fn is_paused(self: @TContractState) -> bool;
-    }
-
+   
     // Internal reentrancy guard implementation using NFTOPIA module
     #[generate_trait]
-    impl InternalReentrancyGuard of InternalReentrancyGuardTrait {
+    pub impl InternalReentrancyGuard of InternalReentrancyGuardTrait {
         fn _assert_non_reentrant(self: @ContractState) {
             assert(!self.reentrancy_locked.read(0), 'ReentrancyGuard: reentrant call');
         }
 
         fn _lock(ref self: ContractState) {
             self.reentrancy_locked.write(0, true);
-            self.emit(Event::ReentrancyGuard(ReentrancyGuardEvent { locked: true }));
+            self.emit(ReentrancyGuardEvent { locked: true });
         }
 
         fn _unlock(ref self: ContractState) {
             self.reentrancy_locked.write(0, false);
-            self.emit(Event::ReentrancyGuard(ReentrancyGuardEvent { locked: false }));
+            self.emit(ReentrancyGuardEvent { locked: false });
         }
 
         fn _is_locked(self: @ContractState) -> bool {
@@ -163,7 +165,7 @@ mod EscrowContract {
 
     // Reentrancy guard interface implementation using NFTOPIA module
     #[abi(embed_v0)]
-    impl ReentrancyGuardImpl of IReentrancyGuard<ContractState> {
+    pub impl ReentrancyGuardImpl of IReentrancyGuard<ContractState> {
         fn assert_non_reentrant(self: @ContractState) {
             self._assert_non_reentrant();
         }
@@ -182,7 +184,7 @@ mod EscrowContract {
 
     // Main escrow implementation
     #[abi(embed_v0)]
-    impl EscrowImpl of IEscrow<ContractState> {
+    pub impl EscrowImpl of IEscrow<ContractState> {
         fn create_swap(
             ref self: ContractState,
             nft_contract: ContractAddress,
@@ -222,14 +224,14 @@ mod EscrowContract {
             self.total_swaps_created.write(0, current_total + 1);
             
             // Emit event
-            self.emit(Event::SwapCreated(SwapCreated {
+            self.emit(SwapCreated {
                 swap_id,
                 creator: caller,
                 nft_contract,
                 nft_id,
                 price,
                 expiry,
-            }));
+            });
 
             self._unlock();
             swap_id
@@ -270,11 +272,11 @@ mod EscrowContract {
             self.total_volume.write(0, current_volume + price);
             
             // Emit event
-            self.emit(Event::SwapAccepted(SwapAccepted {
+            self.emit(SwapAccepted {
                 swap_id,
                 acceptor: caller,
                 accepted_at: current_time,
-            }));
+            });
             
             self._unlock();
         }
@@ -309,11 +311,11 @@ mod EscrowContract {
             self.swap_statuses.write(swap_id, 2); // 2 = cancelled
             
             // Emit event
-            self.emit(Event::SwapCancelled(SwapCancelled {
+            self.emit(SwapCancelled {
                 swap_id,
                 cancelled_by: caller,
                 cancelled_at: current_time,
-            }));
+            });
 
             self._unlock();
         }
@@ -344,11 +346,11 @@ mod EscrowContract {
             let current_time = get_block_timestamp();
             
             // Emit event
-            self.emit(Event::SwapDisputed(SwapDisputed {
+            self.emit(SwapDisputed{
                 swap_id,
                 disputed_by: caller,
                 disputed_at: current_time,
-            }));
+            });
             
             self._unlock();
         }
@@ -386,7 +388,7 @@ mod EscrowContract {
 
     // Admin implementation
     #[abi(embed_v0)]
-    impl AdminImpl of IAdmin<ContractState> {
+    pub impl AdminImpl of IAdmin<ContractState> {
         fn set_admin(ref self: ContractState, new_admin: ContractAddress) {
             self._assert_non_reentrant();
             self._lock();

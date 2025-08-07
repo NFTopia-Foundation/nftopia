@@ -61,10 +61,6 @@ pub mod NftContract {
     use crate::modules::reentrancy_guard::{ ReentrancyGuardComponent, IReentrancyGuardDispatcher, IReentrancyGuardDispatcherTrait };
     use crate::modules::access_control::AccessControl;
 
-    // use crate::modules::royalty::interfaces::{
-    //     IRoyaltyStandardDispatcher,
-    //     IRoyaltyStandardDispatcherTrait
-    // };
 
     component!(path: ReentrancyGuardComponent, storage: reentrancy_storage, event: ReentrancyGuardEvent);
     component!(path: AccessControl, storage: access_control, event: AccessControlEvent);
@@ -104,6 +100,7 @@ pub mod NftContract {
         ApprovalForAll: ApprovalForAll,
         #[flat]
         AccessControlEvent: AccessControl::Event,
+        #[flat]
         ReentrancyGuardEvent: ReentrancyGuardComponent::Event
     }
 
@@ -182,7 +179,7 @@ pub mod NftContract {
             self.owners.write(token_id, to);
             
             // Emit transfer event
-            self.emit(Event::Transfer(Transfer { from, to, token_id }));
+            self.emit(Transfer { from, to, token_id });
 
             reentrancy_guard_dispatcher.unlock();
         }
@@ -304,15 +301,14 @@ pub mod NftContract {
                 // Emit individual mint event for compatibility
                 self
                     .emit(
-                        Event::Mint(
-                            Mint {
+                        Mint {
                                 token_id,
                                 to: recipient,
                                 creator: caller,
                                 uri,
                                 collection: Zero::zero(),
                             },
-                        ),
+                        
                     );
 
                 i += 1;
@@ -355,7 +351,7 @@ pub mod NftContract {
                 // Emit individual mint event for compatibility
                 self
                     .emit(
-                        Event::Mint(
+
                             Mint {
                                 token_id,
                                 to: recipient,
@@ -363,7 +359,7 @@ pub mod NftContract {
                                 uri,
                                 collection: Zero::zero(),
                             },
-                        ),
+                        
                     );
 
                 i += 1;
@@ -415,7 +411,7 @@ pub mod NftContract {
             self.token_approvals.write(token_id, to);
 
             // Emit approval event
-            self.emit(Event::Approval(Approval { owner, approved: to, token_id }));
+            self.emit(Approval { owner, approved: to, token_id });
         }
 
         // Set approval for all tokens of an owner
@@ -433,7 +429,7 @@ pub mod NftContract {
             self.operator_approvals.write((caller, operator), approved);
 
             // Emit approval for all event
-            self.emit(Event::ApprovalForAll(ApprovalForAll { owner: caller, operator, approved }));
+            self.emit(ApprovalForAll { owner: caller, operator, approved });
         }
     }
 }

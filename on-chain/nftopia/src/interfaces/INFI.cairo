@@ -1,5 +1,5 @@
 #[starknet::contract]
-mod Infi {
+pub mod Infi {
     use starknet::{
         ContractAddress, get_caller_address, storage::{StorageMapReadAccess, StorageMapWriteAccess, Map},
     };
@@ -8,7 +8,7 @@ mod Infi {
 
 
     #[derive(Drop, starknet::Event)]
-    struct TokenMinted {
+    pub struct TokenMinted {
         token_id: u256,
         owner: ContractAddress,
         uri: felt252,
@@ -16,14 +16,14 @@ mod Infi {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct TokenTransferred {
+    pub struct TokenTransferred {
         token_id: u256,
         from: ContractAddress,
         to: ContractAddress,
     }
 
     #[derive(Drop, starknet::Event)]
-    struct CollectionUpdated {
+    pub struct CollectionUpdated {
         token_id: u256,
         old_collection: ContractAddress,
         new_collection: ContractAddress,
@@ -31,14 +31,14 @@ mod Infi {
 
     #[event]
     #[derive(Drop, starknet::Event)]
-    enum Event {
+    pub enum Event {
         TokenMinted: TokenMinted,
         TokenTransferred: TokenTransferred,
         CollectionUpdated: CollectionUpdated,
     }
 
     #[storage]
-    struct Storage {
+    pub struct Storage {
         token_owner: Map<u256, ContractAddress>,
         token_uri: Map<u256, felt252>,
         token_collection: Map<u256, ContractAddress>,
@@ -65,7 +65,7 @@ mod Infi {
 
 
     #[abi(embed_v0)]
-    impl InfiImpl of IInfi<ContractState> {
+    pub impl InfiImpl of IInfi<ContractState> {
         fn mint(
             ref self: ContractState,
             recipient: ContractAddress,

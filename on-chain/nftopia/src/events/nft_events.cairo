@@ -3,7 +3,7 @@ use starknet::ContractAddress;
 use core::byte_array::ByteArray;
 
 /// Event emitted when a new token is minted
-#[derive(Drop, Serde, starknet::Event)]
+#[derive(Drop, starknet::Event)]
 pub struct Mint {
     pub token_id: u256,
     pub to: ContractAddress,
@@ -13,7 +13,7 @@ pub struct Mint {
 }
 
 /// Event emitted when a token is transferred
-#[derive(Drop, Serde, starknet::Event)]
+#[derive(Drop, starknet::Event)]
 pub struct Transfer {
     pub from: ContractAddress,
     pub to: ContractAddress,
@@ -21,7 +21,7 @@ pub struct Transfer {
 }
 
 /// Event emitted when approval is given to an address for a specific token
-#[derive(Drop, Serde, starknet::Event)]
+#[derive(Drop, starknet::Event)]
 pub struct Approval {
     pub owner: ContractAddress,
     pub approved: ContractAddress,
@@ -29,7 +29,7 @@ pub struct Approval {
 }
 
 /// Event emitted when an operator is approved or disapproved for all tokens of an owner
-#[derive(Drop, Serde, starknet::Event)]
+#[derive(Drop, starknet::Event)]
 pub struct ApprovalForAll {
     pub owner: ContractAddress,
     pub operator: ContractAddress,

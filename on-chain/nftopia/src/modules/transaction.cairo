@@ -36,21 +36,24 @@ use starknet::storage::{ StorageMapWriteAccess, StorageMapReadAccess, Map };
     use crate::modules::marketplace::settlement::{ IMarketplaceSettlementDispatcher, IMarketplaceSettlementDispatcherTrait };
 
 
+  
+
+    #[event]
     #[derive(Drop, starknet::Event)]
-    struct TransactionRecorded {
+    pub enum Event {
+        TransactionRecorded: TransactionRecorded,
+    }
+
+
+    #[derive(Drop, starknet::Event)]
+    pub struct TransactionRecorded {
         buyer: ContractAddress,
         token_id: u256,
         amount: u256,
     }
 
-    #[event]
-    #[derive(Drop, starknet::Event)]
-    enum Event {
-        TransactionRecorded: super::TransactionRecorded,
-    }
-
     #[storage]
-    struct Storage {
+    pub struct Storage {
         user_purchases: Map<(felt252, felt252), felt252>,
         token_prices: Map<felt252, felt252>,
         token_sold_status: Map<felt252, felt252>,
@@ -74,7 +77,7 @@ use starknet::storage::{ StorageMapWriteAccess, StorageMapReadAccess, Map };
 
 
     #[generate_trait]
-    impl InternalImpl of InternalTrait {
+    pub impl InternalImpl of InternalTrait {
         fn get_purchase_key(user: ContractAddress, token_id: u256) -> (felt252, felt252) {
             let user_felt: felt252 = user.into();
             let token_felt: felt252 = token_id.try_into().unwrap();
@@ -83,7 +86,7 @@ use starknet::storage::{ StorageMapWriteAccess, StorageMapReadAccess, Map };
     }
 
     #[abi(embed_v0)]
-    impl TransactionModuleImpl of super::ITransactionModule<ContractState> {
+    pub impl TransactionModuleImpl of super::ITransactionModule<ContractState> {
         fn record_transaction(ref self: ContractState, token_id: u256, amount: u256) {
             // Validate amount
             assert(!amount.is_zero(), 'Amount must be greater than 0');
@@ -108,12 +111,7 @@ use starknet::storage::{ StorageMapWriteAccess, StorageMapReadAccess, Map };
             self.user_purchases.write(purchase_key, 1);
 
             // Emit event
-            self
-                .emit(
-                    Event::TransactionRecorded(
-                        super::TransactionRecorded { buyer: caller, token_id, amount },
-                    ),
-                );
+            self.emit(TransactionRecorded{ buyer: caller, token_id, amount });
         }
 
         fn has_user_purchased(self: @ContractState, user: ContractAddress, token_id: u256) -> bool {

@@ -1,12 +1,13 @@
 #[feature("deprecated-starknet-consts")]
-use starknet::{ContractAddress, contract_address_const};
+use starknet::ContractAddress;
+use starknet::contract_address::contract_address_const;
 use core::array::ArrayTrait;
 use core::result::ResultTrait;
 use snforge_std::{ContractClassTrait, DeclareResultTrait};
 
 use snforge_std::declare;
 
-use nftopia::transaction::{ITransactionModuleDispatcher, ITransactionModuleDispatcherTrait};
+use nftopia::modules::transaction::{ITransactionModuleDispatcher, ITransactionModuleDispatcherTrait};
 
 // Helper function to deploy the contract
 fn deploy_contract(name: ByteArray) -> ContractAddress {
