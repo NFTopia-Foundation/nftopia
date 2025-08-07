@@ -23,11 +23,11 @@ export default function CreatorDashboardLayout({
   };
 
   return (
-    <div className="flex min-h-screen  bg-gray-900">
+    <div className="flex min-h-screen bg-nftopia-background">
       {/* Mobile Menu Button - Attached to Sidebar */}
       <button
         onClick={toggleSidebar}
-        className="xl:hidden fixed top-3 z-50 p-2 bg-gray-800 rounded-lg text-white hover:bg-gray-700 transition-colors transform  duration-300 ease-in-out"
+        className="xl:hidden fixed top-3 z-50 p-2 bg-nftopia-card border border-nftopia-border rounded-lg text-nftopia-text hover:bg-nftopia-hover transition-colors transform duration-300 ease-in-out"
         style={{
           left: isSidebarOpen ? "13rem" : "1rem", // 16rem = 256px (w-64), 1rem = 16px
         }}
@@ -49,13 +49,13 @@ export default function CreatorDashboardLayout({
 
       {/* Sidebar */}
       <aside
-        className={`fixed xl:static inset-y-0 left-0 z-40 w-64 bg-gray-800 text-white transform transition-transform duration-300 ease-in-out ${
+        className={`fixed xl:static inset-y-0 left-0 z-40 w-64 bg-nftopia-card border-r border-nftopia-border text-nftopia-text transform transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full xl:translate-x-0"
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo Section */}
-          <div className="p-6 border-b border-gray-700">
+          <div className="p-6 border-b border-nftopia-border">
             <Link href={`/${locale}`} className="flex items-center">
               <Image
                 src="/nftopia-04.svg"
@@ -73,7 +73,7 @@ export default function CreatorDashboardLayout({
               <li>
                 <Link
                   href={`/${locale}/creator-dashboard`}
-                  className="text-purple-400 font-semibold block py-2"
+                  className="text-nftopia-primary font-semibold block py-2"
                   onClick={closeSidebar}
                 >
                   {t("navigation.dashboard")}
@@ -82,7 +82,7 @@ export default function CreatorDashboardLayout({
               <li>
                 <Link
                   href={`/${locale}/creator-dashboard/create-your-collection`}
-                  className="text-white hover:text-purple-300 transition-colors block py-2"
+                  className="text-nftopia-text hover:text-nftopia-primary transition-colors block py-2"
                   onClick={closeSidebar}
                 >
                   {t("creator.createNFT")}
@@ -91,7 +91,7 @@ export default function CreatorDashboardLayout({
               <li>
                 <Link
                   href={`/${locale}/creator-dashboard/my-nfts`}
-                  className="text-white hover:text-purple-300 transition-colors block py-2"
+                  className="text-nftopia-text hover:text-nftopia-primary transition-colors block py-2"
                   onClick={closeSidebar}
                 >
                   {t("profile.myNFTs")}
@@ -100,7 +100,7 @@ export default function CreatorDashboardLayout({
               <li>
                 <Link
                   href={`/${locale}/creator-dashboard/collections`}
-                  className="text-white hover:text-purple-300 transition-colors block py-2"
+                  className="text-nftopia-text hover:text-nftopia-primary transition-colors block py-2"
                   onClick={closeSidebar}
                 >
                   {t("profile.myCollections")}
@@ -109,7 +109,7 @@ export default function CreatorDashboardLayout({
               <li>
                 <Link
                   href={`/${locale}/creator-dashboard/sales`}
-                  className="text-white hover:text-purple-300 transition-colors block py-2"
+                  className="text-nftopia-text hover:text-nftopia-primary transition-colors block py-2"
                   onClick={closeSidebar}
                 >
                   {t("creator.earnings")}
@@ -118,7 +118,7 @@ export default function CreatorDashboardLayout({
               <li>
                 <Link
                   href={`/${locale}/creator-dashboard/settings`}
-                  className="text-white hover:text-purple-300 transition-colors block py-2"
+                  className="text-nftopia-text hover:text-nftopia-primary transition-colors block py-2"
                   onClick={closeSidebar}
                 >
                   {t("profile.settings")}
@@ -128,12 +128,12 @@ export default function CreatorDashboardLayout({
           </nav>
 
           {/* Mint Button */}
-          <div className="p-6 border-t border-gray-700">
+          <div className="p-6 border-t border-nftopia-border">
             <Link
               href={`/${locale}/creator-dashboard/mint-nft`}
               onClick={closeSidebar}
             >
-              <button className="w-full py-3 bg-gradient-to-r from-purple-400 to-blue-500 text-white border-none rounded-lg font-semibold hover:opacity-90 transition-opacity">
+              <button className="w-full py-3 bg-nftopia-primary text-nftopia-text border-none rounded-lg font-semibold hover:bg-nftopia-hover transition-colors">
                 {t("creator.mint")}
               </button>
             </Link>
@@ -142,7 +142,7 @@ export default function CreatorDashboardLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 lg:p-8 w-full lg:ml-0 bg-gray-900">
+      <main className="flex-1 p-4 lg:p-8 w-full lg:ml-0 bg-nftopia-background">
         {children}
       </main>
     </div>
