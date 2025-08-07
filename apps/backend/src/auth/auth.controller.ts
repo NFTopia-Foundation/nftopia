@@ -61,12 +61,11 @@ async verifySignature(
   @Body('walletType') walletType: 'argentx' | 'braavos',
   @Res({ passthrough: true }) res: Response,
 ) {
-
-
   console.log(walletAddress);
   console.log(signature);
   console.log(nonce);
   console.log(walletType);
+  
   // Validate request format
   if (!walletAddress || typeof walletAddress !== 'string') {
     throw new BadRequestException('walletAddress must be a non-empty string');
@@ -88,36 +87,78 @@ async verifySignature(
     throw new BadRequestException('walletType must be "argentx" or "braavos"');
   }
 
-  const { accessToken, refreshToken, user } =
-    await this.authService.verifySignature(
-      walletAddress,
-      signature,
-      nonce,
-      walletType,
-    );
+  // Validate signature values are valid hex strings
+  try {
+    signature.forEach((sig, index) => {
+      if (!sig.startsWith('0x') && !/^[0-9a-fA-F]+$/.test(sig)) {
+        throw new BadRequestException(`signature[${index}] must be a valid hex string`);
+      }
+      // Validate signature component is not zero or negative
+      const sigBigInt = BigInt(sig);
+      if (sigBigInt <= 0n) {
+        throw new BadRequestException(`signature[${index}] must be a positive value`);
+      }
+    });
+  } catch (error) {
+    if (error instanceof BadRequestException) {
+      throw error;
+    }
+    throw new BadRequestException('Invalid signature format');
+  }
 
-  const cookieOptions: CookieOptions = {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-  };
+  try {
+    const { accessToken, refreshToken, user } =
+      await this.authService.verifySignature(
+        walletAddress,
+        signature,
+        nonce,
+        walletType,
+      );
 
-  res.cookie('access_token', accessToken, {
-    ...cookieOptions,
-    maxAge: 15 * 60 * 1000, // 15 minutes
-  });
+    const cookieOptions: CookieOptions = {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    };
 
-  res.cookie('refresh_token', refreshToken, {
-    ...cookieOptions,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  });
+    res.cookie('access_token', accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
 
-  res.cookie('auth-user', user, {
-    ...cookieOptions,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  });
+    res.cookie('refresh_token', refreshToken, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
-  return { message: 'Authenticated', user: user };
+    res.cookie('auth-user', user, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return { message: 'Authenticated', user: user };
+  } catch (error) {
+    // Handle specific Starknet signature verification errors
+    if (error instanceof UnauthorizedException) {
+      const message = error.message;
+      
+      if (message.includes('Message hash out of valid range')) {
+        throw new BadRequestException('Message hash exceeds valid Starknet field range');
+      }
+      if (message.includes('Invalid message hash format')) {
+        throw new BadRequestException('Invalid message hash format');
+      }
+      if (message.includes('Invalid signature format')) {
+        throw new BadRequestException('Invalid signature format');
+      }
+      
+      // Re-throw other UnauthorizedException as-is (nonce issues, invalid signatures, etc.)
+      throw error;
+    }
+    
+    // Re-throw any other errors
+    throw error;
+  }
 }
   
 
