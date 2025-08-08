@@ -3,14 +3,12 @@
 
 /// Event emitted when an NFT transaction is recorded
 
-
 #[derive(Drop, starknet::Event)]
 pub struct TransactionRecorded {
     pub buyer: starknet::ContractAddress,
     pub token_id: u256,
     pub amount: u256,
 }
-
 
 
 /// Interface for the Transaction Module
@@ -28,15 +26,15 @@ pub trait ITransactionModule<TContractState> {
 #[starknet::contract]
 pub mod TransactionModule {
     use starknet::storage::StoragePointerReadAccess;
-use starknet::storage::{ StorageMapWriteAccess, StorageMapReadAccess, Map };
+    use starknet::storage::{StorageMapWriteAccess, StorageMapReadAccess, Map};
     use starknet::{ContractAddress, get_caller_address};
     use core::num::traits::Zero;
     use core::traits::Into;
     use core::traits::TryInto;
-    use crate::modules::marketplace::settlement::{ IMarketplaceSettlementDispatcher, IMarketplaceSettlementDispatcherTrait };
+    use crate::contracts::marketplace_settlement_contract::{
+        IMarketplaceSettlementDispatcher, IMarketplaceSettlementDispatcherTrait,
+    };
 
-
-  
 
     #[event]
     #[derive(Drop, starknet::Event)]
@@ -63,15 +61,15 @@ use starknet::storage::{ StorageMapWriteAccess, StorageMapReadAccess, Map };
 
     #[external(v0)]
     pub fn complete_sale(
-    ref self: ContractState,
-    token_id: u256,
-    price: u256,
-    seller: ContractAddress, 
-    nft_contract: ContractAddress
+        ref self: ContractState,
+        token_id: u256,
+        price: u256,
+        seller: ContractAddress,
+        nft_contract: ContractAddress,
     ) {
-    let settlement = IMarketplaceSettlementDispatcher { 
-                    contract_address: self.marketplace_address.read()
-            };
+        let settlement = IMarketplaceSettlementDispatcher {
+            contract_address: self.marketplace_address.read(),
+        };
         settlement.distribute_payment(token_id, price, seller, nft_contract);
     }
 
@@ -111,7 +109,7 @@ use starknet::storage::{ StorageMapWriteAccess, StorageMapReadAccess, Map };
             self.user_purchases.write(purchase_key, 1);
 
             // Emit event
-            self.emit(TransactionRecorded{ buyer: caller, token_id, amount });
+            self.emit(TransactionRecorded { buyer: caller, token_id, amount });
         }
 
         fn has_user_purchased(self: @ContractState, user: ContractAddress, token_id: u256) -> bool {

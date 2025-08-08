@@ -2,11 +2,11 @@ import subprocess
 from getpass import getpass
 
 # === CONFIGURATION ===
-account_path = "~/.starkli-accounts/my-oz-account.json"
-keystore_path = "~/.starkli-wallets/my-keystore.json"
+account_path = "~/.starkli-accounts/nftopia_account2.json"
+keystore_path = "~/.starkli-wallets/nftopia_wallet2.json"
 network = "sepolia"
 fee_token = "strk"
-contract_class_path = "/home/seyi/Documents/nftopia/nftopia/on-chain/abi/nftopia_CollectionFactory.contract_class.json"
+contract_class_path = "/home/seyi/Documents/nftopia/nftopia/on-chain/abi/nftopia_EscrowContract.contract_class.json"
 
 # === Get password securely ===
 keystore_password = getpass("Enter keystore password: ")

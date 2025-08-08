@@ -21,23 +21,27 @@ pub trait IAccessControl<TContractState> {
     fn update_admin_role_approval_threshold(ref self: TContractState, threshold: u64);
     fn approve_admin_role_proposal(ref self: TContractState, proposal_id: u64);
     fn execute_admin_role_proposal(ref self: TContractState, proposal_id: u64);
-    fn grant_roles(ref self: TContractState, roles: Array<felt252>, account: ContractAddress, expiry: u64);
+    fn grant_roles(
+        ref self: TContractState, roles: Array<felt252>, account: ContractAddress, expiry: u64,
+    );
     fn revoke_role(ref self: TContractState, role: felt252, account: ContractAddress);
     fn revoke_roles(ref self: TContractState, roles: Array<felt252>, account: ContractAddress);
     fn renounce_role(ref self: TContractState, role: felt252);
 }
 
-#[starknet::component]  
+#[starknet::component]
 pub mod AccessControl {
     use super::*;
-    use starknet::storage::{Map, StoragePathEntry, StoragePointerWriteAccess, StoragePointerReadAccess};
+    use starknet::storage::{
+        Map, StoragePathEntry, StoragePointerWriteAccess, StoragePointerReadAccess,
+    };
     use starknet::{ContractAddress, get_caller_address, get_block_timestamp};
-    
+
     #[storage]
     pub struct Storage {
         pub role_member: Map<(felt252, ContractAddress), bool>,
         pub role_admin: Map<felt252, felt252>,
-        pub role_admin_count: u64, 
+        pub role_admin_count: u64,
         pub role_member_count: Map<felt252, u64>,
         pub role_expiry: Map<felt252, u64>,
         // number of approvals required to receive admin role
@@ -50,7 +54,7 @@ pub mod AccessControl {
         pub has_approved_admin_role_proposal: Map<(u64, ContractAddress), bool>,
         // proposal_id -> timestamp of last admin approval
         pub last_admin_approval_timestamp: Map<u64, u64>,
-        pub proposals_count: u64
+        pub proposals_count: u64,
     }
 
     #[event]
@@ -115,29 +119,41 @@ pub mod AccessControl {
         pub action: u8, // 1 = grant, 2 = revoke
         pub proposer: ContractAddress,
         pub executed: bool,
-        pub last_approval_timestamp: u64
+        pub last_approval_timestamp: u64,
     }
-    
+
 
     #[embeddable_as(AccessControlComponent)]
-    impl AccessControlImpl<TContractState, +HasComponent<TContractState>> of IAccessControl<ComponentState<TContractState>> {
-        fn has_role(ref self: ComponentState<TContractState>, role: felt252, account: ContractAddress) -> bool {
+    impl AccessControlImpl<
+        TContractState, +HasComponent<TContractState>,
+    > of IAccessControl<ComponentState<TContractState>> {
+        fn has_role(
+            ref self: ComponentState<TContractState>, role: felt252, account: ContractAddress,
+        ) -> bool {
             self.role_member.entry((role, account)).read()
         }
 
-        fn has_admin_role(ref self: ComponentState<TContractState>, account: ContractAddress) -> bool {
+        fn has_admin_role(
+            ref self: ComponentState<TContractState>, account: ContractAddress,
+        ) -> bool {
             self.role_member.entry((DEFAULT_ADMIN_ROLE, account)).read()
         }
 
-        fn has_moderator_role(ref self: ComponentState<TContractState>, account: ContractAddress) -> bool {
+        fn has_moderator_role(
+            ref self: ComponentState<TContractState>, account: ContractAddress,
+        ) -> bool {
             self.role_member.entry((MODERATOR_ROLE, account)).read()
         }
 
-        fn has_treasury_role(ref self: ComponentState<TContractState>, account: ContractAddress) -> bool {
+        fn has_treasury_role(
+            ref self: ComponentState<TContractState>, account: ContractAddress,
+        ) -> bool {
             self.role_member.entry((TREASURY_ROLE, account)).read()
         }
 
-        fn has_upgrade_role(ref self: ComponentState<TContractState>, account: ContractAddress) -> bool {
+        fn has_upgrade_role(
+            ref self: ComponentState<TContractState>, account: ContractAddress,
+        ) -> bool {
             self.role_member.entry((UPGRADE_ROLE, account)).read()
         }
 
@@ -145,7 +161,9 @@ pub mod AccessControl {
             self.role_member_count.entry(role).read()
         }
 
-        fn get_roles(ref self: ComponentState<TContractState>, account: ContractAddress) -> Array<felt252> {
+        fn get_roles(
+            ref self: ComponentState<TContractState>, account: ContractAddress,
+        ) -> Array<felt252> {
             let mut roles: Array<felt252> = ArrayTrait::new();
 
             if self.has_admin_role(account) {
@@ -174,11 +192,16 @@ pub mod AccessControl {
         ///
         /// This function will grant a role to an account.
 
-        fn grant_role(ref self: ComponentState<TContractState>, role: felt252, account: ContractAddress, expiry: u64) {
+        fn grant_role(
+            ref self: ComponentState<TContractState>,
+            role: felt252,
+            account: ContractAddress,
+            expiry: u64,
+        ) {
             self.assert_only_admin();
             if role == DEFAULT_ADMIN_ROLE {
                 self._create_admin_proposal(GRANT_ROLE_ACTION, account);
-            }else{
+            } else {
                 self._grant_role(role, account, expiry);
             }
         }
@@ -188,7 +211,10 @@ pub mod AccessControl {
             let proposal = self.role_admin_proposals.entry(proposal_id).read();
             assert(!proposal.executed, 'proposal already executed');
             let caller = get_caller_address();
-            let has_approved = self.has_approved_admin_role_proposal.entry((proposal_id, caller)).read();
+            let has_approved = self
+                .has_approved_admin_role_proposal
+                .entry((proposal_id, caller))
+                .read();
             assert!(!has_approved, "caller already approved proposal");
             self.has_approved_admin_role_proposal.entry((proposal_id, caller)).write(true);
             self.last_admin_approval_timestamp.entry(proposal_id).write(get_block_timestamp());
@@ -198,25 +224,32 @@ pub mod AccessControl {
         /// Execute the admin role proposal
         /// @param account The account to execute the admin role for
         ///
-        /// This function will grant the admin role to the account if the proposal is approved 
+        /// This function will grant the admin role to the account if the proposal is approved
         /// and the timelock has passed.
         ///
         /// This function will reset the proposal count and last approval timestamp.
         ///
-        /// This function will revert if the proposal is not approved or the timelock has not passed.
+        /// This function will revert if the proposal is not approved or the timelock has not
+        /// passed.
         fn execute_admin_role_proposal(ref self: ComponentState<TContractState>, proposal_id: u64) {
             self.assert_only_admin();
             let mut proposal = self.role_admin_proposals.entry(proposal_id).read();
             assert(!proposal.executed, 'proposal already executed');
             let proposal_count = self.role_admin_approval_count.entry(proposal_id).read();
             let approval_threshold = self.role_admin_approval_threshold.read();
-            let last_approval_timestamp = self.last_admin_approval_timestamp.entry(proposal_id).read();
+            let last_approval_timestamp = self
+                .last_admin_approval_timestamp
+                .entry(proposal_id)
+                .read();
             let current_timestamp = get_block_timestamp();
             assert!(proposal_count >= approval_threshold, "admin role proposal is not approved");
-            assert!(((last_approval_timestamp + ADMIN_ROLE_TIMELOCK) < current_timestamp), "admin role proposal has not passed timelock");
+            assert!(
+                ((last_approval_timestamp + ADMIN_ROLE_TIMELOCK) < current_timestamp),
+                "admin role proposal has not passed timelock",
+            );
             if proposal.action == GRANT_ROLE_ACTION {
                 self._grant_role(DEFAULT_ADMIN_ROLE, proposal.account, 0);
-            }else{
+            } else {
                 self._revoke_role(DEFAULT_ADMIN_ROLE, proposal.account);
             }
             proposal.executed = true;
@@ -230,31 +263,44 @@ pub mod AccessControl {
         /// This function will update the admin role approval threshold.
         ///
         /// This function will revert if the caller is not the admin.
-        fn update_admin_role_approval_threshold(ref self: ComponentState<TContractState>, threshold: u64) {
+        fn update_admin_role_approval_threshold(
+            ref self: ComponentState<TContractState>, threshold: u64,
+        ) {
             self.assert_only_admin();
             assert!(threshold > 0, "threshold must be greater than 0");
             let role_admin_count = self.role_admin_count.read();
             assert(threshold <= role_admin_count, 'threshold is too high');
-            self.role_admin_approval_threshold.write(threshold);    
-            self.emit(AdminRoleApprovalThresholdUpdated { threshold , admin: get_caller_address() });
+            self.role_admin_approval_threshold.write(threshold);
+            self.emit(AdminRoleApprovalThresholdUpdated { threshold, admin: get_caller_address() });
         }
 
-        fn grant_roles(ref self: ComponentState<TContractState>, roles: Array<felt252>, account: ContractAddress, expiry: u64) {
+        fn grant_roles(
+            ref self: ComponentState<TContractState>,
+            roles: Array<felt252>,
+            account: ContractAddress,
+            expiry: u64,
+        ) {
             for index in 0..roles.len() {
                 self.grant_role(*roles[index], account, expiry);
             }
         }
 
-        fn revoke_role(ref self: ComponentState<TContractState>, role: felt252, account: ContractAddress) {
+        fn revoke_role(
+            ref self: ComponentState<TContractState>, role: felt252, account: ContractAddress,
+        ) {
             self.assert_only_admin();
             if role == DEFAULT_ADMIN_ROLE {
                 self._create_admin_proposal(REVOKE_ROLE_ACTION, account);
-            }else{
+            } else {
                 self._revoke_role(role, account);
             }
         }
 
-        fn revoke_roles(ref self: ComponentState<TContractState>, roles: Array<felt252>, account: ContractAddress) {
+        fn revoke_roles(
+            ref self: ComponentState<TContractState>,
+            roles: Array<felt252>,
+            account: ContractAddress,
+        ) {
             for index in 0..roles.len() {
                 self.revoke_role(*roles[index], account);
             }
@@ -267,11 +313,15 @@ pub mod AccessControl {
     }
 
     #[generate_trait]
-    pub impl InternalImpl<TContractState, +HasComponent<TContractState>> of InternalTrait<TContractState> {
+    pub impl InternalImpl<
+        TContractState, +HasComponent<TContractState>,
+    > of InternalTrait<TContractState> {
         fn initializer(ref self: ComponentState<Storage>, approval_threshold: u64) {
             self.role_admin_approval_threshold.write(approval_threshold);
         }
-        fn _create_admin_proposal(ref self: ComponentState<TContractState>, action: u8, account: ContractAddress) {
+        fn _create_admin_proposal(
+            ref self: ComponentState<TContractState>, action: u8, account: ContractAddress,
+        ) {
             self.assert_only_admin();
             let caller = get_caller_address();
             let proposal_id = self.proposals_count.read();
@@ -288,7 +338,12 @@ pub mod AccessControl {
             self.has_approved_admin_role_proposal.entry((new_proposal_id, caller)).write(true);
             self.emit(AdminRoleProposalCreated { proposal_id: new_proposal_id, caller });
         }
-        fn _grant_role(ref self: ComponentState<TContractState>, role: felt252, account: ContractAddress, expiry: u64) {
+        fn _grant_role(
+            ref self: ComponentState<TContractState>,
+            role: felt252,
+            account: ContractAddress,
+            expiry: u64,
+        ) {
             if !self.has_role(role, account) {
                 self.role_member.entry((role, account)).write(true);
                 self.role_member_count.entry(role).write(self.get_roles_members_count(role) + 1);
@@ -302,7 +357,9 @@ pub mod AccessControl {
             }
         }
 
-        fn _revoke_role(ref self: ComponentState<TContractState>, role: felt252, account: ContractAddress) {
+        fn _revoke_role(
+            ref self: ComponentState<TContractState>, role: felt252, account: ContractAddress,
+        ) {
             if self.has_role(role, account) {
                 self.role_member.entry((role, account)).write(false);
                 self.role_member_count.entry(role).write(self.get_roles_members_count(role) - 1);

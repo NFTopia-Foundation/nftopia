@@ -1,7 +1,7 @@
 use core::array::ArrayTrait;
 use core::byte_array::ByteArray;
 use core::result::ResultTrait;
-use nftopia::modules::nft_contract::{INftContractDispatcher, INftContractDispatcherTrait};
+use nftopia::contracts::nft_contract::{INftContractDispatcher, INftContractDispatcherTrait};
 use snforge_std::{
     ContractClassTrait, DeclareResultTrait, declare, start_cheat_caller_address,
     stop_cheat_caller_address,

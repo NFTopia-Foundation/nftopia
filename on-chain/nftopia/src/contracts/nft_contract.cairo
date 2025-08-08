@@ -42,6 +42,9 @@ pub trait INftContract<TContractState> {
 }
 
 
+
+
+
 #[starknet::interface]
 trait INFTEstimator<TContractState> {
     fn estimate_transfer_gas(self: @TContractState, token_id: felt252) -> u128;
@@ -58,23 +61,29 @@ pub mod NftContract {
     use core::traits::Into;
     use starknet::event::EventEmitter;
     use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess, Map};
-    use crate::modules::reentrancy_guard::{ ReentrancyGuardComponent, IReentrancyGuardDispatcher, IReentrancyGuardDispatcherTrait };
-    use crate::modules::access_control::AccessControl;
+    use crate::components::reentrancy_guard_component::{
+        ReentrancyGuardComponent, IReentrancyGuardDispatcher, IReentrancyGuardDispatcherTrait,
+    };
+    use crate::components::access_control_component::AccessControl;
 
 
-    component!(path: ReentrancyGuardComponent, storage: reentrancy_storage, event: ReentrancyGuardEvent);
+    component!(
+        path: ReentrancyGuardComponent, storage: reentrancy_storage, event: ReentrancyGuardEvent,
+    );
     component!(path: AccessControl, storage: access_control, event: AccessControlEvent);
     #[abi(embed_v0)]
     impl AccessControlImpl = AccessControl::AccessControlComponent<ContractState>;
     impl AccessControlInternalImpl = AccessControl::InternalImpl<ContractState>;
 
     #[abi(embed_v0)]
-    impl ReentrancyGuardComponentImpl = ReentrancyGuardComponent::ReentrancyGuard<ContractState>;
-    impl ReentrancyGuardComponentInternalImpl = ReentrancyGuardComponent::InternalImpl<ContractState>;
+    impl ReentrancyGuardComponentImpl =
+        ReentrancyGuardComponent::ReentrancyGuard<ContractState>;
+    impl ReentrancyGuardComponentInternalImpl =
+        ReentrancyGuardComponent::InternalImpl<ContractState>;
 
 
     const ROYALTY_STANDARD_INTERFACE_ID: felt252 = 0x2a55205a; // Example (replace with real value)
-    
+
 
     #[external(v0)]
     fn supports_interface(self: @ContractState, interface_id: felt252) -> bool {
@@ -85,9 +94,7 @@ pub mod NftContract {
         return false;
     }
 
-    // Import event types
-    use crate::events::nft_events::{Mint, Transfer, Approval, ApprovalForAll};
-
+   
     // Maximum batch size to prevent DOS attacks
     const MAX_BATCH_SIZE: u32 = 100;
 
@@ -101,8 +108,45 @@ pub mod NftContract {
         #[flat]
         AccessControlEvent: AccessControl::Event,
         #[flat]
-        ReentrancyGuardEvent: ReentrancyGuardComponent::Event
+        ReentrancyGuardEvent: ReentrancyGuardComponent::Event,
     }
+
+
+
+        /// Event emitted when a new token is minted
+    #[derive(Drop, starknet::Event)]
+    pub struct Mint {
+        pub token_id: u256,
+        pub to: ContractAddress,
+        pub creator: ContractAddress,
+        pub uri: ByteArray,
+        pub collection: ContractAddress,
+    }
+
+    /// Event emitted when a token is transferred
+    #[derive(Drop, starknet::Event)]
+    pub struct Transfer {
+        pub from: ContractAddress,
+        pub to: ContractAddress,
+        pub token_id: u256,
+    }
+
+    /// Event emitted when approval is given to an address for a specific token
+    #[derive(Drop, starknet::Event)]
+    pub struct Approval {
+        pub owner: ContractAddress,
+        pub approved: ContractAddress,
+        pub token_id: u256,
+    }
+
+    /// Event emitted when an operator is approved or disapproved for all tokens of an owner
+    #[derive(Drop, starknet::Event)]
+    pub struct ApprovalForAll {
+        pub owner: ContractAddress,
+        pub operator: ContractAddress,
+        pub approved: bool,
+    }
+
 
     #[storage]
     struct Storage {
@@ -150,34 +194,32 @@ pub mod NftContract {
         fn _transfer(
             ref self: ContractState, from: ContractAddress, to: ContractAddress, token_id: u256,
         ) {
-
-            let reentrancy_guard_dispatcher = IReentrancyGuardDispatcher{ contract_address: to };
+            let reentrancy_guard_dispatcher = IReentrancyGuardDispatcher { contract_address: to };
 
             let to_address: Option<ContractAddress> = Option::Some(to);
 
             reentrancy_guard_dispatcher.assert_non_reentrant(to_address);
             reentrancy_guard_dispatcher.lock();
-                        
-                        
+
             // Validate addresses
             assert(!from.is_zero(), 'Transfer from zero address');
             assert(!to.is_zero(), 'Transfer to zero address');
-            
+
             // Get current owner and validate ownership
             let owner = self.owners.read(token_id);
             assert(!owner.is_zero(), 'Token does not exist');
             assert(owner == from, 'From is not the owner');
-            
+
             // Clear approvals for this token
             self.token_approvals.write(token_id, Zero::zero());
-            
+
             // Update balances
             self.balances.write(from, self.balances.read(from) - 1);
             self.balances.write(to, self.balances.read(to) + 1);
-            
+
             // Update ownership
             self.owners.write(token_id, to);
-            
+
             // Emit transfer event
             self.emit(Transfer { from, to, token_id });
 
@@ -302,13 +344,8 @@ pub mod NftContract {
                 self
                     .emit(
                         Mint {
-                                token_id,
-                                to: recipient,
-                                creator: caller,
-                                uri,
-                                collection: Zero::zero(),
-                            },
-                        
+                            token_id, to: recipient, creator: caller, uri, collection: Zero::zero(),
+                        },
                     );
 
                 i += 1;
@@ -351,15 +388,9 @@ pub mod NftContract {
                 // Emit individual mint event for compatibility
                 self
                     .emit(
-
-                            Mint {
-                                token_id,
-                                to: recipient,
-                                creator: caller,
-                                uri,
-                                collection: Zero::zero(),
-                            },
-                        
+                        Mint {
+                            token_id, to: recipient, creator: caller, uri, collection: Zero::zero(),
+                        },
                     );
 
                 i += 1;
