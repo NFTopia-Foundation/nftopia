@@ -1,12 +1,15 @@
 #[feature("deprecated-starknet-consts")]
-use starknet::{ContractAddress, contract_address_const};
+use starknet::ContractAddress;
+use starknet::contract_address::contract_address_const;
 use core::array::ArrayTrait;
 use core::result::ResultTrait;
 use snforge_std::{ContractClassTrait, DeclareResultTrait};
 
 use snforge_std::declare;
 
-use nftopia::transaction::{ITransactionModuleDispatcher, ITransactionModuleDispatcherTrait};
+use nftopia::contracts::transaction_contract::{
+    ITransactionModuleDispatcher, ITransactionModuleDispatcherTrait,
+};
 
 // Helper function to deploy the contract
 fn deploy_contract(name: ByteArray) -> ContractAddress {
@@ -69,12 +72,21 @@ fn test_multiple_transactions() {
     assert(dispatcher.is_token_sold(*token_ids.at(2)), 'Token 3 should be sold');
 
     // Verify all token prices are recorded correctly
-    assert(dispatcher.get_token_price(*token_ids.at(0)) == *amounts.at(0), 'Token 1 price
-    incorrect');
-    assert(dispatcher.get_token_price(*token_ids.at(1)) == *amounts.at(1), 'Token 2 price
-    incorrect');
-    assert(dispatcher.get_token_price(*token_ids.at(2)) == *amounts.at(2), 'Token 3 price
-    incorrect');
+    assert(
+        dispatcher.get_token_price(*token_ids.at(0)) == *amounts.at(0),
+        'Token 1 price
+    incorrect',
+    );
+    assert(
+        dispatcher.get_token_price(*token_ids.at(1)) == *amounts.at(1),
+        'Token 2 price
+    incorrect',
+    );
+    assert(
+        dispatcher.get_token_price(*token_ids.at(2)) == *amounts.at(2),
+        'Token 3 price
+    incorrect',
+    );
 
     // Verify user has purchased all tokens
     assert(dispatcher.has_user_purchased(user, *token_ids.at(0)), 'Shouldve purchased token
