@@ -1,39 +1,41 @@
-asgiref==3.8.1
-Django==5.2.3
-django-ratelimit==4.1.0
-django-redis==6.0.0
-djangorestframework==3.16.0
-djangorestframework_simplejwt==5.5.0
-PyJWT==2.9.0
-python-dotenv==1.1.1
-redis==6.2.0
-celery==5.3.6
-sqlparse==0.5.3
-tzdata==2025.2
+# Core Dependencies
+asgiref
+Django
+django-ratelimit
+django-redis
+djangorestframework
+djangorestframework_simplejwt
+PyJWT
+python-dotenv
+sqlparse
+tzdata
+
+# Celery & Task Management
+celery  # Using the latest version from your list
+django-celery-beat
+django-celery-results
+
+# Redis
+redis  # Using the latest version
 
 # Report Generation
-reportlab==4.0.4
-matplotlib==3.7.2
-seaborn==0.12.2
-Pillow==10.0.0
+matplotlib
+# Pillow==10.0.0
+reportlab
+seaborn
 
-# Celery and Task Management
-celery==5.3.4
-django-celery-beat==2.5.0
-django-celery-results==2.5.0
-redis==4.6.0
+# Data Analysis
+numpy
+pandas
+pandas-ta
+scipy
 
-# AWS S3 Integration
-boto3==1.28.25
-botocore==1.31.25
+# # AWS Integration
+# boto3==1.28.25
+# botocore
 
-# Additional utilities
-pandas==2.0.3
-numpy==1.24.3
-pandas-ta==0.3.14b0
-drf-spectacular>=0.27.1
+# API Documentation
+drf-spectacular
 
-# NFT Rarity Analysis
-scipy==1.11.4
-
-ipfshttpclient>=0.8.0
+# IPFS
+ipfshttpclient

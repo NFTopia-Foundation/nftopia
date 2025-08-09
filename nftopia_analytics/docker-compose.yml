@@ -1,66 +1,66 @@
-version: '3.8'
+# version: '3.8'
 
-services:
-  django:
-    ports:
-      - "8000:8000"
-      - "8002:8002" 
-  timescaledb:
-    image: timescale/timescaledb:latest-pg14
-    container_name: nftopia_timescaledb
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: nftopia_analytics
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      TIMESCALEDB_TELEMETRY: off
-    volumes:
-      - timescaledb_data:/var/lib/postgresql/data
-      - ./scripts/init_timescale.sql:/docker-entrypoint-initdb.d/init_timescale.sql
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+# services:
+#   django:
+#     ports:
+#       - "8000:8000"
+#       - "8002:8002" 
+#   timescaledb:
+#     image: timescale/timescaledb:latest-pg14
+#     container_name: nftopia_timescaledb
+#     ports:
+#       - "5432:5432"
+#     environment:
+#       POSTGRES_DB: nftopia_analytics
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: postgres
+#       TIMESCALEDB_TELEMETRY: off
+#     volumes:
+#       - timescaledb_data:/var/lib/postgresql/data
+#       - ./scripts/init_timescale.sql:/docker-entrypoint-initdb.d/init_timescale.sql
+#     restart: unless-stopped
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U postgres"]
+#       interval: 30s
+#       timeout: 10s
+#       retries: 3
 
-  redis:
-    image: redis:7-alpine
-    container_name: nftopia_redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-  celery:
-    build: .
-    command: celery -A nftopia_analytics worker --loglevel=info
-    depends_on:
-      - redis
-      - db
+#   redis:
+#     image: redis:7-alpine
+#     container_name: nftopia_redis
+#     ports:
+#       - "6379:6379"
+#     volumes:
+#       - redis_data:/data
+#     restart: unless-stopped
+#     healthcheck:
+#       test: ["CMD", "redis-cli", "ping"]
+#       interval: 30s
+#       timeout: 10s
+#       retries: 3
+#   celery:
+#     build: .
+#     command: celery -A nftopia_analytics worker --loglevel=info
+#     depends_on:
+#       - redis
+#       - db
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: nftopia_pgadmin
-    ports:
-      - "8080:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@nftopia.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - timescaledb
-    restart: unless-stopped
+#   pgadmin:
+#     image: dpage/pgadmin4:latest
+#     container_name: nftopia_pgadmin
+#     ports:
+#       - "8080:80"
+#     environment:
+#       PGADMIN_DEFAULT_EMAIL: admin@nftopia.com
+#       PGADMIN_DEFAULT_PASSWORD: admin
+#       PGADMIN_CONFIG_SERVER_MODE: 'False'
+#     volumes:
+#       - pgadmin_data:/var/lib/pgadmin
+#     depends_on:
+#       - timescaledb
+#     restart: unless-stopped
 
-volumes:
-  timescaledb_data:
-  redis_data:
-  pgadmin_data: 
+# volumes:
+#   timescaledb_data:
+#   redis_data:
+#   pgadmin_data: 
