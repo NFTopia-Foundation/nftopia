@@ -92,6 +92,13 @@ const config: Config = {
           subtext: "#A0A0C0",
           border: "#3A7BFA",
           hover: "#2A5C8A",
+          // Light mode variants
+          "background-light": "#F8FAFC",
+          "card-light": "#FFFFFF",
+          "text-light": "#1E293B",
+          "subtext-light": "#64748B",
+          "border-light": "#E2E8F0",
+          "hover-light": "#F1F5F9",
         },
       },
       keyframes: {
