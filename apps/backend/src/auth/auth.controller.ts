@@ -47,120 +47,128 @@ export class AuthController {
   requestNonce(@Body('walletAddress') walletAddress: string) {
     const nonce = this.authService.generateNonce(walletAddress);
     console.log(`walletAddres: ${walletAddress}`);
-    console.log(`nonce: ${nonce}`)
+    console.log(`nonce: ${nonce}`);
     return { nonce };
   }
 
-
-@Post('verify-signature')
-@HttpCode(200)
-async verifySignature(
-  @Body('walletAddress') walletAddress: string,
-  @Body('signature') signature: [string, string],
-  @Body('nonce') nonce: string,
-  @Body('walletType') walletType: 'argentx' | 'braavos',
-  @Res({ passthrough: true }) res: Response,
-) {
-  console.log(walletAddress);
-  console.log(signature);
-  console.log(nonce);
-  console.log(walletType);
-  
-  // Validate request format
-  if (!walletAddress || typeof walletAddress !== 'string') {
-    throw new BadRequestException('walletAddress must be a non-empty string');
-  }
-
-  if (
-    !Array.isArray(signature) ||
-    signature.length !== 2 ||
-    !signature.every((val) => typeof val === 'string')
+  @Post('verify-signature')
+  @HttpCode(200)
+  async verifySignature(
+    @Body('walletAddress') walletAddress: string,
+    @Body('signature') signature: [string, string],
+    @Body('nonce') nonce: string,
+    @Body('walletType') walletType: 'argentx' | 'braavos',
+    @Res({ passthrough: true }) res: Response,
   ) {
-    throw new BadRequestException('signature must be a [string, string] array');
-  }
+    console.log(walletAddress);
+    console.log(signature);
+    console.log(nonce);
+    console.log(walletType);
 
-  if (!nonce || typeof nonce !== 'string') {
-    throw new BadRequestException('nonce must be a string');
-  }
-
-  if (!['argentx', 'braavos'].includes(walletType)) {
-    throw new BadRequestException('walletType must be "argentx" or "braavos"');
-  }
-
-  // Validate signature values are valid hex strings
-  try {
-    signature.forEach((sig, index) => {
-      if (!sig.startsWith('0x') && !/^[0-9a-fA-F]+$/.test(sig)) {
-        throw new BadRequestException(`signature[${index}] must be a valid hex string`);
-      }
-      // Validate signature component is not zero or negative
-      const sigBigInt = BigInt(sig);
-      if (sigBigInt <= 0n) {
-        throw new BadRequestException(`signature[${index}] must be a positive value`);
-      }
-    });
-  } catch (error) {
-    if (error instanceof BadRequestException) {
-      throw error;
+    // Validate request format
+    if (!walletAddress || typeof walletAddress !== 'string') {
+      throw new BadRequestException('walletAddress must be a non-empty string');
     }
-    throw new BadRequestException('Invalid signature format');
-  }
 
-  try {
-    const { accessToken, refreshToken, user } =
-      await this.authService.verifySignature(
-        walletAddress,
-        signature,
-        nonce,
-        walletType,
+    if (
+      !Array.isArray(signature) ||
+      signature.length !== 2 ||
+      !signature.every((val) => typeof val === 'string')
+    ) {
+      throw new BadRequestException(
+        'signature must be a [string, string] array',
       );
+    }
 
-    const cookieOptions: CookieOptions = {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    };
+    if (!nonce || typeof nonce !== 'string') {
+      throw new BadRequestException('nonce must be a string');
+    }
 
-    res.cookie('access_token', accessToken, {
-      ...cookieOptions,
-      maxAge: 15 * 60 * 1000, // 15 minutes
-    });
+    if (!['argentx', 'braavos'].includes(walletType)) {
+      throw new BadRequestException(
+        'walletType must be "argentx" or "braavos"',
+      );
+    }
 
-    res.cookie('refresh_token', refreshToken, {
-      ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
-    res.cookie('auth-user', user, {
-      ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
-    return { message: 'Authenticated', user: user };
-  } catch (error) {
-    // Handle specific Starknet signature verification errors
-    if (error instanceof UnauthorizedException) {
-      const message = error.message;
-      
-      if (message.includes('Message hash out of valid range')) {
-        throw new BadRequestException('Message hash exceeds valid Starknet field range');
+    // Validate signature values are valid hex strings
+    try {
+      signature.forEach((sig, index) => {
+        if (!sig.startsWith('0x') && !/^[0-9a-fA-F]+$/.test(sig)) {
+          throw new BadRequestException(
+            `signature[${index}] must be a valid hex string`,
+          );
+        }
+        // Validate signature component is not zero or negative
+        const sigBigInt = BigInt(sig);
+        if (sigBigInt <= 0n) {
+          throw new BadRequestException(
+            `signature[${index}] must be a positive value`,
+          );
+        }
+      });
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
       }
-      if (message.includes('Invalid message hash format')) {
-        throw new BadRequestException('Invalid message hash format');
+      throw new BadRequestException('Invalid signature format');
+    }
+
+    try {
+      const { accessToken, refreshToken, user } =
+        await this.authService.verifySignature(
+          walletAddress,
+          signature,
+          nonce,
+          walletType,
+        );
+
+      const cookieOptions: CookieOptions = {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      };
+
+      res.cookie('access_token', accessToken, {
+        ...cookieOptions,
+        maxAge: 15 * 60 * 1000, // 15 minutes
+      });
+
+      res.cookie('refresh_token', refreshToken, {
+        ...cookieOptions,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      res.cookie('auth-user', user, {
+        ...cookieOptions,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      return { message: 'Authenticated', user: user };
+    } catch (error) {
+      // Handle specific Starknet signature verification errors
+      if (error instanceof UnauthorizedException) {
+        const message = error.message;
+
+        if (message.includes('Message hash out of valid range')) {
+          throw new BadRequestException(
+            'Message hash exceeds valid Starknet field range',
+          );
+        }
+        if (message.includes('Invalid message hash format')) {
+          throw new BadRequestException('Invalid message hash format');
+        }
+        if (message.includes('Invalid signature format')) {
+          throw new BadRequestException('Invalid signature format');
+        }
+
+        // Re-throw other UnauthorizedException as-is (nonce issues, invalid signatures, etc.)
+        throw error;
       }
-      if (message.includes('Invalid signature format')) {
-        throw new BadRequestException('Invalid signature format');
-      }
-      
-      // Re-throw other UnauthorizedException as-is (nonce issues, invalid signatures, etc.)
+
+      // Re-throw any other errors
       throw error;
     }
-    
-    // Re-throw any other errors
-    throw error;
   }
-}
-  
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
@@ -168,7 +176,6 @@ async verifySignature(
     console.log(req['user']);
     return req['user'];
   }
-
 
   @Post('refresh')
   @HttpCode(200)
@@ -211,10 +218,7 @@ async verifySignature(
 
   @Post('logout')
   @HttpCode(204)
-  async logout(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response
-  ) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     try {
       // Clear all authentication cookies with secure options
       const cookieOptions = {
@@ -226,10 +230,10 @@ async verifySignature(
 
       // Clear access token
       res.clearCookie('access_token', cookieOptions);
-      
+
       // Clear refresh token
       res.clearCookie('refresh_token', cookieOptions);
-      
+
       // Clear auth user data
       res.clearCookie('auth-user', cookieOptions);
 

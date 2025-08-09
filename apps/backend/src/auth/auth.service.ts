@@ -8,15 +8,11 @@ import {
 } from '../utils/verify-starknet-signature';
 import { UsersService } from '../users/users.service';
 
-
-
-
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private readonly usersService: UsersService
-
+    private readonly usersService: UsersService,
   ) {}
 
   private nonces = new Map<string, string>();
@@ -47,7 +43,7 @@ export class AuthService {
     walletAddress: string,
     signature: [string, string],
     nonce: string,
-    walletType: 'argentx' | 'braavos'
+    walletType: 'argentx' | 'braavos',
   ) {
     const normalizedAddress = walletAddress.toLowerCase();
     const storedNonce = this.nonces.get(normalizedAddress);
@@ -86,7 +82,7 @@ export class AuthService {
       }
     } catch (error) {
       console.error('[verifySignature] Signature verification failed:', error);
-      
+
       // Handle specific error types for better user experience
       if (error instanceof Error) {
         if (error.message.includes('Invalid message hash')) {
@@ -99,7 +95,7 @@ export class AuthService {
           throw new UnauthorizedException('Invalid signature format');
         }
       }
-      
+
       // Generic signature verification failure
       throw new UnauthorizedException('Signature verification failed');
     }
@@ -111,7 +107,8 @@ export class AuthService {
     // Remove the nonce to prevent reuse
     this.nonces.delete(normalizedAddress);
 
-    const fetchedUser = await this.usersService.findOrCreateByWallet(walletAddress);
+    const fetchedUser =
+      await this.usersService.findOrCreateByWallet(walletAddress);
     console.log(fetchedUser);
     const tokens = await this.generateTokens(fetchedUser);
 
