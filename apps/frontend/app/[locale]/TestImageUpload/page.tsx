@@ -32,12 +32,12 @@ export default function Page() {
   };
 
   return (
-    <div className="w-full h-screen flex items-center justify-center bg-gray-50">
+    <div className="w-full h-screen flex items-center justify-center bg-nftopia-background">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm flex flex-col gap-3 items-center bg-white rounded-lg text-black p-4 shadow"
+        className="w-full max-w-sm flex flex-col gap-3 items-center bg-nftopia-card border border-nftopia-border rounded-lg text-nftopia-text p-4 shadow"
       >
-        <h1 className="text-lg font-semibold">Upload your image</h1>
+        <h1 className="text-lg font-semibold text-nftopia-text">Upload your image</h1>
         <input
           type="file"
           id="imageFile"
@@ -49,23 +49,24 @@ export default function Page() {
               setFileUrl("");
             }
           }}
+          className="w-full p-2 rounded border border-nftopia-border bg-nftopia-background text-nftopia-text file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-nftopia-primary file:text-nftopia-text hover:file:bg-nftopia-hover"
         />
 
         <button
           type="submit"
-          className="w-full p-2 rounded-sm text-white bg-blue-500 hover:bg-blue-600"
+          className="w-full p-2 rounded text-nftopia-text bg-nftopia-primary hover:bg-nftopia-hover transition-colors"
         >
           Upload Image
         </button>
 
         {uploadProgress > 0 && (
-          <p className="text-sm text-blue-600">Uploading: {uploadProgress}%</p>
+          <p className="text-sm text-nftopia-primary">Uploading: {uploadProgress}%</p>
         )}
 
         {fileUrl && (
           <div className="mt-3">
-            <p className="text-sm text-green-600">Upload complete!</p>
-            <img src={fileUrl} alt="Uploaded" className="w-32 h-auto rounded" />
+            <p className="text-sm text-green-400">Upload complete!</p>
+            <img src={fileUrl} alt="Uploaded" className="w-32 h-auto rounded border border-nftopia-border" />
           </div>
         )}
       </form>

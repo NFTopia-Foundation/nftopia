@@ -147,14 +147,14 @@ export default function CreateYourCollection() {
 
   if (success) {
     return (
-      <div className="min-h-[100vh] bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] flex items-center justify-center ">
-        <Card className="w-full max-w-md bg-gray-900/60 border-gray-700/40 backdrop-blur-sm">
+      <div className="min-h-[100vh] bg-nftopia-background flex items-center justify-center ">
+        <Card className="w-full max-w-md bg-nftopia-card border border-nftopia-border backdrop-blur-sm">
           <CardContent className="p-8 text-center">
             <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">
+            <h2 className="text-2xl font-bold text-nftopia-text mb-2">
               {t("createCollection.collectionCreated")}
             </h2>
-            <p className="text-gray-300 mb-4">
+            <p className="text-nftopia-subtext mb-4">
               {t("createCollection.collectionCreatedMessage")}
             </p>
           </CardContent>
@@ -164,13 +164,13 @@ export default function CreateYourCollection() {
   }
 
   return (
-    <div className="min-h-[100h] mt-10 bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] py-12 px-4">
+    <div className="min-h-[100vh] mt-10 bg-nftopia-background py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">
+          <h1 className="text-4xl font-bold text-nftopia-text mb-4">
             {t("createCollection.title")}
           </h1>
-          <p className="text-gray-300 text-lg">
+          <p className="text-nftopia-subtext text-lg">
             {t("createCollection.subtitle")}
           </p>
         </div>
@@ -184,9 +184,9 @@ export default function CreateYourCollection() {
           </Alert>
         )}
 
-        <div className="bg-gray-900/40 border-gray-700/30 backdrop-blur-sm w-full">
+        <div className="bg-nftopia-card border border-nftopia-border backdrop-blur-sm w-full rounded-lg">
           <CardHeader>
-            <CardTitle className="text-white text-2xl">
+            <CardTitle className="text-nftopia-text text-2xl">
               {t("createCollection.collectionDetails")}
             </CardTitle>
           </CardHeader>
@@ -194,7 +194,7 @@ export default function CreateYourCollection() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Collection Name */}
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-white font-medium">
+                <Label htmlFor="name" className="text-nftopia-text font-medium">
                   {t("createCollection.collectionName")} *
                 </Label>
                 <Input
@@ -204,8 +204,8 @@ export default function CreateYourCollection() {
                   value={form.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   className={cn(
-                    "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400",
-                    "focus:border-gray-500 focus:ring-gray-500/20",
+                    "bg-nftopia-background border-nftopia-border text-nftopia-text placeholder-nftopia-subtext",
+                    "focus:border-nftopia-primary focus:ring-nftopia-primary/20",
                     errors.name && "border-red-500/70 focus:border-red-400"
                   )}
                   maxLength={50}
@@ -213,14 +213,14 @@ export default function CreateYourCollection() {
                 {errors.name && (
                   <p className="text-red-300 text-sm">{errors.name}</p>
                 )}
-                <p className="text-gray-400 text-xs">
+                <p className="text-nftopia-subtext text-xs">
                   {form.name.length}/50 {t("createCollection.characters")}
                 </p>
               </div>
 
               {/* Description */}
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-white font-medium">
+                <Label htmlFor="description" className="text-nftopia-text font-medium">
                   {t("createCollection.description")} *
                 </Label>
                 <Textarea
@@ -231,8 +231,8 @@ export default function CreateYourCollection() {
                     handleInputChange("description", e.target.value)
                   }
                   className={cn(
-                    "bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400",
-                    "focus:border-gray-500 focus:ring-gray-500/20 min-h-[120px]",
+                    "bg-nftopia-background border-nftopia-border text-nftopia-text placeholder-nftopia-subtext",
+                    "focus:border-nftopia-primary focus:ring-nftopia-primary/20 min-h-[120px]",
                     errors.description &&
                       "border-red-500/70 focus:border-red-400"
                   )}
@@ -241,14 +241,14 @@ export default function CreateYourCollection() {
                 {errors.description && (
                   <p className="text-red-300 text-sm">{errors.description}</p>
                 )}
-                <p className="text-gray-400 text-xs">
+                <p className="text-nftopia-subtext text-xs">
                   {form.description.length}/500{" "}
                   {t("createCollection.characters")}
                 </p>
               </div>
 
               <div className="mb-6">
-                <label className="block text-sm text-white font-medium mb-2">
+                <label className="block text-sm text-nftopia-text font-medium mb-2">
                   {t("createCollection.uploadBannerImage")}
                 </label>
                 <FileDropZone
@@ -262,7 +262,7 @@ export default function CreateYourCollection() {
                 disabled={
                   !form.name && !form.description && selectedFiles.length === 0
                 }
-                className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold hover:from-purple-600 hover:to-blue-600 transition duration-200 disabled:opacity-50"
+                className="w-full py-3 px-4 rounded-lg bg-nftopia-primary text-nftopia-text font-bold hover:bg-nftopia-hover transition duration-200 disabled:opacity-50"
               >
                 {isLoading
                   ? t("createCollection.creating")
@@ -274,11 +274,11 @@ export default function CreateYourCollection() {
 
         {/* Help Text */}
         <div className="mt-8 text-center">
-          <p className="text-gray-400 text-sm">
+          <p className="text-nftopia-subtext text-sm">
             {t("createCollection.needHelp")}{" "}
             <a
               href="#"
-              className="text-purple-400 hover:text-purple-300 underline transition-colors"
+              className="text-nftopia-primary hover:text-nftopia-hover underline transition-colors"
             >
               {t("createCollection.collectionGuide")}
             </a>

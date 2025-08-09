@@ -83,6 +83,23 @@ const config: Config = {
           light: "rgba(26, 9, 66, 0.4)",
           border: "rgba(255, 100, 255, 0.2)",
         },
+        // NFTOPIA Harmonized Color Scheme
+        nftopia: {
+          background: "#1E1E2D",
+          card: "#25253D",
+          primary: "#3A7BFA",
+          text: "#FFFFFF",
+          subtext: "#A0A0C0",
+          border: "#3A7BFA",
+          hover: "#2A5C8A",
+          // Light mode variants
+          "background-light": "#F8FAFC",
+          "card-light": "#FFFFFF",
+          "text-light": "#1E293B",
+          "subtext-light": "#64748B",
+          "border-light": "#E2E8F0",
+          "hover-light": "#F1F5F9",
+        },
       },
       keyframes: {
         "accordion-down": {

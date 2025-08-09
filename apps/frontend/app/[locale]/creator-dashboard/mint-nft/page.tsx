@@ -118,12 +118,12 @@ export default function MintNFTPage() {
   }
 
   return (
-    <div className="min-h-[100svh]  mt-32 flex items-center justify-center px-4">
+    <div className="min-h-[100svh] mt-32 flex items-center justify-center px-4">
       <form
         onSubmit={handleSubmit}
-        className="bg-[#100026] p-8 rounded-2xl shadow-lg w-full max-w-md border border-purple-800"
+        className="bg-nftopia-card p-8 rounded-2xl shadow-lg w-full max-w-md border border-nftopia-border"
       >
-        <h1 className="text-3xl font-bold text-center text-white mb-6">
+        <h1 className="text-3xl font-bold text-center text-nftopia-text mb-6">
           {t("mintNFT.title")}
         </h1>
 
@@ -135,13 +135,13 @@ export default function MintNFTPage() {
 
         {collections.length > 0 && (
           <div className="mb-4">
-            <label className="block text-sm text-purple-300 mb-1">
+            <label className="block text-sm text-nftopia-subtext mb-1">
               {t("mintNFT.collection")}
             </label>
             <select
               value={selectedCollectionId}
               onChange={(e) => setSelectedCollectionId(e.target.value)}
-              className="w-full px-4 py-2 rounded bg-[#1e1e2f] text-white border border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-2 rounded bg-nftopia-background text-nftopia-text border border-nftopia-border focus:outline-none focus:ring-2 focus:ring-nftopia-primary"
               required
             >
               {collections.map((collection) => (
@@ -154,26 +154,26 @@ export default function MintNFTPage() {
         )}
 
         <div className="mb-4">
-          <label className="block text-sm text-purple-300 mb-1">
+          <label className="block text-sm text-nftopia-subtext mb-1">
             {t("mintNFT.title")}
           </label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2 rounded bg-[#1e1e2f] text-white border border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-4 py-2 rounded bg-nftopia-background text-nftopia-text border border-nftopia-border focus:outline-none focus:ring-2 focus:ring-nftopia-primary"
             required
           />
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm text-purple-300 mb-1">
+          <label className="block text-sm text-nftopia-subtext mb-1">
             {t("mintNFT.description")}
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-4 py-2 rounded bg-[#1e1e2f] text-white border border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-4 py-2 rounded bg-nftopia-background text-nftopia-text border border-nftopia-border focus:outline-none focus:ring-2 focus:ring-nftopia-primary"
             required
             rows={4}
           />
@@ -181,7 +181,7 @@ export default function MintNFTPage() {
 
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm text-purple-300 mb-1">
+            <label className="block text-sm text-nftopia-subtext mb-1">
               {t("mintNFT.price")}
             </label>
             <input
@@ -190,18 +190,18 @@ export default function MintNFTPage() {
               min="0"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              className="w-full px-4 py-2 rounded bg-[#1e1e2f] text-white border border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-2 rounded bg-nftopia-background text-nftopia-text border border-nftopia-border focus:outline-none focus:ring-2 focus:ring-nftopia-primary"
               required
             />
           </div>
           <div>
-            <label className="block text-sm text-purple-300 mb-1">
+            <label className="block text-sm text-nftopia-subtext mb-1">
               {t("mintNFT.currency")}
             </label>
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
-              className="w-full px-4 py-2 rounded bg-[#1e1e2f] text-white border border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-2 rounded bg-nftopia-background text-nftopia-text border border-nftopia-border focus:outline-none focus:ring-2 focus:ring-nftopia-primary"
             >
               <option value="STK">STK</option>
               <option value="ETH">ETH</option>
@@ -211,19 +211,19 @@ export default function MintNFTPage() {
         </div>
 
         <div className="mb-6">
-          <label className="block text-sm text-purple-300 mb-2">
+          <label className="block text-sm text-nftopia-subtext mb-2">
             {t("mintNFT.nftImage")}
           </label>
           <FileDropZone
             onFilesSelected={setFiles}
             accept={["image/*"]}
             maxSizeMB={10}
-            className="border border-purple-600 rounded-lg bg-[#1e1e2f] hover:border-purple-500 transition-colors"
+            className="border border-nftopia-border rounded-lg bg-nftopia-background hover:border-nftopia-primary transition-colors"
             dropZoneText={t("mintNFT.dragDropText")}
-            dropZoneTextClass="text-purple-300"
+            dropZoneTextClass="text-nftopia-subtext"
           />
           {files.length > 0 && (
-            <p className="mt-2 text-xs text-purple-400">
+            <p className="mt-2 text-xs text-nftopia-primary">
               {t("mintNFT.selected")}: {files[0].file.name} (
               {(files[0].file.size / 1024 / 1024).toFixed(2)} MB)
             </p>
@@ -238,7 +238,7 @@ export default function MintNFTPage() {
             files.length === 0 ||
             collections.length === 0
           }
-          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white py-2 px-4 rounded-lg hover:opacity-90 transition disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 bg-nftopia-primary text-nftopia-text py-2 px-4 rounded-lg hover:bg-nftopia-hover transition disabled:opacity-50"
         >
           <UploadCloud size={18} />
           {loading ? t("mintNFT.minting") : t("mintNFT.mintNFT")}
