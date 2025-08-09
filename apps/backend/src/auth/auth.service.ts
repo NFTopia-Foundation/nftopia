@@ -8,15 +8,11 @@ import {
 } from '../utils/verify-starknet-signature';
 import { UsersService } from '../users/users.service';
 
-
-
-
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private readonly usersService: UsersService
-
+    private readonly usersService: UsersService,
   ) {}
 
   private nonces = new Map<string, string>();
@@ -47,7 +43,7 @@ export class AuthService {
     walletAddress: string,
     signature: [string, string],
     nonce: string,
-    walletType: 'argentx' | 'braavos'
+    walletType: 'argentx' | 'braavos',
   ) {
     const normalizedAddress = walletAddress.toLowerCase();
     const storedNonce = this.nonces.get(normalizedAddress);
@@ -56,7 +52,7 @@ export class AuthService {
       throw new UnauthorizedException('Nonce mismatch or expired');
     }
 
-    let isValid = true;
+    let isValid = false;
 
     try {
       if (walletType === 'argentx') {
@@ -78,25 +74,41 @@ export class AuthService {
           message: { nonce },
         };
 
-        // isValid = verifyTypedDataSignature(walletAddress, typedData, signature);
+        isValid = verifyTypedDataSignature(walletAddress, typedData, signature);
       } else if (walletType === 'braavos') {
-        // isValid = verifyRawMessageSignature(walletAddress, signature, nonce);
+        isValid = verifyRawMessageSignature(walletAddress, signature, nonce);
       } else {
         throw new UnauthorizedException('Unsupported wallet type');
       }
     } catch (error) {
       console.error('[verifySignature] Signature verification failed:', error);
-      isValid = false;
+
+      // Handle specific error types for better user experience
+      if (error instanceof Error) {
+        if (error.message.includes('Invalid message hash')) {
+          throw new UnauthorizedException('Invalid message hash format');
+        }
+        if (error.message.includes('msgHash should be')) {
+          throw new UnauthorizedException('Message hash out of valid range');
+        }
+        if (error.message.includes('signature must be')) {
+          throw new UnauthorizedException('Invalid signature format');
+        }
+      }
+
+      // Generic signature verification failure
+      throw new UnauthorizedException('Signature verification failed');
     }
 
     if (!isValid) {
       throw new UnauthorizedException('Invalid signature');
     }
 
-    // Optionally remove the nonce to prevent reuse
+    // Remove the nonce to prevent reuse
     this.nonces.delete(normalizedAddress);
 
-    const fetchedUser = await this.usersService.findOrCreateByWallet(walletAddress);
+    const fetchedUser =
+      await this.usersService.findOrCreateByWallet(walletAddress);
     console.log(fetchedUser);
     const tokens = await this.generateTokens(fetchedUser);
 
