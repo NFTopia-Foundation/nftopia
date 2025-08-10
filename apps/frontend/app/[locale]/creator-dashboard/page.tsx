@@ -70,10 +70,10 @@ export default function CreatorDashboardPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">
-          {t("Creator Dashboard") || "Creator Dashboard"}
+          {t("creatorDashboard.title") || "Creator Dashboard"}
         </h1>
         <p className="text-muted-foreground">
-          {t("Manage your NFTs and track your earnings") || "Manage your NFTs and track your earnings"}
+          {t("creatorDashboard.subtitle") || "Manage your NFTs and track your earnings"}
         </p>
       </div>
 
@@ -152,7 +152,7 @@ export default function CreatorDashboardPage() {
             </div>
           </div>
           <p className="text-muted-foreground mb-4">
-            {t("Create single NFTs or batch mint your collection") || "Create single NFTs or batch mint your collection"}
+            {t("creatorDashboard.singleOrBatch")}
           </p>
           <Link
             href="/creator-dashboard/mint-nft"
@@ -165,20 +165,20 @@ export default function CreatorDashboardPage() {
         <div className="bg-card border border-border rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-card-foreground">
-              {t("Create NFT Collection") || "Create Collection"}
+              {t("creatorDashboard.createCollection")}
             </h3>
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <Users className="h-4 w-4 text-primary-foreground" />
             </div>
           </div>
           <p className="text-muted-foreground mb-4">
-            {t("Start a new NFT collection with unique traits and metadata") || "Start a new NFT collection with unique traits and metadata"}
+            {t("creatorDashboard.collectionDescription")}
           </p>
           <Link
             href="/creator-dashboard/create-your-collection"
             className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
           >
-            {t("Create NFT Collection") || "Create Collection"}
+            {t("creatorDashboard.createCollection")}
           </Link>
         </div>
       </div>

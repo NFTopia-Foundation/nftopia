@@ -21,7 +21,7 @@ export default function CreatorDashboard() {
   }, [isAuthenticated, fetchUserCollections]);
 
   return (
-    <div className="min-h-[100svh] bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970]">
+    <div className="min-h-[100svh] bg-nftopia-background">
       {/* Header */}
       <DashboardHeader />
 

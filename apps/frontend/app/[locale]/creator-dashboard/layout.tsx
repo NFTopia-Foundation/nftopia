@@ -60,11 +60,11 @@ export default function CreatorDashboardLayout({
 
       {/* Sidebar */}
       <aside
-        className={`fixed xl:static inset-y-0 left-0 z-40 w-64 bg-card border-r border-border text-card-foreground transform transition-transform duration-300 ease-in-out ${
+        className={`fixed xl:static inset-y-0 left-0 z-40 w-64 bg-card border-r border-border text-card-foreground transform transition-transform duration-300 ease-in-out h-screen ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full xl:translate-x-0"
         }`}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-screen overflow-hidden">
           {/* Logo Section */}
           <div className="p-6 border-b border-border flex items-center justify-between">
             <Link href={`/${locale}`} className="flex items-center">
@@ -74,7 +74,7 @@ export default function CreatorDashboardLayout({
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-6">
+          <nav className="flex-1 p-6 overflow-y-auto">
             <ul className="list-none p-0 space-y-4">
               <li>
                 <Link
