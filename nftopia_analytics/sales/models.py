@@ -244,17 +244,21 @@
 #         return f"TX {self.transaction_hash[:10]}... ({self.amount})"
 
 
-# payments/models.py
+import os
+import sys
 from django.db import models
 
-class Transaction(models.Model):
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+if PROJECT_ROOT not in sys.path:
+    sys.path.append(PROJECT_ROOT)
+
+
+from nftopia_analytics.core.models import SchemaModel
+class Transaction(SchemaModel):
     id = models.UUIDField(primary_key=True)
-    buyer_id = models.UUIDField()  # Reference to user_service.users
-    nft_id = models.UUIDField()    # Reference to user_service.nfts
     amount = models.DecimalField(max_digits=36, decimal_places=18)
-    status = models.CharField(max_length=10)
     timestamp = models.DateTimeField()
 
-    class Meta:
-        managed = False  # Table owned by payment service
-        db_table = 'payment_service"."transactions'  # Schema-qualified name
+    class Meta(SchemaModel.Meta):
+        db_table = 'nftopia_payment_service.transaction'  # Schema-qualified name

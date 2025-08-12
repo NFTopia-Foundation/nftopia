@@ -733,9 +733,45 @@ INSTALLED_APPS = [
     
     # Your Custom Apps (add yours here)
     'analytics.apps.AnalyticsConfig',
-    'nfts.apps.NftsConfig',
-    'transactions.apps.TransactionsConfig'
+    'minting.apps.MintingConfig',
+    'sales.apps.SalesConfig'
 ]
+
+
+# nftopia_analytics/
+# ├── analytics/
+# │   ├── __init__.py
+# │   ├── models.py
+# │   ├── queries.py
+# │   └── timeseries.py
+# ├── payments/
+# │   ├── __init__.py
+# │   ├── models.py
+# │   └── consumers.py
+# ├── nfts/
+# │   ├── __init__.py
+# │   ├── models.py
+# │   └── consumers.py
+# └── config/
+#     ├── __init__.py
+#     ├── db_router.py
+#     └── fdw_setup.py
+
+
+
+# JDBC URL example
+# spring.datasource.url=jdbc:postgresql://localhost:5432/nftopiadb?currentSchema=nftopia_payment_service
+
+
+
+# // data-source.ts
+# export default new DataSource({
+#   type: 'postgres',
+#   host: 'localhost',
+#   schema: 'nftopia_user_service', // ← Global schema
+#   entities: [NFT, User, Collection],
+#   // ... other config
+# });
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -783,14 +819,14 @@ print(f"db name is: {os.getenv('POSTGRES_DB')}")
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'nftopiadb'),
-        'USER': os.getenv('POSTGRES_USER', 'nftopia'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'nftopia123'),
-        'HOST': os.getenv('POSTGRES_HOST', '127.0.0.1'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
-        # 'OPTIONS': {
-        #     'init_command': "SET sql_mode=STRICT_TRANS_TABLES"
-        # }
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
+        'PORT': os.getenv('POSTGRES_PORT'),
+         'OPTIONS': {
+            'options': '-c search_path=nftopia_analytics,public'  # Default schema
+        }
     }
 }
 
@@ -806,6 +842,12 @@ DATABASES = {
 #         }
 #     }
 # }
+
+
+# settings.py
+TIMESCALE_AUTO_INIT = os.getenv('TIMESCALE_AUTO_INIT', 'False')
+
+DATABASE_ROUTERS = ['nftopia_analytics.config.db_router.SchemaRouter']
 
 
 

@@ -418,4 +418,203 @@
 
 #     def __str__(self):
 #         return f"{self.user} in {self.segment}"
-    
+
+
+
+
+#WIP
+
+# from django.db import models
+
+# class TimescaleModel(models.Model):
+#     """
+#     Abstract base model for TimescaleDB hypertables with composite primary keys
+#     """
+#     class Meta:
+#         abstract = True
+#         managed = False  # Tables are managed by TimescaleDB directly
+
+# class NftMint(TimescaleModel):
+#     id = models.UUIDField()
+#     nft_id = models.UUIDField(help_text="Original NFT ID from user_service")
+#     mint_time = models.DateTimeField(
+#         db_index=True,
+#         help_text="When the NFT was minted"
+#     )
+#     minter_address = models.CharField(max_length=42)
+#     token_id = models.CharField(max_length=100)
+#     collection_id = models.UUIDField()
+#     metadata = models.JSONField(null=True, blank=True)
+#     gas_used = models.DecimalField(max_digits=50, decimal_places=0, null=True)
+#     block_number = models.BigIntegerField()
+
+#     class Meta(TimescaleModel.Meta):
+#         db_table = 'nftopia_analytics"."nft_mints'
+#         constraints = [
+#             models.UniqueConstraint(
+#                 fields=['id', 'mint_time'],
+#                 name='nft_mint_composite_pk'
+#             )
+#         ]
+#         indexes = [
+#             models.Index(fields=['collection_id', 'mint_time']),
+#             models.Index(fields=['minter_address', 'mint_time']),
+#         ]
+#         verbose_name = "NFT Mint Event"
+
+# class NftSale(TimescaleModel):
+#     id = models.UUIDField()
+#     transaction_id = models.UUIDField()
+#     sale_time = models.DateTimeField(db_index=True)
+#     nft_id = models.UUIDField()
+#     seller_address = models.CharField(max_length=42)
+#     buyer_address = models.CharField(max_length=42)
+#     amount = models.DecimalField(max_digits=36, decimal_places=18)
+#     currency = models.CharField(max_length=10, default='ETH')
+#     marketplace_fee = models.DecimalField(max_digits=36, decimal_places=18, null=True)
+#     royalty_amount = models.DecimalField(max_digits=36, decimal_places=18, null=True)
+#     tx_hash = models.CharField(max_length=66)
+
+#     class Meta(TimescaleModel.Meta):
+#         db_table = 'nftopia_analytics"."nft_sales'
+#         constraints = [
+#             models.UniqueConstraint(
+#                 fields=['id', 'sale_time'],
+#                 name='nft_sale_composite_pk'
+#             ),
+#             models.UniqueConstraint(
+#                 fields=['tx_hash'],
+#                 name='unique_tx_hash'
+#             )
+#         ]
+#         indexes = [
+#             models.Index(fields=['nft_id', 'sale_time']),
+#             models.Index(fields=['seller_address']),
+#             models.Index(fields=['buyer_address']),
+#         ]
+#         verbose_name = "NFT Sale Event"
+
+# class NftTransfer(TimescaleModel):
+#     id = models.UUIDField()
+#     transfer_time = models.DateTimeField(db_index=True)
+#     nft_id = models.UUIDField()
+#     from_address = models.CharField(max_length=42)
+#     to_address = models.CharField(max_length=42)
+#     tx_hash = models.CharField(max_length=66)
+#     log_index = models.IntegerField()
+#     event_type = models.CharField(
+#         max_length=20,
+#         choices=[
+#             ('TRANSFER', 'Standard Transfer'),
+#             ('MINT', 'Initial Mint'),
+#             ('BURN', 'Token Burn')
+#         ]
+#     )
+
+#     class Meta(TimescaleModel.Meta):
+#         db_table = 'nftopia_analytics"."nft_transfers'
+#         constraints = [
+#             models.UniqueConstraint(
+#                 fields=['id', 'transfer_time'],
+#                 name='nft_transfer_composite_pk'
+#             ),
+#             models.UniqueConstraint(
+#                 fields=['tx_hash', 'log_index'],
+#                 name='unique_tx_log_combo'
+#             )
+#         ]
+#         indexes = [
+#             models.Index(fields=['nft_id', 'transfer_time']),
+#             models.Index(fields=['from_address']),
+#             models.Index(fields=['to_address']),
+#         ]
+#         verbose_name = "NFT Transfer Event"
+
+
+
+
+
+
+# from django.db import models
+
+# class TimescaleModel(models.Model):
+#     """
+#     Abstract base model for TimescaleDB hypertables
+#     """
+#     class Meta:
+#         abstract = True
+#         managed = False  # Tables are managed by TimescaleDB
+
+# class NftMint(TimescaleModel):
+#     id = models.UUIDField(primary_key=True)
+#     nft_id = models.UUIDField(help_text="Original NFT ID from user_service")
+#     mint_time = models.DateTimeField(
+#         db_index=True,
+#         help_text="When the NFT was minted (from nftopia_user_service.nft.created_at)"
+#     )
+#     minter_address = models.CharField(
+#         max_length=42,
+#         help_text="Wallet address of the minter"
+#     )
+#     token_id = models.CharField(max_length=100)
+#     collection_id = models.UUIDField()
+#     metadata = models.JSONField(null=True, blank=True)
+#     gas_used = models.DecimalField(max_digits=50, decimal_places=0, null=True)
+#     block_number = models.BigIntegerField()
+
+#     class Meta(TimescaleModel.Meta):
+#         db_table = 'nftopia_analytics"."nft_mints'
+#         indexes = [
+#             models.Index(fields=['collection_id', 'mint_time']),
+#             models.Index(fields=['minter_address', 'mint_time']),
+#         ]
+#         verbose_name = "NFT Mint Event"
+
+# class NftSale(TimescaleModel):
+#     id = models.UUIDField(primary_key=True)
+#     transaction_id = models.UUIDField(help_text="Original transaction ID from payment_service")
+#     sale_time = models.DateTimeField(db_index=True)
+#     nft_id = models.UUIDField()
+#     seller_address = models.CharField(max_length=42)
+#     buyer_address = models.CharField(max_length=42)
+#     amount = models.DecimalField(max_digits=36, decimal_places=18)
+#     currency = models.CharField(max_length=10, default='ETH')
+#     marketplace_fee = models.DecimalField(max_digits=36, decimal_places=18, null=True)
+#     royalty_amount = models.DecimalField(max_digits=36, decimal_places=18, null=True)
+#     tx_hash = models.CharField(max_length=66, unique=True)
+
+#     class Meta(TimescaleModel.Meta):
+#         db_table = 'nftopia_analytics"."nft_sales'
+#         indexes = [
+#             models.Index(fields=['nft_id', 'sale_time']),
+#             models.Index(fields=['seller_address', 'sale_time']),
+#             models.Index(fields=['buyer_address']),
+#         ]
+#         verbose_name = "NFT Sale Event"
+
+# class NftTransfer(TimescaleModel):
+#     id = models.UUIDField(primary_key=True)
+#     transfer_time = models.DateTimeField(db_index=True)
+#     nft_id = models.UUIDField()
+#     from_address = models.CharField(max_length=42)
+#     to_address = models.CharField(max_length=42)
+#     tx_hash = models.CharField(max_length=66)
+#     log_index = models.IntegerField()
+#     event_type = models.CharField(
+#         max_length=20,
+#         choices=[
+#             ('TRANSFER', 'Standard Transfer'),
+#             ('MINT', 'Initial Mint'),
+#             ('BURN', 'Token Burn')
+#         ]
+#     )
+
+#     class Meta(TimescaleModel.Meta):
+#         db_table = 'nftopia_analytics"."nft_transfers'
+#         indexes = [
+#             models.Index(fields=['nft_id', 'transfer_time']),
+#             models.Index(fields=['from_address', 'transfer_time']),
+#             models.Index(fields=['to_address']),
+#         ]
+#         unique_together = [('tx_hash', 'log_index')]
+#         verbose_name = "NFT Transfer Event"

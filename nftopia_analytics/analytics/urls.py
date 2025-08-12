@@ -84,8 +84,9 @@
 
 from django.urls import path, include
 
-from .views import home
+from .views import home, check_timescale_status
 
 urlpatterns = [
     path('', home, name="home"),
+    path('timescale/status/', check_timescale_status, name="timescale_status"),
 ]

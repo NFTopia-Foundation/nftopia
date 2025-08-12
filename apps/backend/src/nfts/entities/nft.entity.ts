@@ -3,7 +3,7 @@ import { User } from '../../users/entities/user.entity';
 import { Collection } from '../../collections/entities/collection.entity';
 import { Category } from '../../categories/entities/category.entity';
 
-@Entity()
+@Entity({ schema: 'nftopia_user_service' })
 export class NFT {
   @PrimaryGeneratedColumn('uuid')
   id: string;

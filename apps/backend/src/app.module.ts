@@ -32,6 +32,7 @@ import { EventsModule } from './events/events.module';
       username: process.env.POSTGRES_USER || 'nftopia',
       password: process.env.POSTGRES_PASSWORD || 'nftopia123',
       database: process.env.POSTGRES_DB || 'nftopiadb',
+      schema: 'nftopia_user_service',
       entities: [User, Collection, NFT],
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       migrationsRun: true,

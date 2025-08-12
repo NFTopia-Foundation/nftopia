@@ -41,17 +41,33 @@
 #     except ImportError:
 #         # Cache utils not available yet during initial setup
 #         pass
-
-
-# nfts/models.py
+import os
+import sys
 from django.db import models
 
-class NFT(models.Model):
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+if PROJECT_ROOT not in sys.path:
+    sys.path.append(PROJECT_ROOT)
+
+from nftopia_analytics.core.models import SchemaModel
+
+# class NFT(SchemaModel):
+#     id = models.UUIDField(primary_key=True)
+#     token_id = models.CharField(max_length=255)
+#     created_at = models.DateTimeField(auto_now_add=True)
+
+#     class Meta(SchemaModel.Meta):
+#         db_schema = 'nftopia_user_service'
+#         db_table = 'nft'
+#         managed = False  # Since tables are managed by other services
+
+# minting/models.py
+
+class NftMint(SchemaModel):
     id = models.UUIDField(primary_key=True)
-    owner_id = models.UUIDField()  # Reference to user_service.users
-    token_id = models.CharField(max_length=100)
-    price = models.DecimalField(max_digits=36, decimal_places=18)
+    mint_time = models.DateTimeField()
     
-    class Meta:
-        managed = False
-        db_table = 'user_service"."nfts'
+    class Meta(SchemaModel.Meta):
+        db_table = 'nftopia_user_service.nft_mints'  # Schema-qualified table name
+        managed = False  # Since TimescaleDB manages these

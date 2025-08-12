@@ -3,7 +3,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, Up
 import { NFT } from '../../nfts/entities/nft.entity'; // Assuming you have an NFT entity
 import { Exclude } from 'class-transformer';
 
-@Entity('categories')
+@Entity({ schema: 'nftopia_user_service' })
 export class Category {
   @PrimaryGeneratedColumn()
   id: number;
