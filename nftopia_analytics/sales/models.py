@@ -242,3 +242,19 @@
 
 #     def __str__(self):
 #         return f"TX {self.transaction_hash[:10]}... ({self.amount})"
+
+
+# payments/models.py
+from django.db import models
+
+class Transaction(models.Model):
+    id = models.UUIDField(primary_key=True)
+    buyer_id = models.UUIDField()  # Reference to user_service.users
+    nft_id = models.UUIDField()    # Reference to user_service.nfts
+    amount = models.DecimalField(max_digits=36, decimal_places=18)
+    status = models.CharField(max_length=10)
+    timestamp = models.DateTimeField()
+
+    class Meta:
+        managed = False  # Table owned by payment service
+        db_table = 'payment_service"."transactions'  # Schema-qualified name

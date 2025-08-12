@@ -715,6 +715,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
+
     
     # Third-Party Apps
     'rest_framework',                    # djangorestframework
@@ -731,6 +733,8 @@ INSTALLED_APPS = [
     
     # Your Custom Apps (add yours here)
     'analytics.apps.AnalyticsConfig',
+    'nfts.apps.NftsConfig',
+    'transactions.apps.TransactionsConfig'
 ]
 
 MIDDLEWARE = [
@@ -789,6 +793,19 @@ DATABASES = {
         # }
     }
 }
+
+
+# # settings.py
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'nftopia_db',
+#         'HOST': 'postgres',
+#         'OPTIONS': {
+#             'options': '-c search_path=analytics,payment_service,user_service'
+#         }
+#     }
+# }
 
 
 

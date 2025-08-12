@@ -41,3 +41,17 @@
 #     except ImportError:
 #         # Cache utils not available yet during initial setup
 #         pass
+
+
+# nfts/models.py
+from django.db import models
+
+class NFT(models.Model):
+    id = models.UUIDField(primary_key=True)
+    owner_id = models.UUIDField()  # Reference to user_service.users
+    token_id = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=36, decimal_places=18)
+    
+    class Meta:
+        managed = False
+        db_table = 'user_service"."nfts'
