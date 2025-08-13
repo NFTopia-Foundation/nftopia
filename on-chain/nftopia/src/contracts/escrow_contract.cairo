@@ -121,24 +121,7 @@ pub mod EscrowContract {
         locked: bool,
     }
 
-    #[constructor]
-    fn constructor(ref self: ContractState, initial_admin: ContractAddress) {
-        assert(initial_admin.into() != 0, 'Invalid admin address');
-
-        // Initialize admin and contract state
-        self.admin.write(0, initial_admin);
-        self.paused.write(0, false);
-
-        // Initialize reentrancy guard
-        self.reentrancy_locked.write(0, false);
-
-        // Initialize counters
-        self.swap_count.write(0, 0);
-        self.total_swaps_created.write(0, 0);
-        self.total_swaps_completed.write(0, 0);
-        self.total_volume.write(0, 0);
-    }
-
+   
     // Internal reentrancy guard implementation using NFTOPIA module
     #[generate_trait]
     pub impl InternalReentrancyGuard of InternalReentrancyGuardTrait {

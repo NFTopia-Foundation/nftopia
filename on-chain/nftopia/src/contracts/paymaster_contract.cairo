@@ -107,12 +107,7 @@ pub mod PaymasterContract {
         total_fees_collected: Map<ContractAddress, u256>
     }
 
-      // Constructor
-      #[constructor]
-      fn constructor(ref self: ContractState, admin: ContractAddress) {
-          self.admins.write(admin, true);
-      }
-
+  
     // Implementation
     #[abi(embed_v0)]
     pub impl PaymasterImpl of IPaymaster<ContractState> {
