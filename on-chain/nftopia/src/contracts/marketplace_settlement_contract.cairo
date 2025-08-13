@@ -67,15 +67,6 @@ pub mod MarketplaceSettlement {
         royalty_receiver: ContractAddress,
     }
 
-    #[constructor]
-    fn constructor(
-        ref self: ContractState, payment_token: ContractAddress, marketplace_owner: ContractAddress,
-    ) {
-        self.payment_token.write(payment_token);
-        self.marketplace_owner.write(marketplace_owner);
-        self.reentrancy_guard.write(false);
-    }
-
     #[abi(embed_v0)]
     pub impl MarketplaceSettlementImpl of super::IMarketplaceSettlement<ContractState> {
         fn distribute_payment(
