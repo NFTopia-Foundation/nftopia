@@ -58,6 +58,7 @@ export class AuthController {
     @Body('signature') signature: [string, string],
     @Body('nonce') nonce: string,
     @Body('walletType') walletType: 'argentx' | 'braavos',
+    @Body('network') network: 'mainnet' | 'sepolia' = 'sepolia',
     @Res({ passthrough: true }) res: Response,
   ) {
     console.log(walletAddress);
@@ -120,6 +121,7 @@ export class AuthController {
           signature,
           nonce,
           walletType,
+          network,
         );
 
       const cookieOptions: CookieOptions = {
@@ -212,6 +214,7 @@ export class AuthController {
 
       return { message: 'Refreshed successfully' };
     } catch (err) {
+      console.error('Token refresh failed:', err);
       throw new UnauthorizedException('Invalid refresh token');
     }
   }

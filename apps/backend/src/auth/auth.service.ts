@@ -44,6 +44,7 @@ export class AuthService {
     signature: [string, string],
     nonce: string,
     walletType: 'argentx' | 'braavos',
+    network: 'mainnet' | 'sepolia' = 'sepolia',
   ) {
     const normalizedAddress = walletAddress.toLowerCase();
     const storedNonce = this.nonces.get(normalizedAddress);
@@ -69,14 +70,24 @@ export class AuthService {
           domain: {
             name: 'NFTopia',
             version: '1',
-            chainId: 'SN_SEPOLIA',
+            chainId: network === 'mainnet' ? 'SN_MAIN' : 'SN_SEPOLIA',
           },
           message: { nonce },
         };
 
-        isValid = verifyTypedDataSignature(walletAddress, typedData, signature);
+        isValid = await verifyTypedDataSignature(
+          walletAddress,
+          typedData,
+          signature,
+          network,
+        );
       } else if (walletType === 'braavos') {
-        isValid = verifyRawMessageSignature(walletAddress, signature, nonce);
+        isValid = await verifyRawMessageSignature(
+          walletAddress,
+          signature,
+          nonce,
+          network,
+        );
       } else {
         throw new UnauthorizedException('Unsupported wallet type');
       }

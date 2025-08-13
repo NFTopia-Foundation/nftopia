@@ -1,98 +1,88 @@
-import { keccak_256 } from '@noble/hashes/sha3';
-import { verify } from '@scure/starknet';
-import { bytesToHex } from '@noble/curves/abstract/utils';
+import { RpcProvider, constants, type TypedData } from 'starknet';
 
-// Starknet field prime: 2^251 + 17*2^192 + 1
-const FIELD_PRIME = BigInt(
-  '0x800000000000011000000000000000000000000000000000000000000000001',
-);
+// Configure RPC providers for different networks
+const getProvider = (network: 'mainnet' | 'sepolia' = 'sepolia') => {
+  const rpcUrls = {
+    mainnet: 'https://starknet-mainnet.public.blastapi.io',
+    sepolia: 'https://starknet-sepolia.public.blastapi.io',
+  };
 
-// const { getMessageHash } = typedData;
+  return new RpcProvider({ nodeUrl: rpcUrls[network] });
+};
 
-/**
- * Validates that a message hash is within the valid Starknet field range.
- */
-function validateMessageHash(msgHash: string): void {
-  const hashBigInt = BigInt(msgHash);
-  if (hashBigInt >= FIELD_PRIME) {
-    throw new Error(`msgHash should be in range [0, ${FIELD_PRIME})`);
-  }
-  if (hashBigInt < 0n) {
-    throw new Error('msgHash cannot be negative');
-  }
-}
+// Get chain ID based on network
+const getChainId = (network: 'mainnet' | 'sepolia' = 'sepolia') => {
+  return network === 'mainnet'
+    ? constants.StarknetChainId.SN_MAIN
+    : constants.StarknetChainId.SN_SEPOLIA;
+};
 
 /**
- * Creates a proper Starknet message hash that is guaranteed to be within field range.
+ * ✅ Verifies a raw message signature (Braavos-style) using Starknet.js
  */
-function createValidMessageHash(message: string): string {
-  const messageBytes = new TextEncoder().encode(message);
-  const keccakHash = keccak_256(messageBytes);
-  const hashBigInt = BigInt('0x' + bytesToHex(keccakHash));
-
-  // Ensure the hash is within the field prime by taking modulo
-  const validHash = hashBigInt % FIELD_PRIME;
-  return '0x' + validHash.toString(16);
-}
-
-/**
- * Converts r and s values into a 64-byte compact hex string for @scure/starknet.
- */
-function toCompactSignatureHex(r: string, s: string): string {
-  const rHex = BigInt(r).toString(16).padStart(64, '0');
-  const sHex = BigInt(s).toString(16).padStart(64, '0');
-  return '0x' + rHex + sHex;
-}
-
-/**
- * ✅ Verifies a raw message signature (Braavos-style)
- */
-export function verifyRawMessageSignature(
+export async function verifyRawMessageSignature(
   walletAddress: string,
   signature: [string, string],
   nonce: string,
-): boolean {
+  network: 'mainnet' | 'sepolia' = 'sepolia',
+): Promise<boolean> {
   try {
-    // Create a valid message hash within Starknet field range
-    const msgHashHex = createValidMessageHash(nonce);
+    const provider = getProvider(network);
 
-    // Validate the message hash is within range (extra safety check)
-    validateMessageHash(msgHashHex);
+    // Create typed data for the message
+    const myTypedData: TypedData = {
+      types: {
+        StarkNetDomain: [
+          { name: 'name', type: 'felt' },
+          { name: 'version', type: 'felt' },
+          { name: 'chainId', type: 'felt' },
+        ],
+        Message: [{ name: 'nonce', type: 'felt' }],
+      },
+      primaryType: 'Message',
+      domain: {
+        name: 'NFTopia',
+        version: '1',
+        chainId: getChainId(network),
+      },
+      message: { nonce },
+    };
 
-    const signatureHex = toCompactSignatureHex(signature[0], signature[1]);
-    const pubKeyHex = '0x' + BigInt(walletAddress).toString(16);
-
-    return verify(signatureHex, msgHashHex, pubKeyHex);
+    // Verify using Starknet.js on-chain verification
+    return await provider.verifyMessageInStarknet(
+      myTypedData,
+      signature,
+      walletAddress,
+    );
   } catch (err) {
     console.error('[verifyRawMessageSignature] Error:', err);
-
-    // If it's a validation error, throw it with more context
-    if (err instanceof Error && err.message.includes('msgHash should be')) {
-      throw new Error(`Invalid message hash: ${err.message}`);
-    }
-
     return false;
   }
 }
 
 /**
- * ✅ Verifies a typed data signature (ArgentX-style)
+ * ✅ Verifies a typed data signature (ArgentX-style) using Starknet.js
  */
-export function verifyTypedDataSignature(
+export async function verifyTypedDataSignature(
   address: string,
-  typedData: any,
+  typedDataObj: TypedData,
   signature: string[],
-): boolean {
+  network: 'mainnet' | 'sepolia' = 'sepolia',
+): Promise<boolean> {
   try {
     // Ensure signature has exactly 2 elements (r, s)
     if (signature.length !== 2) {
       throw new Error('Signature must be an array of [r, s]');
     }
 
-    // Use the same compact signature formatting as raw message verification
-    const signatureHex = toCompactSignatureHex(signature[0], signature[1]);
+    const provider = getProvider(network);
 
-    return verify(signatureHex, typedData, address);
+    // Verify using Starknet.js on-chain verification
+    return await provider.verifyMessageInStarknet(
+      typedDataObj,
+      signature,
+      address,
+    );
   } catch (error) {
     console.error('Signature verification failed:', error);
     return false;

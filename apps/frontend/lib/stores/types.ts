@@ -45,6 +45,7 @@ export type AuthStore = {
     signature: [string, string], // Changed from string to [string, string]
     nonce: string,
     walletType: 'argentx' | 'braavos',
+    network: 'mainnet' | 'sepolia',
     locale: string
   ) => Promise<void>;
   logout: () => Promise<void>;

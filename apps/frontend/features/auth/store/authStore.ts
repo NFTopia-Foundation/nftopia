@@ -52,7 +52,9 @@ export const useAuthStore = create<AuthStore>()(
             _walletAddress: string,
             _signature: [string, string],
             _nonce: string,
-            _walletType: "argentx" | "braavos"
+            _walletType: "argentx" | "braavos",
+            _network: "mainnet" | "sepolia",
+            _locale: string
           ) => {
             throw new Error("Not implemented");
           },

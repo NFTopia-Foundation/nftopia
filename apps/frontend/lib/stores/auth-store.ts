@@ -82,6 +82,7 @@ export const useAuthStore = create<AuthStore>()(
         signature: [string, string],
         nonce: string,
         walletType: 'argentx' | 'braavos',
+        network: 'mainnet' | 'sepolia',
         locale: string
       ) => {
         set({ loading: true });
@@ -100,6 +101,7 @@ export const useAuthStore = create<AuthStore>()(
               signature,
               nonce,
               walletType,
+              network,
             }),
           });
 
