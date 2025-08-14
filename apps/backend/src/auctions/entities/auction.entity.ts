@@ -3,7 +3,7 @@ import { User } from '../../users/entities/user.entity';
 import { NFT } from '../../nfts/entities/nft.entity';
 import { Bid } from '../../bids/entities/bid.entity';
 
-@Entity()
+@Entity({ schema: 'nftopia_marketplace_service' })
 export class Auction {
   @PrimaryGeneratedColumn('uuid')
   id: string;

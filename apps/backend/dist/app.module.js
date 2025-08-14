@@ -44,6 +44,7 @@ exports.AppModule = AppModule = __decorate([
                 username: process.env.POSTGRES_USER || 'nftopia',
                 password: process.env.POSTGRES_PASSWORD || 'nftopia123',
                 database: process.env.POSTGRES_DB || 'nftopiadb',
+                schema: 'nftopia_user_service',
                 entities: [user_entity_1.User, collection_entity_1.Collection, nft_entity_1.NFT],
                 migrations: [__dirname + '/migrations/*{.ts,.js}'],
                 migrationsRun: true,
