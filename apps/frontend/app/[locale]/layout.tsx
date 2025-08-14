@@ -11,6 +11,7 @@ import { StoreProvider } from "@/lib/stores/store-provider";
 import { Toast } from "@/components/ui/toast";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "@/hooks/useTranslation";
+import { ClientBody } from "@/components/layout/ClientBody";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -80,15 +81,15 @@ export default function LocaleLayout({ children, params }: LocaleLayoutProps) {
         <meta name="twitter:description" content={t("seo.description")} />
       </head>
       <body className={inter.className}>
-        <div className="min-h-screen bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] text-white relative contain-layout">
-          <StoreProvider>
-            <StarknetProvider>
-              {isCreatorDashboard ? (
-                <main className="relative z-10">
-                  <WebVitals />
-                  {children}
-                </main>
-              ) : (
+        <StoreProvider>
+          <StarknetProvider>
+            {isCreatorDashboard ? (
+              <ClientBody>
+                <WebVitals />
+                {children}
+              </ClientBody>
+            ) : (
+              <div className="min-h-screen bg-gradient-to-b from-[#0f0c38] via-[#181359] to-[#241970] text-white relative contain-layout">
                 <main className="relative z-10 pt-16 md:pt-20">
                   {!isAuthPage && <Navbar />}
                   {!isAuthPage && <CircuitBackground />}
@@ -98,11 +99,11 @@ export default function LocaleLayout({ children, params }: LocaleLayoutProps) {
                   </div>
                   {!isAuthPage && <Footer />}
                 </main>
-              )}
-              <Toast />
-            </StarknetProvider>
-          </StoreProvider>
-        </div>
+              </div>
+            )}
+            <Toast />
+          </StarknetProvider>
+        </StoreProvider>
       </body>
     </html>
   );
