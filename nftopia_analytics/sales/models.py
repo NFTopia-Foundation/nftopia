@@ -244,21 +244,96 @@
 #         return f"TX {self.transaction_hash[:10]}... ({self.amount})"
 
 
-import os
-import sys
+# import os
+# import sys
+# from django.db import models
+
+
+# PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+# if PROJECT_ROOT not in sys.path:
+#     sys.path.append(PROJECT_ROOT)
+
+
+# from nftopia_analytics.core.models import SchemaModel
+# class Transaction(SchemaModel):
+#     id = models.UUIDField(primary_key=True)
+#     amount = models.DecimalField(max_digits=36, decimal_places=18)
+#     timestamp = models.DateTimeField()
+
+#     class Meta(SchemaModel.Meta):
+#         db_table = 'nftopia_payment_service.transaction'  # Schema-qualified name
+
+
+# from django.db import models
+
+# class Transaction(models.Model):
+#     id = models.UUIDField(primary_key=True)
+#     buyer_id = models.UUIDField()
+#     seller_id = models.UUIDField()
+#     nft_id = models.UUIDField()
+#     auction_id = models.UUIDField(null=True, blank=True)
+#     amount = models.DecimalField(max_digits=36, decimal_places=18)
+#     transaction_hash = models.CharField(max_length=255)
+#     status = models.CharField(max_length=20, default='pending')
+#     timestamp = models.DateTimeField()
+
+#     class Meta:
+#         managed = False
+#         db_table = 'nftopia_payment_service"."transaction'
+
+
+# from django.db import models
+
+# class Transaction(models.Model):
+#     """
+#     Lightweight analytics mapping for Timescale hypertable.
+#     Only includes fields needed for time-series queries.
+#     """
+#     id = models.BigAutoField(primary_key=True)  # auto-increment PK for Timescale
+#     occurred_at = models.DateTimeField(db_column='timestamp')  # maps to 'timestamp' column
+
+#     class Meta:
+#         managed = False  # Don't let Django modify the table
+#         db_table = 'nftopia_payment_service"."transaction'
+#         app_label = 'analytics'
+
+
+# from django.db import models
+
+# class Transaction(models.Model):
+#     id = models.UUIDField(primary_key=True)
+#     buyer_id = models.UUIDField()
+#     seller_id = models.UUIDField()
+#     nft_id = models.UUIDField()
+#     auction_id = models.UUIDField(null=True, blank=True)
+#     amount = models.DecimalField(max_digits=36, decimal_places=18)
+#     transaction_hash = models.CharField(max_length=255)
+#     status = models.CharField(max_length=20, default='pending')
+#     occurred_at = models.DateTimeField(db_column='timestamp')  # ← mapping here
+
+#     class Meta:
+#         managed = False
+#         db_table = 'nftopia_payment_service"."transaction'
+#         app_label = 'analytics'
+
+
+# sales/models.py
 from django.db import models
+import uuid
 
-
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
-if PROJECT_ROOT not in sys.path:
-    sys.path.append(PROJECT_ROOT)
-
-
-from nftopia_analytics.core.models import SchemaModel
-class Transaction(SchemaModel):
-    id = models.UUIDField(primary_key=True)
+class Transaction(models.Model):
+    id = models.UUIDField(primary_key=True)   # matches existing PK
+    buyer_id = models.UUIDField(db_column='buyerId')   # map exact column name, change if your DB uses snake_case
+    seller_id = models.UUIDField(db_column='sellerId')
+    nft_id = models.UUIDField(db_column='nftId')
+    auction_id = models.UUIDField(db_column='auctionId', null=True, blank=True)
     amount = models.DecimalField(max_digits=36, decimal_places=18)
-    timestamp = models.DateTimeField()
+    transaction_hash = models.CharField(max_length=255, db_column='transactionHash')
+    status = models.CharField(max_length=20, default='pending')
+    timestamp = models.DateTimeField()  # the time column in your DB; change db_column if needed
 
-    class Meta(SchemaModel.Meta):
-        db_table = 'nftopia_payment_service.transaction'  # Schema-qualified name
+    class Meta:
+        managed = False
+        db_table = 'public"."transaction'   # adjust schema if not public
+        # app_label = 'sales'  # usually not needed
+

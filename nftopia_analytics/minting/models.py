@@ -40,17 +40,16 @@
 #         invalidate_minting_cache()
 #     except ImportError:
 #         # Cache utils not available yet during initial setup
-#         pass
-import os
-import sys
-from django.db import models
+# #         pass
+# import os
+# import sys
+# from django.db import models
 
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
-if PROJECT_ROOT not in sys.path:
-    sys.path.append(PROJECT_ROOT)
+# PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+# if PROJECT_ROOT not in sys.path:
+#     sys.path.append(PROJECT_ROOT)
 
-from nftopia_analytics.core.models import SchemaModel
 
 # class NFT(SchemaModel):
 #     id = models.UUIDField(primary_key=True)
@@ -62,12 +61,57 @@ from nftopia_analytics.core.models import SchemaModel
 #         db_table = 'nft'
 #         managed = False  # Since tables are managed by other services
 
-# minting/models.py
+# # minting/models.py
 
-class NftMint(SchemaModel):
-    id = models.UUIDField(primary_key=True)
-    mint_time = models.DateTimeField()
+# class NftMint(SchemaModel):
+#     id = models.UUIDField(primary_key=True)
+#     mint_time = models.DateTimeField()
     
-    class Meta(SchemaModel.Meta):
-        db_table = 'nftopia_user_service.nft_mints'  # Schema-qualified table name
-        managed = False  # Since TimescaleDB manages these
+#     class Meta(SchemaModel.Meta):
+#         db_table = 'nftopia_user_service.nft_mints'  # Schema-qualified table name
+#         managed = False  # Since TimescaleDB manages these
+
+
+# from django.db import models
+
+# class NFT(models.Model):
+#     id = models.UUIDField(primary_key=True)  # Matches TypeORM @PrimaryGeneratedColumn('uuid')
+#     name = models.CharField(max_length=255)
+#     description = models.TextField(blank=True, null=True)
+#     image_url = models.CharField(max_length=500, blank=True, null=True)
+#     owner_id = models.UUIDField()  # Foreign key to user table, if needed
+#     collection_id = models.UUIDField(blank=True, null=True)
+#     token_id = models.CharField(max_length=255)  # On-chain token ID
+#     metadata_uri = models.CharField(max_length=500, blank=True, null=True)
+#     created_at = models.DateTimeField()
+#     updated_at = models.DateTimeField()
+
+#     class Meta:
+#         managed = False
+#         db_table = 'nftopia_user_service"."nft'
+
+# minting/models.py
+from django.db import models
+import uuid
+
+class NFT(models.Model):
+    id = models.UUIDField(primary_key=True)
+    token_id = models.CharField(max_length=255, db_column='tokenId')  # tokenId per your entity
+    title = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    image_url = models.CharField(max_length=500, db_column='imageUrl', null=True, blank=True)
+    ipfs_url = models.CharField(max_length=500, db_column='ipfsUrl', null=True, blank=True)
+    metadata = models.JSONField(null=True, blank=True)
+    price = models.DecimalField(max_digits=36, decimal_places=18, null=True)
+    currency = models.CharField(max_length=16, default='STK')
+    owner_id = models.UUIDField(db_column='ownerId')   # map to owner column
+    collection_id = models.UUIDField(db_column='collectionId', null=True, blank=True)
+    category_id = models.UUIDField(db_column='categoryId', null=True, blank=True)
+    is_listed = models.BooleanField(default=False, db_column='isListed')
+    created_at = models.DateTimeField(db_column='createdAt')
+    updated_at = models.DateTimeField(db_column='updatedAt')
+
+    class Meta:
+        managed = False
+        db_table = 'public"."nft'   # adjust schema if not public
+

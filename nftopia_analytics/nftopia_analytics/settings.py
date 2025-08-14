@@ -825,7 +825,7 @@ DATABASES = {
         'HOST': os.getenv('POSTGRES_HOST'),
         'PORT': os.getenv('POSTGRES_PORT'),
          'OPTIONS': {
-            'options': '-c search_path=nftopia_analytics,public'  # Default schema
+            'options': '-c search_path=public'
         }
     }
 }
@@ -845,9 +845,7 @@ DATABASES = {
 
 
 # settings.py
-TIMESCALE_AUTO_INIT = os.getenv('TIMESCALE_AUTO_INIT', 'False')
 
-DATABASE_ROUTERS = ['nftopia_analytics.config.db_router.SchemaRouter']
 
 
 

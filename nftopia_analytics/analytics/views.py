@@ -529,17 +529,8 @@
 #         return Response(serializer.data)
 
 from django.http import HttpResponse, JsonResponse
-from django.db import connection
 
 
 def home(request):
     return HttpResponse("Hello from NFTopia Analytics")
 
-def check_timescale_status(request):
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT hypertable_name, compression_enabled 
-            FROM timescaledb_information.hypertables
-        """)
-        results = cursor.fetchall()
-    return JsonResponse({'hypertables': results})

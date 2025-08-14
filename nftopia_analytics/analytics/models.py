@@ -618,3 +618,51 @@
 #         ]
 #         unique_together = [('tx_hash', 'log_index')]
 #         verbose_name = "NFT Transfer Event"
+
+
+
+
+# analytics/models.py
+from django.db import models
+import uuid
+
+class NFTMint(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nft_id = models.UUIDField()
+    owner_user_id = models.UUIDField(null=True)
+    token_id = models.TextField(null=True)
+    tx_hash = models.TextField(null=True)
+    occurred_at = models.DateTimeField()   # hypertable time column
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'nftopia_analytics"."nft_mints'   # schema-qualified table name
+
+
+class NFTSale(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nft_id = models.UUIDField()
+    buyer_user_id = models.UUIDField(null=True)
+    seller_user_id = models.UUIDField(null=True)
+    amount = models.DecimalField(max_digits=36, decimal_places=18)
+    currency = models.CharField(max_length=16, default='STK')
+    tx_hash = models.TextField(null=True)
+    status = models.CharField(max_length=32, null=True)
+    occurred_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'nftopia_analytics"."nft_sales'
+
+
+class NFTTransfer(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nft_id = models.UUIDField()
+    from_user_id = models.UUIDField(null=True)
+    to_user_id = models.UUIDField(null=True)
+    tx_hash = models.TextField(null=True)
+    occurred_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'nftopia_analytics"."nft_transfers'
