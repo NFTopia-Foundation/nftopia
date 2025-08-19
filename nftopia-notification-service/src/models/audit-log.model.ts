@@ -1,28 +1,58 @@
-// src/models/audit-log.model.ts
+// // src/models/audit-log.model.ts
+// import { Schema, model, Document } from 'mongoose';
+
+// // Define the interface
+// export interface AuditLogDocument extends Document {
+//   action: string;
+//   userId: string | null;
+//   entityType: string;
+//   entityId: string;
+//   metadata: Record<string, any>;
+//   timestamp: Date;
+// }
+
+// // Define the schema
+// const AuditLogSchema = new Schema<AuditLogDocument>({
+//   action: { type: String, required: true },
+//   userId: { type: String, default: null },
+//   entityType: { type: String, required: true },
+//   entityId: { type: String, required: true },
+//   metadata: { type: Schema.Types.Mixed, required: true },
+//   timestamp: { type: Date, default: Date.now }
+// });
+
+// // Create and export the model
+// export const AuditLog = model<AuditLogDocument>('AuditLog', AuditLogSchema);
+
+
 import { Schema, model, Document } from 'mongoose';
 
-// Define the interface
-export interface AuditLogDocument extends Document {
-  action: string;
-  userId: string | null;
-  entityType: string;
-  entityId: string;
-  metadata: Record<string, any>;
-  timestamp: Date;
+
+export interface IAuditLog extends Document {
+action: 'create' | 'update' | 'markAsRead' | 'updateStatus' | 'softDelete' | 'hardDelete';
+entityType: 'Notification';
+entityId: string;
+actorId: string | null;
+before?: any;
+after?: any;
+createdAt: Date;
 }
 
-// Define the schema
-const AuditLogSchema = new Schema<AuditLogDocument>({
-  action: { type: String, required: true },
-  userId: { type: String, default: null },
-  entityType: { type: String, required: true },
-  entityId: { type: String, required: true },
-  metadata: { type: Schema.Types.Mixed, required: true },
-  timestamp: { type: Date, default: Date.now }
-});
 
-// Create and export the model
-export const AuditLog = model<AuditLogDocument>('AuditLog', AuditLogSchema);
+const AuditLogSchema = new Schema<IAuditLog>(
+{
+action: { type: String, required: true },
+entityType: { type: String, required: true, default: 'Notification' },
+entityId: { type: String, required: true, index: true },
+actorId: { type: String, default: null, index: true },
+before: { type: Schema.Types.Mixed },
+after: { type: Schema.Types.Mixed }
+},
+{ timestamps: { createdAt: true, updatedAt: false } }
+);
+
+
+export const AuditLog = model<IAuditLog>('AuditLog', AuditLogSchema);
 
 
 
