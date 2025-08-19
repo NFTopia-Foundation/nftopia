@@ -24,7 +24,7 @@ describe('NotificationRepository', () => {
 it('creates and finds by id', async () => {
 const created = await repo.create({ userId: 'u1', type: 'mint', content: 'Minted', metadata: { nftId: 'n1' } });
 expect(created._id).toBeDefined();
-const found = await repo.findById(created.id.toString());
+const found = await repo.findById(created.id);
 expect(found?.content).toBe('Minted');
 });
 
@@ -48,21 +48,21 @@ expect(byNft.length).toBe(1);
 
 it('marks as read', async () => {
 const created = await repo.create({ userId: 'u4', type: 'admin', content: 'Admin' });
-const updated = await repo.markAsRead(created.id.toString());
+const updated = await repo.markAsRead(created.id);
 expect(updated.status).toBe('read');
 });
 
 
 it('updates status', async () => {
 const created = await repo.create({ userId: 'u5', type: 'bid', content: 'B' });
-const updated = await repo.updateStatus(created.id.toString(), 'sent');
+const updated = await repo.updateStatus(created.id, 'sent');
 expect(updated.status).toBe('sent');
 });
 
 
 it('soft and hard delete', async () => {
 const created = await repo.create({ userId: 'u6', type: 'sale', content: 'S' });
-const soft = await repo.softDelete(created.id.toString());
+const soft = await repo.softDelete(created.id);
 expect(soft).not.toBeNull();
 
 
