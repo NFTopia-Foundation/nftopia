@@ -1,7 +1,7 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import { NotificationRepository } from '../repositories/notification.repository';
-import { Notification } from '../models/Notification';
+import { Notification } from '../models/notification.model';
 
 
 let mongod: MongoMemoryServer;

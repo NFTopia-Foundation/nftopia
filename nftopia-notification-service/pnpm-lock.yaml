@@ -64,7 +64,7 @@ importers:
         version: 7.2.1
       firebase-admin:
         specifier: ^13.4.0
-        version: 13.4.0
+        version: 13.4.0(encoding@0.1.13)
       force:
         specifier: ^0.0.3
         version: 0.0.3
@@ -88,7 +88,7 @@ importers:
         version: 9.0.2
       mjml:
         specifier: ^4.15.3
-        version: 4.15.3
+        version: 4.15.3(encoding@0.1.13)
       mongoose:
         specifier: ^8.16.1
         version: 8.16.1
@@ -141,6 +141,9 @@ importers:
       '@types/morgan':
         specifier: ^1.9.10
         version: 1.9.10
+      '@types/sendgrid':
+        specifier: ^4.3.0
+        version: 4.3.0
       '@types/supertest':
         specifier: ^6.0.3
         version: 6.0.3
@@ -798,6 +801,10 @@ packages:
   '@types/send@0.17.5':
     resolution: {integrity: sha512-z6F2D3cOStZvuk2SaP6YrwkNO65iTZcwA2ZkSABegdkAh/lf+Aa/YQndZVfmEXT5vgAp6zv06VQ3ejSVjAny4w==}
 
+  '@types/sendgrid@4.3.0':
+    resolution: {integrity: sha512-IllGHyMdT/2vNFGmaW7LdhiJmDJxwIbJcArclb9kPW+0FVOb8h3JmjP0FrnCx6anSigi8hBeDymBzWtNyfj+bw==}
+    deprecated: This is a stub types definition for sendgrid (https://github.com/sendgrid/sendgrid-nodejs). sendgrid provides its own type definitions, so you don't need @types/sendgrid installed!
+
   '@types/serve-static@1.15.8':
     resolution: {integrity: sha512-roei0UY3LhpOJvjbIP6ZZFngyLKl5dskOtDhxY5THRSpO+ZI+nzJ+m5yUMzGrp89YRa7lvknKkMYjqQFGwA7Sg==}
 
@@ -864,6 +871,9 @@ packages:
     resolution: {integrity: sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+
+  addressparser@1.0.1:
+    resolution: {integrity: sha512-aQX7AISOMM7HFE0iZ3+YnD07oIeJqWGVnJ+ZIKaBZAk03ftmVYVqsGas/rbXKR21n4D/hKCSHypvcyOkds/xzg==}
 
   agent-base@6.0.2:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
@@ -936,6 +946,39 @@ packages:
 
   async-retry@1.3.3:
     resolution: {integrity: sha512-wfr/jstw9xNi/0teMHrRW7dsz3Lt5ARhYNZ2ewpadnhaIp5mbALhOAP+EAdsC7t4Z6wqsDVv9+W6gm1Dk9mEyw==}
+
+  async.ensureasync@0.5.2:
+    resolution: {integrity: sha512-eez/kJFHbnnHUBWpYlmWcjZpho/Oh7SHwnnnuscM8nOZcIJ41t+ACMSYTfNtdrES+XfbGVQtyw+6YK2evQgV5w==}
+
+  async.queue@0.5.2:
+    resolution: {integrity: sha512-SX5gCWh47bIRLqHAt/zfJmRl2xpCF4OM4kkT3HehVJLmgQfLzYjL6QhLHe+SS4e7FOYU6NgMy2kXPB2wVchncg==}
+
+  async.util.arrayeach@0.5.2:
+    resolution: {integrity: sha512-PIb4rVYjwzLqb93XX2wj0+mA9YTgSWtxQRKxtuLqxXvGj1xZMB6qJUfr1NhS+FSaMPJIE1tF40Gl/o/vlfIz/A==}
+
+  async.util.ensureasync@0.5.2:
+    resolution: {integrity: sha512-sQufNz4JYLHO/7ZUklaTGJtiX36gCp28McNNcMZfVYPm/wqi1pKk4xRCPr2DOZDM6KfA54zjG36jQjBU2mLzXg==}
+
+  async.util.isarray@0.5.2:
+    resolution: {integrity: sha512-wbUzlrwON8RUgi+v/rhF0U99Ce8Osjcn+JP/mFNg6ymvShcobAOvE6cvLajSY5dPqKCOE1xfdhefgBif11zZgw==}
+
+  async.util.map@0.5.2:
+    resolution: {integrity: sha512-uXZhyNIH9Jo25jn35lUoEwFLAdZWC2ZQKjLO5PLq8VAisfW6qvSfgDLH4H57/WQSKZSo6OOmuqGhtdvIHDTi1Q==}
+
+  async.util.noop@0.5.2:
+    resolution: {integrity: sha512-AdwShXwE0KoskgqVJAck8zcM32nIHj3AC8ZN62ZaR5srhrY235Nw18vOJZWxcOfhxdVM0hRVKM8kMx7lcl7cCQ==}
+
+  async.util.onlyonce@0.5.2:
+    resolution: {integrity: sha512-UgQvkU9JZ+I0Cm1f56XyGXcII+J3d/5XWUuHpcevlItuA3WFSJcqZrsyAUck2FkRSD8BwYQX1zUTDp3SJMVESg==}
+
+  async.util.queue@0.5.2:
+    resolution: {integrity: sha512-DlKOFnhCzERL9D3bLKlNdgXwSckckcj+XkCvNuX4KMs4brBc2lHvPg8MK4NoPIhwAvUBGvE4NECdNRY0I5UOEQ==}
+
+  async.util.restparam@0.5.2:
+    resolution: {integrity: sha512-Q9Z+zgmtMxFX5i7CnBvNOkgrL5hptztCqwarQluyNudUUk4iCmyjmsQl8MuQEjNh3gGqP5ayvDaextL1VXXgIg==}
+
+  async.util.setimmediate@0.5.2:
+    resolution: {integrity: sha512-aCYF85ZFCQ9Xn0106GcOVx+LvFguIIzfbfRTOlQoie3G4KeSjURfA6f7CfpFAF09FNP2A1MtdjeFdvYeTGDebw==}
 
   async@3.2.6:
     resolution: {integrity: sha512-htCUDlxyyCLMgaM3xXg0C0LW2xqfuQ6p05pCEIsXuyQ+a1koYKTuBMzRNwmybfLgvJDMd0r1LTn4+E0Ti6C2AA==}
@@ -1013,6 +1056,9 @@ packages:
 
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
+
+  bottleneck@1.16.0:
+    resolution: {integrity: sha512-HinT6aCt+ZLPVvMtOy8Vd1vQtR2R/Qi06fKRCa4oGiIuFF+CQwNYR/KZTjrEynkER7y9WaY8fhwWKqZp+/aXeg==}
 
   brace-expansion@1.1.12:
     resolution: {integrity: sha512-9T9UjW3r0UW5c1Q7GTwllptXwhvYmEzFhzMfZ9H7FQWt+uZePjZPjBP/W1ZEyZ1twGWom5/56TF4lPcqjnDHcg==}
@@ -1213,6 +1259,9 @@ packages:
   cookiejar@2.1.4:
     resolution: {integrity: sha512-LDx6oHrK+PhzLKJU9j5S7/Y3jM/mUHvD/DeI1WQmJn652iPC5Y4TBzC9l+5OMOXlyTTA+SmVUPm0HQUwpD5Jqw==}
 
+  core-js@3.45.0:
+    resolution: {integrity: sha512-c2KZL9lP4DjkN3hk/an4pWn5b5ZefhRJnAc42n6LJ19kSnbeRbdQZE5dSeE2LBol1OwJD3X1BQvFTAsa8ReeDA==}
+
   core-util-is@1.0.2:
     resolution: {integrity: sha512-3lqz5YjWTYnW6dlDa5TLaTCcShfar1e40rmcJVwCBJC6mWlFuj0eCHIElmG1g5kyuJ/GD+8Wn4FFCcz4gJPfaQ==}
 
@@ -1349,6 +1398,10 @@ packages:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
     engines: {node: '>=12'}
 
+  dotenv@4.0.0:
+    resolution: {integrity: sha512-XcaMACOr3JMVcEv0Y/iUM2XaOsATRZ3U1In41/1jjK6vJZ2PZbQ1bzCG8uvaByfaBpl9gqc9QWJovpUGBXLLYQ==}
+    engines: {node: '>=4.6.0'}
+
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
@@ -1397,6 +1450,9 @@ packages:
   encodeurl@2.0.0:
     resolution: {integrity: sha512-Q0n9HRi4m6JuGIV1eFlmvJB7ZEVxu93IrMyiMsGC0lrMJMWzRgx6WGquyfQgZVb31vhGgXnfmPNNXmxnOkRBrg==}
     engines: {node: '>= 0.8'}
+
+  encoding@0.1.13:
+    resolution: {integrity: sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==}
 
   end-of-stream@1.4.5:
     resolution: {integrity: sha512-ooEGc6HP26xXq/N+GCGOT0JKCLDGrq2bQUZrQ7gyrJiZANJ/8YDTxTpQBXGMn+WbIQXNVpyWymm7KYVICQnyOg==}
@@ -1449,6 +1505,10 @@ packages:
 
   escape-html@1.0.3:
     resolution: {integrity: sha512-NiSupZ4OeuGwr68lGIeym/ksIZMJodUGOSCZ/FSnTxcrekbvqrgdUxlJOMpijaKZVjAJrWrGs/6Jy8OMuyj9ow==}
+
+  escape-string-regexp@1.0.5:
+    resolution: {integrity: sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg==}
+    engines: {node: '>=0.8.0'}
 
   escape-string-regexp@2.0.0:
     resolution: {integrity: sha512-UpzcLCXolUWcNu5HtVMHYdXJjArjsF9C0aNnquZYY4uW/Vu0miy5YoWvbV345HauVvcAUnpRuhMMcqTcGOY2+w==}
@@ -2160,6 +2220,9 @@ packages:
   lodash.camelcase@4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
 
+  lodash.chunk@4.2.0:
+    resolution: {integrity: sha512-ZzydJKfUHJwHa+hF5X66zLFCBrWn5GeF28OHEr4WVWtNDXlQ/IjWKPBiikqKo2ne0+v6JgCgJ0GzJp8k8bHC7w==}
+
   lodash.clonedeep@4.5.0:
     resolution: {integrity: sha512-H5ZhCF25riFd9uB5UCkVKo61m3S/xZk1x4wA6yp/L3RFP6Z/eHH1ymQcGLo7J3GMPfm0V/7m1tryHuGVxpqEBQ==}
 
@@ -2234,6 +2297,10 @@ packages:
   lru-memoizer@2.3.0:
     resolution: {integrity: sha512-GXn7gyHAMhO13WSKrIiNfztwxodVsP8IoZ3XfrJV4yH2x0/OeTO/FIaAHTY5YekdGgW94njfuKmyyt1E0mR6Ug==}
 
+  mailparser@0.6.2:
+    resolution: {integrity: sha512-5Z5nv7TYojrdrKHjhCOKKFaYs0Lo7PCja4RnLZ2kFE1Fskqg+rRVwFpG9Oqx3YjosGM2QEItjHo7+Jc9qvxGqw==}
+    deprecated: Mailparser versions older than v2.3.0 are deprecated
+
   make-dir@3.1.0:
     resolution: {integrity: sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==}
     engines: {node: '>=8'}
@@ -2296,6 +2363,11 @@ packages:
   mime@1.2.11:
     resolution: {integrity: sha512-Ysa2F/nqTNGHhhm9MV8ure4+Hc+Y8AWiqUdHxsO7xu8zc92ND9f3kpALHjaP026Ft17UfxrMt95c50PLUeynBw==}
 
+  mime@1.6.0:
+    resolution: {integrity: sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==}
+    engines: {node: '>=4'}
+    hasBin: true
+
   mime@2.6.0:
     resolution: {integrity: sha512-USPkMeET31rOMiarsBNIHZKLGgvKc/LrjofAnBlOttf5ajRvqiRA8QsenbcooctK6d6Ts6aqZXBA+XbkKthiQg==}
     engines: {node: '>=4.0.0'}
@@ -2305,6 +2377,10 @@ packages:
     resolution: {integrity: sha512-jSCU7/VB1loIWBZe14aEYHU/+1UMEHoaO7qxCOVJOw9GgH72VAWppxNcjU+x9a2k3GSIBXNKxXQFqRvvZ7vr3A==}
     engines: {node: '>=10.0.0'}
     hasBin: true
+
+  mimelib@0.3.1:
+    resolution: {integrity: sha512-ipzNp6TBsNfD3hButGlPVlGmuCgybIM9SBf8YwIG+SYmBgtU0u8wjf+BSrJX0mvqtv59SLmwphw/XiCbkLWv7w==}
+    deprecated: This project is unmaintained
 
   mimic-fn@2.1.0:
     resolution: {integrity: sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==}
@@ -2848,6 +2924,15 @@ packages:
     resolution: {integrity: sha512-uaW0WwXKpL9blXE2o0bRhoL2EGXIrZxQ2ZQ4mgcfoBxdFmQold+qWsD2jLrfZ0trjKL6vOw0j//eAwcALFjKSw==}
     engines: {node: '>= 18'}
 
+  sendgrid-rest@2.6.1:
+    resolution: {integrity: sha512-W7gPROAPkEiD3+XQh+jeiU5mTNWqfgn45y1Xi8WiFA3CYKGOvHn+U0d62pTWjjynNqsmQIq9AJ0+93Bq67gbSQ==}
+    engines: {node: '>= 0.10'}
+
+  sendgrid@5.2.3:
+    resolution: {integrity: sha512-FD7oR9TbJFUew1p0Vw9JX0wBetDyq634LzylSXz4n9+hwaf+6a9dNloZl8CcjpsX4NuEc3HJanTN4GjDwNyi4A==}
+    engines: {node: '>= 4.0.0'}
+    deprecated: Please see v6.X+ at https://www.npmjs.com/org/sendgrid
+
   serve-static@2.2.0:
     resolution: {integrity: sha512-61g9pCh0Vnh7IutZjtLGGpTA355+OPn2TyDv/6ivP2h/AdAVX9azsoxmg2/M6nZeQZNYBEwIcsne1mJd9oQItQ==}
     engines: {node: '>= 18'}
@@ -3204,6 +3289,9 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+
+  uue@3.1.2:
+    resolution: {integrity: sha512-axKLXVqwtdI/czrjG0X8hyV1KLgeWx8F4KvSbvVCnS+RUvsQMGRjx0kfuZDXXqj0LYvVJmx3B9kWlKtEdRrJLg==}
 
   uuid@11.1.0:
     resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
@@ -3637,12 +3725,12 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@google-cloud/firestore@7.11.3':
+  '@google-cloud/firestore@7.11.3(encoding@0.1.13)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       fast-deep-equal: 3.1.3
       functional-red-black-tree: 1.0.1
-      google-gax: 4.6.1
+      google-gax: 4.6.1(encoding@0.1.13)
       protobufjs: 7.5.4
     transitivePeerDependencies:
       - encoding
@@ -3661,7 +3749,7 @@ snapshots:
   '@google-cloud/promisify@4.0.0':
     optional: true
 
-  '@google-cloud/storage@7.17.0':
+  '@google-cloud/storage@7.17.0(encoding@0.1.13)':
     dependencies:
       '@google-cloud/paginator': 5.0.2
       '@google-cloud/projectify': 4.0.0
@@ -3670,13 +3758,13 @@ snapshots:
       async-retry: 1.3.3
       duplexify: 4.1.3
       fast-xml-parser: 4.5.3
-      gaxios: 6.7.1
-      google-auth-library: 9.15.1
+      gaxios: 6.7.1(encoding@0.1.13)
+      google-auth-library: 9.15.1(encoding@0.1.13)
       html-entities: 2.6.0
       mime: 3.0.0
       p-limit: 3.1.0
-      retry-request: 7.0.2
-      teeny-request: 9.0.0
+      retry-request: 7.0.2(encoding@0.1.13)
+      teeny-request: 9.0.0(encoding@0.1.13)
       uuid: 8.3.2
     transitivePeerDependencies:
       - encoding
@@ -4206,6 +4294,12 @@ snapshots:
       '@types/mime': 1.3.5
       '@types/node': 24.0.4
 
+  '@types/sendgrid@4.3.0':
+    dependencies:
+      sendgrid: 5.2.3
+    transitivePeerDependencies:
+      - supports-color
+
   '@types/serve-static@1.15.8':
     dependencies:
       '@types/http-errors': 2.0.5
@@ -4285,6 +4379,8 @@ snapshots:
 
   acorn@8.15.0: {}
 
+  addressparser@1.0.1: {}
+
   agent-base@6.0.2:
     dependencies:
       debug: 4.4.1(supports-color@5.5.0)
@@ -4350,6 +4446,42 @@ snapshots:
     dependencies:
       retry: 0.13.1
     optional: true
+
+  async.ensureasync@0.5.2:
+    dependencies:
+      async.util.ensureasync: 0.5.2
+
+  async.queue@0.5.2:
+    dependencies:
+      async.util.queue: 0.5.2
+
+  async.util.arrayeach@0.5.2: {}
+
+  async.util.ensureasync@0.5.2:
+    dependencies:
+      async.util.restparam: 0.5.2
+      async.util.setimmediate: 0.5.2
+
+  async.util.isarray@0.5.2: {}
+
+  async.util.map@0.5.2: {}
+
+  async.util.noop@0.5.2: {}
+
+  async.util.onlyonce@0.5.2: {}
+
+  async.util.queue@0.5.2:
+    dependencies:
+      async.util.arrayeach: 0.5.2
+      async.util.isarray: 0.5.2
+      async.util.map: 0.5.2
+      async.util.noop: 0.5.2
+      async.util.onlyonce: 0.5.2
+      async.util.setimmediate: 0.5.2
+
+  async.util.restparam@0.5.2: {}
+
+  async.util.setimmediate@0.5.2: {}
 
   async@3.2.6: {}
 
@@ -4460,6 +4592,8 @@ snapshots:
       - supports-color
 
   boolbase@1.0.0: {}
+
+  bottleneck@1.16.0: {}
 
   brace-expansion@1.1.12:
     dependencies:
@@ -4653,6 +4787,8 @@ snapshots:
 
   cookiejar@2.1.4: {}
 
+  core-js@3.45.0: {}
+
   core-util-is@1.0.2: {}
 
   cors@2.8.5:
@@ -4780,6 +4916,8 @@ snapshots:
 
   dotenv@16.6.1: {}
 
+  dotenv@4.0.0: {}
+
   dunder-proto@1.0.1:
     dependencies:
       call-bind-apply-helpers: 1.0.2
@@ -4829,6 +4967,10 @@ snapshots:
   enabled@2.0.0: {}
 
   encodeurl@2.0.0: {}
+
+  encoding@0.1.13:
+    dependencies:
+      iconv-lite: 0.6.3
 
   end-of-stream@1.4.5:
     dependencies:
@@ -4884,6 +5026,8 @@ snapshots:
   escape-goat@3.0.0: {}
 
   escape-html@1.0.3: {}
+
+  escape-string-regexp@1.0.5: {}
 
   escape-string-regexp@2.0.0: {}
 
@@ -5029,21 +5173,21 @@ snapshots:
       locate-path: 5.0.0
       path-exists: 4.0.0
 
-  firebase-admin@13.4.0:
+  firebase-admin@13.4.0(encoding@0.1.13):
     dependencies:
       '@fastify/busboy': 3.2.0
       '@firebase/database-compat': 2.1.0
       '@firebase/database-types': 1.0.16
       '@types/node': 22.17.2
       farmhash-modern: 1.1.0
-      google-auth-library: 9.15.1
+      google-auth-library: 9.15.1(encoding@0.1.13)
       jsonwebtoken: 9.0.2
       jwks-rsa: 3.2.0
       node-forge: 1.3.1
       uuid: 11.1.0
     optionalDependencies:
-      '@google-cloud/firestore': 7.11.3
-      '@google-cloud/storage': 7.17.0
+      '@google-cloud/firestore': 7.11.3(encoding@0.1.13)
+      '@google-cloud/storage': 7.17.0(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -5112,20 +5256,20 @@ snapshots:
   functional-red-black-tree@1.0.1:
     optional: true
 
-  gaxios@6.7.1:
+  gaxios@6.7.1(encoding@0.1.13):
     dependencies:
       extend: 3.0.2
       https-proxy-agent: 7.0.6
       is-stream: 2.0.1
-      node-fetch: 2.7.0
+      node-fetch: 2.7.0(encoding@0.1.13)
       uuid: 9.0.1
     transitivePeerDependencies:
       - encoding
       - supports-color
 
-  gcp-metadata@6.1.1:
+  gcp-metadata@6.1.1(encoding@0.1.13):
     dependencies:
-      gaxios: 6.7.1
+      gaxios: 6.7.1(encoding@0.1.13)
       google-logging-utils: 0.0.2
       json-bigint: 1.0.0
     transitivePeerDependencies:
@@ -5204,31 +5348,31 @@ snapshots:
 
   globals@11.12.0: {}
 
-  google-auth-library@9.15.1:
+  google-auth-library@9.15.1(encoding@0.1.13):
     dependencies:
       base64-js: 1.5.1
       ecdsa-sig-formatter: 1.0.11
-      gaxios: 6.7.1
-      gcp-metadata: 6.1.1
-      gtoken: 7.1.0
+      gaxios: 6.7.1(encoding@0.1.13)
+      gcp-metadata: 6.1.1(encoding@0.1.13)
+      gtoken: 7.1.0(encoding@0.1.13)
       jws: 4.0.0
     transitivePeerDependencies:
       - encoding
       - supports-color
 
-  google-gax@4.6.1:
+  google-gax@4.6.1(encoding@0.1.13):
     dependencies:
       '@grpc/grpc-js': 1.13.4
       '@grpc/proto-loader': 0.7.15
       '@types/long': 4.0.2
       abort-controller: 3.0.0
       duplexify: 4.1.3
-      google-auth-library: 9.15.1
-      node-fetch: 2.7.0
+      google-auth-library: 9.15.1(encoding@0.1.13)
+      node-fetch: 2.7.0(encoding@0.1.13)
       object-hash: 3.0.0
       proto3-json-serializer: 2.0.2
       protobufjs: 7.5.4
-      retry-request: 7.0.2
+      retry-request: 7.0.2(encoding@0.1.13)
       uuid: 9.0.1
     transitivePeerDependencies:
       - encoding
@@ -5241,9 +5385,9 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
-  gtoken@7.1.0:
+  gtoken@7.1.0(encoding@0.1.13):
     dependencies:
-      gaxios: 6.7.1
+      gaxios: 6.7.1(encoding@0.1.13)
       jws: 4.0.0
     transitivePeerDependencies:
       - encoding
@@ -5868,13 +6012,13 @@ snapshots:
       json-schema: 0.4.0
       verror: 1.10.0
 
-  juice@10.0.1:
+  juice@10.0.1(encoding@0.1.13):
     dependencies:
       cheerio: 1.0.0-rc.12
       commander: 6.2.1
       mensch: 0.3.4
       slick: 1.12.2
-      web-resource-inliner: 6.0.1
+      web-resource-inliner: 6.0.1(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
@@ -5931,6 +6075,8 @@ snapshots:
 
   lodash.camelcase@4.3.0:
     optional: true
+
+  lodash.chunk@4.2.0: {}
 
   lodash.clonedeep@4.5.0: {}
 
@@ -5993,6 +6139,13 @@ snapshots:
       lodash.clonedeep: 4.5.0
       lru-cache: 6.0.0
 
+  mailparser@0.6.2:
+    dependencies:
+      encoding: 0.1.13
+      mime: 1.6.0
+      mimelib: 0.3.1
+      uue: 3.1.2
+
   make-dir@3.1.0:
     dependencies:
       semver: 6.3.1
@@ -6040,10 +6193,17 @@ snapshots:
 
   mime@1.2.11: {}
 
+  mime@1.6.0: {}
+
   mime@2.6.0: {}
 
   mime@3.0.0:
     optional: true
+
+  mimelib@0.3.1:
+    dependencies:
+      addressparser: 1.0.1
+      encoding: 0.1.13
 
   mimic-fn@2.1.0: {}
 
@@ -6071,39 +6231,39 @@ snapshots:
 
   minipass@7.1.2: {}
 
-  mjml-accordion@4.15.3:
+  mjml-accordion@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-body@4.15.3:
+  mjml-body@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-button@4.15.3:
+  mjml-button@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-carousel@4.15.3:
+  mjml-carousel@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-cli@4.15.3:
+  mjml-cli@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       chokidar: 3.6.0
@@ -6112,149 +6272,149 @@ snapshots:
       js-beautify: 1.15.4
       lodash: 4.17.21
       minimatch: 9.0.5
-      mjml-core: 4.15.3
-      mjml-migrate: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
+      mjml-migrate: 4.15.3(encoding@0.1.13)
       mjml-parser-xml: 4.15.3
       mjml-validator: 4.15.3
       yargs: 17.7.2
     transitivePeerDependencies:
       - encoding
 
-  mjml-column@4.15.3:
+  mjml-column@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-core@4.15.3:
+  mjml-core@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       cheerio: 1.0.0-rc.12
       detect-node: 2.1.0
       html-minifier: 4.0.0
       js-beautify: 1.15.4
-      juice: 10.0.1
+      juice: 10.0.1(encoding@0.1.13)
       lodash: 4.17.21
-      mjml-migrate: 4.15.3
+      mjml-migrate: 4.15.3(encoding@0.1.13)
       mjml-parser-xml: 4.15.3
       mjml-validator: 4.15.3
     transitivePeerDependencies:
       - encoding
 
-  mjml-divider@4.15.3:
+  mjml-divider@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-group@4.15.3:
+  mjml-group@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-head-attributes@4.15.3:
+  mjml-head-attributes@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-head-breakpoint@4.15.3:
+  mjml-head-breakpoint@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-head-font@4.15.3:
+  mjml-head-font@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-head-html-attributes@4.15.3:
+  mjml-head-html-attributes@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-head-preview@4.15.3:
+  mjml-head-preview@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-head-style@4.15.3:
+  mjml-head-style@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-head-title@4.15.3:
+  mjml-head-title@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-head@4.15.3:
+  mjml-head@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-hero@4.15.3:
+  mjml-hero@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-image@4.15.3:
+  mjml-image@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-migrate@4.15.3:
+  mjml-migrate@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       js-beautify: 1.15.4
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
       mjml-parser-xml: 4.15.3
       yargs: 17.7.2
     transitivePeerDependencies:
       - encoding
 
-  mjml-navbar@4.15.3:
+  mjml-navbar@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
@@ -6265,82 +6425,82 @@ snapshots:
       htmlparser2: 9.1.0
       lodash: 4.17.21
 
-  mjml-preset-core@4.15.3:
+  mjml-preset-core@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
-      mjml-accordion: 4.15.3
-      mjml-body: 4.15.3
-      mjml-button: 4.15.3
-      mjml-carousel: 4.15.3
-      mjml-column: 4.15.3
-      mjml-divider: 4.15.3
-      mjml-group: 4.15.3
-      mjml-head: 4.15.3
-      mjml-head-attributes: 4.15.3
-      mjml-head-breakpoint: 4.15.3
-      mjml-head-font: 4.15.3
-      mjml-head-html-attributes: 4.15.3
-      mjml-head-preview: 4.15.3
-      mjml-head-style: 4.15.3
-      mjml-head-title: 4.15.3
-      mjml-hero: 4.15.3
-      mjml-image: 4.15.3
-      mjml-navbar: 4.15.3
-      mjml-raw: 4.15.3
-      mjml-section: 4.15.3
-      mjml-social: 4.15.3
-      mjml-spacer: 4.15.3
-      mjml-table: 4.15.3
-      mjml-text: 4.15.3
-      mjml-wrapper: 4.15.3
+      mjml-accordion: 4.15.3(encoding@0.1.13)
+      mjml-body: 4.15.3(encoding@0.1.13)
+      mjml-button: 4.15.3(encoding@0.1.13)
+      mjml-carousel: 4.15.3(encoding@0.1.13)
+      mjml-column: 4.15.3(encoding@0.1.13)
+      mjml-divider: 4.15.3(encoding@0.1.13)
+      mjml-group: 4.15.3(encoding@0.1.13)
+      mjml-head: 4.15.3(encoding@0.1.13)
+      mjml-head-attributes: 4.15.3(encoding@0.1.13)
+      mjml-head-breakpoint: 4.15.3(encoding@0.1.13)
+      mjml-head-font: 4.15.3(encoding@0.1.13)
+      mjml-head-html-attributes: 4.15.3(encoding@0.1.13)
+      mjml-head-preview: 4.15.3(encoding@0.1.13)
+      mjml-head-style: 4.15.3(encoding@0.1.13)
+      mjml-head-title: 4.15.3(encoding@0.1.13)
+      mjml-hero: 4.15.3(encoding@0.1.13)
+      mjml-image: 4.15.3(encoding@0.1.13)
+      mjml-navbar: 4.15.3(encoding@0.1.13)
+      mjml-raw: 4.15.3(encoding@0.1.13)
+      mjml-section: 4.15.3(encoding@0.1.13)
+      mjml-social: 4.15.3(encoding@0.1.13)
+      mjml-spacer: 4.15.3(encoding@0.1.13)
+      mjml-table: 4.15.3(encoding@0.1.13)
+      mjml-text: 4.15.3(encoding@0.1.13)
+      mjml-wrapper: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-raw@4.15.3:
+  mjml-raw@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-section@4.15.3:
+  mjml-section@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-social@4.15.3:
+  mjml-social@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-spacer@4.15.3:
+  mjml-spacer@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-table@4.15.3:
+  mjml-table@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml-text@4.15.3:
+  mjml-text@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
@@ -6348,22 +6508,22 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.27.6
 
-  mjml-wrapper@4.15.3:
+  mjml-wrapper@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
       lodash: 4.17.21
-      mjml-core: 4.15.3
-      mjml-section: 4.15.3
+      mjml-core: 4.15.3(encoding@0.1.13)
+      mjml-section: 4.15.3(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
 
-  mjml@4.15.3:
+  mjml@4.15.3(encoding@0.1.13):
     dependencies:
       '@babel/runtime': 7.27.6
-      mjml-cli: 4.15.3
-      mjml-core: 4.15.3
-      mjml-migrate: 4.15.3
-      mjml-preset-core: 4.15.3
+      mjml-cli: 4.15.3(encoding@0.1.13)
+      mjml-core: 4.15.3(encoding@0.1.13)
+      mjml-migrate: 4.15.3(encoding@0.1.13)
+      mjml-preset-core: 4.15.3(encoding@0.1.13)
       mjml-validator: 4.15.3
     transitivePeerDependencies:
       - encoding
@@ -6476,9 +6636,11 @@ snapshots:
     dependencies:
       lower-case: 1.1.4
 
-  node-fetch@2.7.0:
+  node-fetch@2.7.0(encoding@0.1.13):
     dependencies:
       whatwg-url: 5.0.0
+    optionalDependencies:
+      encoding: 0.1.13
 
   node-forge@1.3.1: {}
 
@@ -6764,11 +6926,11 @@ snapshots:
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
-  retry-request@7.0.2:
+  retry-request@7.0.2(encoding@0.1.13):
     dependencies:
       '@types/request': 2.48.13
       extend: 3.0.2
-      teeny-request: 9.0.0
+      teeny-request: 9.0.0(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -6818,6 +6980,23 @@ snapshots:
       on-finished: 2.4.1
       range-parser: 1.2.1
       statuses: 2.0.2
+    transitivePeerDependencies:
+      - supports-color
+
+  sendgrid-rest@2.6.1:
+    dependencies:
+      core-js: 3.45.0
+      dotenv: 4.0.0
+
+  sendgrid@5.2.3:
+    dependencies:
+      async.ensureasync: 0.5.2
+      async.queue: 0.5.2
+      bottleneck: 1.16.0
+      debug: 2.6.9
+      lodash.chunk: 4.2.0
+      mailparser: 0.6.2
+      sendgrid-rest: 2.6.1
     transitivePeerDependencies:
       - supports-color
 
@@ -7077,11 +7256,11 @@ snapshots:
       fast-fifo: 1.3.2
       streamx: 2.22.1
 
-  teeny-request@9.0.0:
+  teeny-request@9.0.0(encoding@0.1.13):
     dependencies:
       http-proxy-agent: 5.0.0
       https-proxy-agent: 5.0.1
-      node-fetch: 2.7.0
+      node-fetch: 2.7.0(encoding@0.1.13)
       stream-events: 1.0.5
       uuid: 9.0.1
     transitivePeerDependencies:
@@ -7223,6 +7402,11 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
+  uue@3.1.2:
+    dependencies:
+      escape-string-regexp: 1.0.5
+      extend: 3.0.2
+
   uuid@11.1.0: {}
 
   uuid@3.4.0: {}
@@ -7256,13 +7440,13 @@ snapshots:
     dependencies:
       makeerror: 1.0.12
 
-  web-resource-inliner@6.0.1:
+  web-resource-inliner@6.0.1(encoding@0.1.13):
     dependencies:
       ansi-colors: 4.1.3
       escape-goat: 3.0.0
       htmlparser2: 5.0.1
       mime: 2.6.0
-      node-fetch: 2.7.0
+      node-fetch: 2.7.0(encoding@0.1.13)
       valid-data-url: 3.0.1
     transitivePeerDependencies:
       - encoding

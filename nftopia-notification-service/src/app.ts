@@ -10,7 +10,7 @@ import { engine } from "express-handlebars";
 import htmlToText from "html-to-text";
 import path from "path";
 
-import { Notification } from "./models/Notification";
+import { Notification } from "./models/notification.model";
 import helmet from 'helmet';
 import morgan from 'morgan';
 import notificationRoutes from './routes/notification.routes';
@@ -82,7 +82,7 @@ app.get("/health", async (req, res) => {
   res.status(dbStatus === "connected" ? 200 : 503).json({
     status: dbStatus,
     timestamp: new Date().toISOString(),
-    service: "notification-service",
+    service: "nftopia-notification-service",
     database: dbStatus,
   });
 });
