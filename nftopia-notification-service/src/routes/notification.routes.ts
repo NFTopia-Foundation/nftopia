@@ -1,27 +1,31 @@
-import { sendPurchaseEmail } from '../controllers/notification.controller';
-import { unsubscribeEmail, getPreferenceCenter, updatePreferences, sendGridWebhook } from '../controllers/unsubscribe.controller';
 import { Router } from 'express';
 import { NotificationController } from '../controllers/notification.controller';
-import { authMiddleware } from '../middlewares/auth.middleware';
+import { validateBody } from '../middlewares/validate.middleware';
+import { createNotificationSchema, updateStatusSchema } from '../validators/notification.schema';
+
 
 const router = Router();
 
-const controller = new NotificationController();
+
+// Create
+router.post('/', validateBody(createNotificationSchema), NotificationController.create);
 
 
-router.post('/notifications/purchase', sendPurchaseEmail);
+// Read
+router.get('/:id', NotificationController.getById);
+router.get('/user/:userId', NotificationController.listByUser);
+router.get('/nft/:nftId', NotificationController.listByNFT);
 
-router.post('/notifications', authMiddleware, controller.createNotification);
-router.get('/notifications/:id', authMiddleware, controller.getNotification);
-// Add other routes for update, delete, etc.
 
-// Unsubscribe endpoints
-router.get('/unsubscribe/:token', unsubscribeEmail);
-router.get('/preferences/:token', getPreferenceCenter);
-router.post('/preferences/:token', updatePreferences);
+// Update
+router.patch('/:id/read', NotificationController.markAsRead);
+router.patch('/:id/status', validateBody(updateStatusSchema), NotificationController.updateStatus);
 
-// Webhook for SendGrid
-router.post('/webhook/sendgrid', sendGridWebhook);
+
+// Delete
+router.delete('/:id', NotificationController.softDelete);
+router.delete('/:id/hard', NotificationController.hardDelete);
+
 
 export default router;
 

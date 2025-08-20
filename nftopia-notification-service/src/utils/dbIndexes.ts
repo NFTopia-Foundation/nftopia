@@ -1,4 +1,4 @@
-import { Notification } from '../models/Notification';
+import { Notification } from '../models/notification.model';
 
 // Database index configuration for notifications collection
 export class NotificationIndexes {

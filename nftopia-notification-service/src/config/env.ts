@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export default {
-  PORT: process.env.PORT || 3002,
+  PORT: process.env.PORT || 9001,
   NODE_ENV: process.env.NODE_ENV || "development",
   emailRetry: {
     maxAttempts: parseInt(process.env.EMAIL_RETRY_MAX_ATTEMPTS || "3", 10),
