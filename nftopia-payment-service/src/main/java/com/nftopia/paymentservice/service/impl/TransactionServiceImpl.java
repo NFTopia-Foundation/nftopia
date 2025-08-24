@@ -1,154 +1,139 @@
 package com.nftopia.paymentservice.service.impl;
 
-import com.nftopia.paymentservice.dto.*;
-import com.nftopia.paymentservice.entity.Transaction;
-import com.nftopia.paymentservice.entity.IdempotencyKey;
-import com.nftopia.paymentservice.repository.TransactionRepository;
-import com.nftopia.paymentservice.repository.IdempotencyKeyRepository;
-import com.nftopia.paymentservice.service.TransactionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
-import com.nftopia.paymentservice.exception.TransactionNotFoundException;
-import com.nftopia.paymentservice.exception.EscrowUpdateException;
+import java.util.function.Supplier;
 
-import java.util.List;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import com.nftopia.paymentservice.dto.CreateTransactionRequest;
+import com.nftopia.paymentservice.dto.EscrowDetailsDTO;
+import com.nftopia.paymentservice.dto.TransactionFilter;
+import com.nftopia.paymentservice.dto.TransactionResponse;
+import com.nftopia.paymentservice.entity.Transaction;
+import com.nftopia.paymentservice.entity.enums.TransactionStatus;
+import com.nftopia.paymentservice.exception.NotFoundException;
+import com.nftopia.paymentservice.repository.TransactionRepository;
+import com.nftopia.paymentservice.service.IdempotencyService;
+import com.nftopia.paymentservice.service.TransactionService;
+import com.nftopia.paymentservice.service.spec.TransactionSpecifications;
+import com.nftopia.paymentservice.utils.ExplorerUrlBuilder;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
-    @Autowired
-    private TransactionRepository transactionRepository;
-    @Autowired
-    private IdempotencyKeyRepository idempotencyKeyRepository;
-    @Autowired
-    private ObjectMapper objectMapper;
 
-    @Override
-    public TransactionResponse createTransaction(CreateTransactionRequest request, String idempotencyKey) {
-        if (idempotencyKey != null && !idempotencyKey.isBlank()) {
-            String requestHash = Integer.toHexString(request.hashCode());
-            IdempotencyKey existing = idempotencyKeyRepository.findById(idempotencyKey).orElse(null);
-            if (existing != null) {
-                if (!existing.getRequestHash().equals(requestHash)) {
-                    throw new IllegalArgumentException("Idempotency-Key reuse with different request body");
-                }
-                try {
-                    return objectMapper.readValue(existing.getResponseJson(), TransactionResponse.class);
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to deserialize idempotent response");
-                }
-            }
-            // Not found, proceed and store
-            Transaction transaction = new Transaction();
-            transaction.setNftId(request.nftId());
-            transaction.setReceiverId(request.receiverId());
-            transaction.setAmount(request.amount());
-            transaction.setPaymentMethod(request.paymentMethod());
-            transaction.setStatus(TransactionStatus.PENDING);
-            transaction.setCreatedAt(Instant.now());
-            transaction.setUpdatedAt(Instant.now());
-            transaction = transactionRepository.save(transaction);
-            TransactionResponse response = toResponse(transaction);
-            try {
-                String responseJson = objectMapper.writeValueAsString(response);
-                IdempotencyKey keyEntity = new IdempotencyKey(idempotencyKey, requestHash, responseJson, Instant.now());
-                idempotencyKeyRepository.save(keyEntity);
-            } catch (Exception e) {
-                // Log and continue
-            }
-            return response;
-        } else {
-            // No idempotency key, process normally
-            Transaction transaction = new Transaction();
-            transaction.setNftId(request.nftId());
-            transaction.setReceiverId(request.receiverId());
-            transaction.setAmount(request.amount());
-            transaction.setPaymentMethod(request.paymentMethod());
-            transaction.setStatus(TransactionStatus.PENDING);
-            transaction.setCreatedAt(Instant.now());
-            transaction.setUpdatedAt(Instant.now());
-            transaction = transactionRepository.save(transaction);
-            return toResponse(transaction);
-        }
+    private final TransactionRepository repository;
+    private final IdempotencyService idempotencyService;
+    private final ExplorerUrlBuilder explorerUrlBuilder;
+
+    public TransactionServiceImpl(TransactionRepository repository,
+                                  IdempotencyService idempotencyService,
+                                  ExplorerUrlBuilder explorerUrlBuilder) {
+        this.repository = repository;
+        this.idempotencyService = idempotencyService;
+        this.explorerUrlBuilder = explorerUrlBuilder;
     }
+
+    @Autowired 
+    WebClient webClient; 
+
+   
+    @Override
+    public TransactionResponse createTransaction(CreateTransactionRequest req) {
+    Supplier<TransactionResponse> lambda = () -> {
+        Transaction tx = new Transaction();
+        tx.setBuyerId(req.receiverId());
+        tx.setAuctionId(req.auctionId());
+        tx.setTransactionHash(req.transactionHash());
+        tx.setSellerId(resolveSellerId(req.nftId()));
+        tx.setNftId(req.nftId());
+        tx.setAmount(req.amount().setScale(18, BigDecimal.ROUND_UNNECESSARY));
+        tx.setPaymentMethod(req.paymentMethod());
+        tx.setStatus(TransactionStatus.PENDING);
+        tx.setEscrowDetails(toEscrowJson(req.escrowDetails()));
+        tx.setIdempotencyKey(req.idempotencyKey());
+
+        Transaction saved = repository.save(tx);
+        return this.toResponse(saved);
+    };
+
+    try {
+        return idempotencyService.execute(req.idempotencyKey(), lambda);
+    } catch (DataIntegrityViolationException e) {
+        throw new IllegalStateException(
+            "Transaction with hash " + req.transactionHash() + " already exists.", e
+        );
+    } catch (ConstraintViolationException e) {
+        throw new IllegalArgumentException("Invalid input: " + e.getMessage(), e);
+    } 
+}
+
 
     @Override
     public TransactionResponse getTransaction(UUID id) {
-        Optional<Transaction> transaction = transactionRepository.findById(id);
-        if (transaction.isEmpty()) {
-            throw new TransactionNotFoundException("Transaction not found");
-        }
-        return toResponse(transaction.get());
+        Transaction tx = repository.findById(id)
+            .orElseThrow(() -> new NotFoundException("Transaction not found"));
+  
+      return this.toResponse(tx);
     }
+
+   
+    @Override
+    public Page<TransactionResponse> filterTransactions(TransactionFilter filter, Pageable pageable) {
+    // start with a base "always true" specification
+    Specification<Transaction> spec = (root, query, cb) -> cb.conjunction();
+
+    if (filter.nftId() != null) {
+        spec = spec.and(TransactionSpecifications.hasNftId(filter.nftId()));
+    }
+    if (filter.userId() != null) {
+        spec = spec.and(TransactionSpecifications.hasUserId(filter.userId()));
+    }
+    if (filter.status() != null) {
+        spec = spec.and(TransactionSpecifications.hasStatus(filter.status()));
+    }
+
+    return repository.findAll(spec, pageable).map(this::toResponse);
+}
 
     @Override
-    public Page<TransactionResponse> getTransactions(UUID nftId, UUID userId, TransactionStatus status, int page, int size) {
-        Page<Transaction> transactions;
-        if (nftId != null && userId != null && status != null) {
-            // Fetch all and filter in memory (not optimal for large datasets)
-            List<Transaction> all = transactionRepository.findAll();
-            List<Transaction> filtered = all.stream()
-                .filter(t -> t.getNftId().equals(nftId) && t.getReceiverId().equals(userId) && t.getStatus() == status)
-                .toList();
-            int start = Math.min(page * size, filtered.size());
-            int end = Math.min(start + size, filtered.size());
-            List<Transaction> pageList = filtered.subList(start, end);
-            return new PageImpl<>(pageList, PageRequest.of(page, size), filtered.size()).map(this::toResponse);
-        } else if (nftId != null && userId != null) {
-            transactions = transactionRepository.findByNftIdAndReceiverId(nftId, userId, PageRequest.of(page, size));
-        } else if (nftId != null && status != null) {
-            List<Transaction> all = transactionRepository.findByNftId(nftId, PageRequest.of(page, size)).getContent();
-            List<Transaction> filtered = all.stream().filter(t -> t.getStatus() == status).toList();
-            return new PageImpl<>(filtered, PageRequest.of(page, size), filtered.size()).map(this::toResponse);
-        } else if (userId != null && status != null) {
-            List<Transaction> all = transactionRepository.findByReceiverId(userId, PageRequest.of(page, size)).getContent();
-            List<Transaction> filtered = all.stream().filter(t -> t.getStatus() == status).toList();
-            return new PageImpl<>(filtered, PageRequest.of(page, size), filtered.size()).map(this::toResponse);
-        } else if (nftId != null) {
-            transactions = transactionRepository.findByNftId(nftId, PageRequest.of(page, size));
-        } else if (userId != null) {
-            transactions = transactionRepository.findByReceiverId(userId, PageRequest.of(page, size));
-        } else if (status != null) {
-            transactions = transactionRepository.findByStatus(status, PageRequest.of(page, size));
-        } else {
-            transactions = transactionRepository.findAll(PageRequest.of(page, size));
-        }
-        return transactions.map(this::toResponse);
+    public TransactionResponse updateEscrow(UUID id, EscrowDetailsDTO escrowDetails) {
+        Transaction tx = repository.findById(id).orElseThrow(() -> new NotFoundException("Transaction not found"));
+        tx.setEscrowDetails(toEscrowJson(escrowDetails));
+        Transaction saved = repository.save(tx);
+        return toResponse(saved);
     }
 
-    @Override
-    public TransactionResponse updateEscrowStatus(UUID id, EscrowDetailsDTO escrowDetails) {
-        Optional<Transaction> transactionOpt = transactionRepository.findById(id);
-        if (transactionOpt.isEmpty()) {
-            throw new TransactionNotFoundException("Transaction not found");
-        }
-        Transaction transaction = transactionOpt.get();
-        try {
-            transaction.setEscrowStatus(escrowDetails.escrowStatus());
-            transaction.setEscrowExpiration(escrowDetails.expiration());
-            transaction.setDisputed(escrowDetails.isDisputed());
-            transaction.setStatus(TransactionStatus.ESCROW);
-            transaction.setUpdatedAt(Instant.now());
-            transaction = transactionRepository.save(transaction);
-            return toResponse(transaction);
-        } catch (Exception e) {
-            throw new EscrowUpdateException("Failed to update escrow status: " + e.getMessage());
-        }
+    private Map<String, Object> toEscrowJson(EscrowDetailsDTO dto) {
+        if (dto == null) return null;
+        Map<String, Object> m = new HashMap<>();
+        m.put("releaseDate", dto.releaseDate());
+        m.put("conditions", dto.conditions());
+        return m;
     }
 
-    private TransactionResponse toResponse(Transaction transaction) {
-        return new TransactionResponse(
-                transaction.getId(),
-                transaction.getStatus(),
-                transaction.getCreatedAt(),
-                null // TODO: Set blockchainExplorerUrl if available
-        );
+    private UUID resolveSellerId(UUID nftId) {
+    return webClient.get()
+            .uri("http://localhost:9000/nfts/{id}/owner", nftId)
+            .retrieve()
+            .bodyToMono(UUID.class)
+            .onErrorReturn(UUID.randomUUID())   // fallback on error
+            .block();
+}
+
+
+
+    private TransactionResponse toResponse(Transaction t) {
+        String explorerUrl = t.getTransactionHash() == null ? null : explorerUrlBuilder.tx(t.getTransactionHash());
+        return new TransactionResponse(t.getId(), t.getStatus(), t.getCreatedAt(), explorerUrl);
     }
-} 
+}

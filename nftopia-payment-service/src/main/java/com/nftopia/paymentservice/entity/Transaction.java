@@ -1,108 +1,206 @@
 package com.nftopia.paymentservice.entity;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import com.nftopia.paymentservice.entity.enums.PaymentMethod;
+import com.nftopia.paymentservice.entity.enums.TransactionStatus;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Type;
+
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
-import javax.persistence.*;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 
 @Entity
-@Table(name = "transactions")
+@Table(name = "transaction", schema = "nftopia_payment_service",
+       indexes = {
+           @Index(name = "idx_transaction_status", columnList = "status"),
+           @Index(name = "idx_transaction_nft_id", columnList = "nftId"),
+           @Index(name = "idx_transaction_created_at", columnList = "createdAt")
+       },
+       uniqueConstraints = {
+           @UniqueConstraint(name = "uk_transaction_idempotency_key", columnNames = {"idempotencyKey"})
+       }
+)
 public class Transaction {
-    @Id
 
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id
+    @GeneratedValue
     private UUID id;
+
+    @Column(nullable = false)
+    private UUID buyerId;
+
+    @Column(nullable = false)
+    private UUID sellerId;
 
     @Column(nullable = false)
     private UUID nftId;
 
     @Column(nullable = false)
-    private UUID receiverId;
+    private UUID auctionId;
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false)
-    private Long userId;
-
-
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 36, scale = 18)
     private BigDecimal amount;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentMethod paymentMethod;
+
+    @Column(nullable = false, unique = true)
+    private String transactionHash; 
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private com.nftopia.paymentservice.dto.PaymentMethod paymentMethod;
+    private TransactionStatus status = TransactionStatus.PENDING;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private com.nftopia.paymentservice.dto.TransactionStatus status;
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Object> escrowDetails;
 
-    @Column(nullable = false)
-    private Instant createdAt;
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Object> royaltySplit;
 
-    @Column(nullable = false)
-    private Instant updatedAt;
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Object> fraudMetadata;
 
-    @Column
-    private String escrowStatus;
-
-    @Column
-    private Instant escrowExpiration;
-
-    @Column
-    private boolean isDisputed;
-
-    // Getters and setters
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-    public UUID getNftId() { return nftId; }
-    public void setNftId(UUID nftId) { this.nftId = nftId; }
-    public UUID getReceiverId() { return receiverId; }
-    public void setReceiverId(UUID receiverId) { this.receiverId = receiverId; }
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
-    public com.nftopia.paymentservice.dto.PaymentMethod getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(com.nftopia.paymentservice.dto.PaymentMethod paymentMethod) { this.paymentMethod = paymentMethod; }
-    public com.nftopia.paymentservice.dto.TransactionStatus getStatus() { return status; }
-    public void setStatus(com.nftopia.paymentservice.dto.TransactionStatus status) { this.status = status; }
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
-    public Instant getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
-    public String getEscrowStatus() { return escrowStatus; }
-    public void setEscrowStatus(String escrowStatus) { this.escrowStatus = escrowStatus; }
-    public Instant getEscrowExpiration() { return escrowExpiration; }
-    public void setEscrowExpiration(Instant escrowExpiration) { this.escrowExpiration = escrowExpiration; }
-    public boolean isDisputed() { return isDisputed; }
-    public void setDisputed(boolean disputed) { isDisputed = disputed; }
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt = Instant.now();
 
     @Column(nullable = false)
-    private String currency;
+    private Instant updatedAt = Instant.now();
 
-    @Column(nullable = false)
-    private String deviceId;
+    @Column(nullable = false, length = 64)
+    private String idempotencyKey;
 
-    @Column(nullable = false)
-    private String ipAddress;
+    @PreUpdate
+    public void touch() {
+        this.updatedAt = Instant.now();
+    }
 
-    @Column(nullable = false)
-    private String billingAddress;
+    public Transaction() {
+        }
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TransactionStatus status;
+    public UUID getId() {
+        return this.id;
+    }
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    public UUID getBuyerId() {
+        return this.buyerId;
+    }
 
-    // Getters and setters omitted for brevity
+    public void setBuyerId(UUID buyerId) {
+        this.buyerId = buyerId;
+    }
 
-} 
+    public UUID getSellerId() {
+        return this.sellerId;
+    }
+
+    public void setSellerId(UUID sellerId) {
+        this.sellerId = sellerId;
+    }
+
+    public UUID getNftId() {
+        return this.nftId;
+    }
+
+    public void setNftId(UUID nftId) {
+        this.nftId = nftId;
+    }
+
+    public UUID getAuctionId() {
+        return this.auctionId;
+    }
+
+    public void setAuctionId(UUID auctionId) {
+        this.auctionId = auctionId;
+    }
+
+    public BigDecimal getAmount() {
+        return this.amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public PaymentMethod getPaymentMethod() {
+        return this.paymentMethod;
+    }
+
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getTransactionHash() {
+        return this.transactionHash;
+    }
+
+    public void setTransactionHash(String transactionHash) {
+        this.transactionHash = transactionHash;
+    }
+
+    public TransactionStatus getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(TransactionStatus status) {
+        this.status = status;
+    }
+
+    public Map<String,Object> getEscrowDetails() {
+        return this.escrowDetails;
+    }
+
+    public void setEscrowDetails(Map<String,Object> escrowDetails) {
+        this.escrowDetails = escrowDetails;
+    }
+
+    public Map<String,Object> getRoyaltySplit() {
+        return this.royaltySplit;
+    }
+
+    public void setRoyaltySplit(Map<String,Object> royaltySplit) {
+        this.royaltySplit = royaltySplit;
+    }
+
+    public Map<String,Object> getFraudMetadata() {
+        return this.fraudMetadata;
+    }
+
+    public void setFraudMetadata(Map<String,Object> fraudMetadata) {
+        this.fraudMetadata = fraudMetadata;
+    }
+
+    public Instant getCreatedAt() {
+        return this.createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return this.updatedAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getIdempotencyKey() {
+        return this.idempotencyKey;
+    }
+
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
+    }
+
+}

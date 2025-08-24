@@ -37,6 +37,7 @@ dependencies {
     // Database
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+    implementation 'com.vladmihalcea:hibernate-types-60:2.21.1'
 
     
     // Security

@@ -1,39 +1,46 @@
 package com.nftopia.paymentservice.entity;
 
-import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.UUID;
+
+import org.hibernate.annotations.CreationTimestamp;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "idempotency_keys")
-public class IdempotencyKey {
-    @Id
-    @Column(name = "idempotency_key", nullable = false, unique = true)
-    private String idempotencyKey;
-
-    @Column(nullable = false)
-    private String requestHash;
-
-    @Lob
-    @Column(nullable = false)
-    private String responseJson;
-
-    @Column(nullable = false)
-    private Instant createdAt;
-
-    public IdempotencyKey() {}
-    public IdempotencyKey(String idempotencyKey, String requestHash, String responseJson, Instant createdAt) {
-        this.idempotencyKey = idempotencyKey;
-        this.requestHash = requestHash;
-        this.responseJson = responseJson;
-        this.createdAt = createdAt;
+@Table(
+    name = "idempotency_keys",
+    schema = "nftopia_payment_service",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_idempotency_key", columnNames = "keyValue")
     }
-    // Getters and setters
-    public String getIdempotencyKey() { return idempotencyKey; }
-    public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
-    public String getRequestHash() { return requestHash; }
-    public void setRequestHash(String requestHash) { this.requestHash = requestHash; }
-    public String getResponseJson() { return responseJson; }
-    public void setResponseJson(String responseJson) { this.responseJson = responseJson; }
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
-} 
+)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class IdempotencyKey {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private UUID id;
+
+    @Column(nullable = false, unique = true, length = 255)
+    private String key;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
+}
