@@ -636,7 +636,9 @@ class NFTMint(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'nftopia_analytics"."nft_mints'   # schema-qualified table name
+        db_table = 'nftopia_analytics.nft_mints'   # schema-qualified table name
+        # db_table = 'nftopia_analytics"."nft_mints'   # schema-qualified table name
+
 
 
 class NFTSale(models.Model):
@@ -652,7 +654,9 @@ class NFTSale(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'nftopia_analytics"."nft_sales'
+        db_table = 'nftopia_analytics.nft_sales'
+        # db_table = 'nftopia_analytics"."nft_sales'
+
 
 
 class NFTTransfer(models.Model):
@@ -665,4 +669,6 @@ class NFTTransfer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'nftopia_analytics"."nft_transfers'
+        db_table = 'nftopia_analytics.nft_transfers'
+        # db_table = 'nftopia_analytics"."nft_transfers'
+

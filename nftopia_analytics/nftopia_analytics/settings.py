@@ -722,6 +722,8 @@ INSTALLED_APPS = [
     'rest_framework',                    # djangorestframework
     'rest_framework_simplejwt',           # djangorestframework_simplejwt
     'drf_spectacular',                   # drf-spectacular
+    'django_extensions',
+
     
     # Django Add-ons
     # 'django_ratelimit',                  # django-ratelimit

@@ -39,3 +39,6 @@ drf-spectacular
 
 # IPFS
 ipfshttpclient
+
+confluent-kafka
+django-extensions
