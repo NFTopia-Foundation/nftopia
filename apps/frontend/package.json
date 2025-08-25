@@ -33,6 +33,7 @@
     "localforage": "^1.10.0",
     "lucide-react": "^0.446.0",
     "next": "13.5.1",
+    "next-pwa": "^5.6.0",
     "postcss": "8.4.30",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -45,6 +46,7 @@
     "tailwindcss-animate": "^1.0.7",
     "use-sound": "^5.0.0",
     "uuid": "^11.1.0",
+    "workbox-webpack-plugin": "^7.3.0",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
