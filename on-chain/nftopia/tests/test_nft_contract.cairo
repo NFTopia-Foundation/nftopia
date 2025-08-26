@@ -1,13 +1,15 @@
 use core::array::ArrayTrait;
 use core::byte_array::ByteArray;
 use core::result::ResultTrait;
-use nftopia::nft_contract::{INftContractDispatcher, INftContractDispatcherTrait};
+use nftopia::contracts::nft_contract::{INftContractDispatcher, INftContractDispatcherTrait};
 use snforge_std::{
     ContractClassTrait, DeclareResultTrait, declare, start_cheat_caller_address,
     stop_cheat_caller_address,
 };
 #[feature("deprecated-starknet-consts")]
-use starknet::{ContractAddress, contract_address_const};
+use starknet::ContractAddress;
+use starknet::contract_address::contract_address_const;
+
 
 // Constants for testing
 const TOKEN_ID_1: u256 = 1;

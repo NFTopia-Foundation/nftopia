@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FirebaseService } from '../firebase/firebase.service';
 import { NftStorageService } from '../nftstorage/nftstorage.service';
 import { NFT } from './entities/nft.entity';
 import { NFTMetadata } from '../interfaces/NFTMetadata';
-import { MintNftDto } from './dto/mint-nft.dto';
+import { CreateNftFromUrlDto, MintNftDto } from './dto/mint-nft.dto';
 import { User } from '../users/entities/user.entity';
 import { Collection } from '../collections/entities/collection.entity';
 
@@ -58,6 +58,43 @@ export class NftsService {
       description: dto.description,
       imageUrl: firebaseUrl,
       ipfsUrl: ipfsUrl,
+      metadata: nftMetadata,
+      price: dto.price,
+      currency: dto.currency || 'STK',
+      owner,
+      collection,
+      isListed: false,
+    });
+
+    return await this.nftRepo.save(nft);
+  }
+
+  async mintNftFromUrl(dto: CreateNftFromUrlDto, userId: string, collectionId: string) {
+    if (!this.firebase.isValidUrl(dto.imageUrl)) {
+      throw new BadRequestException('Invalid image URL');
+    }
+
+    // Prepare metadata for NFT.Storage
+    const nftMetadata: NFTMetadata = {
+      name: dto.title,
+      description: dto.description,
+      image: dto.imageUrl,
+      attributes: []
+    };
+
+    // Upload to NFT.Storage? do we then still send over the image buffer?\
+    // const ipfsUrl = await this.nftStorage.uploadToIPFS(fileBuffer, fileName, nftMetadata);
+
+    // Get owner and collection entities
+    const owner = await this.userRepo.findOneBy({ id: userId });
+    const collection = await this.collectionRepo.findOneBy({ id: collectionId });
+
+    // Save to database
+    const nft = this.nftRepo.create({
+      tokenId: `TKN-${Date.now()}`,
+      title: dto.title,
+      description: dto.description,
+      imageUrl: dto.imageUrl,
       metadata: nftMetadata,
       price: dto.price,
       currency: dto.currency || 'STK',

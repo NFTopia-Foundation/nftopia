@@ -1,66 +1,25 @@
 version: '3.8'
 
 services:
-  django:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
     ports:
-      - "8000:8000"
-      - "8002:8002" 
-  timescaledb:
-    image: timescale/timescaledb:latest-pg14
-    container_name: nftopia_timescaledb
-    ports:
-      - "5432:5432"
+      - "2181:2181"
     environment:
-      POSTGRES_DB: nftopia_analytics
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      TIMESCALEDB_TELEMETRY: off
-    volumes:
-      - timescaledb_data:/var/lib/postgresql/data
-      - ./scripts/init_timescale.sql:/docker-entrypoint-initdb.d/init_timescale.sql
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
 
-  redis:
-    image: redis:7-alpine
-    container_name: nftopia_redis
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
     ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-  celery:
-    build: .
-    command: celery -A nftopia_analytics worker --loglevel=info
-    depends_on:
-      - redis
-      - db
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: nftopia_pgadmin
-    ports:
-      - "8080:80"
+      - "9092:9092"
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@nftopia.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
-      - timescaledb
-    restart: unless-stopped
-
-volumes:
-  timescaledb_data:
-  redis_data:
-  pgadmin_data: 
+      - zookeeper

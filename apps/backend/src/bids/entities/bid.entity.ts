@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, Up
 import { User } from '../../users/entities/user.entity';
 import { Auction } from '../../auctions/entities/auction.entity';
 
-@Entity()
+@Entity({ schema: 'nftopia_marketplace_service' })
 export class Bid {
   @PrimaryGeneratedColumn('uuid')
   id: string;

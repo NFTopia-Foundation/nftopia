@@ -2,11 +2,11 @@ import subprocess
 from getpass import getpass
 
 # === CONFIGURATION ===
-account_path = "~/.starkli-accounts/my-oz-account.json"
-keystore_path = "~/.starkli-wallets/my-keystore.json"
+account_path = "~/.starkli-accounts/nftopia_account2.json"
+keystore_path = "~/.starkli-wallets/nftopia_wallet2.json"
 network = "sepolia"
 fee_token = "strk"
-contract_class_path = "/home/seyi/Documents/nftopia/nftopia/on-chain/abi/nftopia_CollectionFactory.contract_class.json"
+contract_class_path = "/home/seyi/Documents/nftopia/nftopia/on-chain/abi/nftopia_TransactionModule.contract_class.json"
 
 # === Get password securely ===
 keystore_password = getpass("Enter keystore password: ")
@@ -17,7 +17,7 @@ declare_cmd = [
     "--account", account_path,
     "--keystore", keystore_path,
     "--network", network,
-    "--fee-token", fee_token,
+    # "--fee-token", fee_token,
     contract_class_path
 ]
 
@@ -47,7 +47,7 @@ deploy_cmd = [
     "--account", account_path,
     "--keystore", keystore_path,
     "--network", network,
-    "--fee-token", fee_token,
+    # "--fee-token", fee_token,
     class_hash
 ]
 
@@ -66,5 +66,4 @@ if deploy_proc.returncode != 0:
 
 print("✅ Deploy successful:\n", deploy_proc.stdout)
 
-# class hash: 0x03e3fa5c4d032cbed3d2f8e36768c4c1ef384331f3c9aabad7463662e6d19a1b
-# deploy address: 0x04cec950e6de7ec09fd09278fda5b55d434079b5058c6c1ea3c41e5289443b71
+

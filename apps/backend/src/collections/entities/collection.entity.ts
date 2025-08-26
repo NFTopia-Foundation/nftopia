@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDat
 import { User } from '../../users/entities/user.entity'; 
 import { NFT } from '../../nfts/entities/nft.entity'; 
 
-@Entity()
+@Entity({ schema: 'nftopia_user_service' })
 export class Collection {
   @PrimaryGeneratedColumn('uuid')
   id: string;

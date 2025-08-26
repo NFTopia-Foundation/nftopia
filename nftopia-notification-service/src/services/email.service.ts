@@ -1,95 +1,70 @@
-import { htmlToText } from 'html-to-text';
-import app from '../app';
-import { generateToken } from '../utils/token';
-import { PurchaseData } from '../types/email';
-import nodemailer from 'nodemailer';
-import config from '../config/env'; // Import config
+import sgMail from '@sendgrid/mail';
+import { sendGridConfig, EmailTemplateKey } from '../config/email';
+
+sgMail.setApiKey(sendGridConfig.apiKey);
 
 export class EmailService {
-  private transporter = nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE || 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
+  static async sendTemplateEmail(
+    to: string,
+    templateKey: EmailTemplateKey,
+    dynamicData: Record<string, any>,
+    notificationId?: string
+  ): Promise<void> {
+    const templateId = sendGridConfig.templates[templateKey];
 
-  async sendPurchaseConfirmation(email: string, data: PurchaseData) {
-    try {
-      const html = await this.renderTemplate('purchase-confirmation/html', {
-        ...data,
-        theme: 'dark',
-        txHashShort: data.txHash.substring(0, 12) + '...',
-      });
-
-      const text = htmlToText(html);
-
-      return this.sendEmail({
-        to: email,
-        subject: `NFT Purchase Confirmation: ${data.nftName}`,
-        html,
-        text,
-      });
-    } catch (error) {
-      console.error('Template rendering failed:', error);
-      throw new Error('Failed to generate email content');
+    if (!templateId) {
+      const availableKeys = Object.keys(sendGridConfig.templates).join(', ');
+      throw new Error(
+        `[EmailService] Invalid template key: "${templateKey}". Available keys: ${availableKeys}`
+      );
     }
-  }
 
-  private async renderTemplate(template: string, data: object): Promise<string> {
-    return new Promise((resolve, reject) => {
-      app.render(template, data, (err, html) => {
-        if (err) reject(err);
-        resolve(html || ''); // Ensure we always return a string
-      });
-    });
-  }
+    const msg: any = {
+      to,
+      from: sendGridConfig.fromEmail,
+      templateId,
+      dynamicTemplateData: dynamicData,
+      mailSettings: {
+        sandboxMode: { enable: sendGridConfig.sandboxMode }
+      },
+    };
 
-  private async sendEmail(options: {
-    to: string;
-    subject: string;
-    html: string;
-    text: string;
-  }): Promise<void> {
-    try {
-      await this.transporter.sendMail({
-        from: `"NFTopia" <${process.env.EMAIL_FROM || 'noreply@nftopia.com'}>`,
-        ...options,
-      });
-    } catch (error) {
-      console.error('Email sending failed:', error);
-      throw new Error('Failed to send email');
+    if (notificationId) {
+      msg.customArgs = { notificationId };
     }
-  }
 
-  async sendEmailWithUnsubscribe(options: {
-    to: string;
-    template: string;
-    subject?: string;  // Add this line
-    isCritical?: boolean;
-    isTransactional?: boolean;
-  }) {
-    const unsubscribeToken = generateToken({
-      email: options.to,
-      notificationType: options.template
-    });
+    // Debug the payload we’re about to send
+    console.log('[EmailService] about to send:', JSON.stringify({
+      to: msg.to, from: msg.from, templateId: msg.templateId,
+      hasDynamicData: !!msg.dynamicTemplateData, sandbox: sendGridConfig.sandboxMode,
+      customArgs: msg.customArgs
+    }, null, 2));
 
-    const unsubscribeUrl = `${config.BASE_URL}/unsubscribe/${unsubscribeToken}`;
-    const preferenceCenterUrl = `${config.BASE_URL}/preferences/${unsubscribeToken}`;
-
-    const html = await this.renderTemplate(options.template, { // Fixed: using this.renderTemplate
-      ...options,
-      unsubscribeUrl,
-      preferenceCenterUrl
-    });
-
-    const text = htmlToText(html);
-
-    return this.sendEmail({
-      to: options.to,
-      subject: options.subject || 'Notification from NFTopia',
-      html,
-      text,
-    });
+    try {
+      await sgMail.send(msg);
+      console.log(`[EmailService] Email sent to ${to} with "${templateKey}"`);
+    } catch (err: any) {
+      console.error('[EmailService] Error sending email:', err.response?.body?.errors || err.message);
+      throw new Error('Email sending failed');
+    }
   }
 }
+
+
+//Test with curl
+// curl -X POST http://localhost:9001/api/notifications   -H "Content-Type: application/json"   -d '{
+//   "userId": "user-123",
+//   "type": "sale",
+//   "content": "Your CryptoCat #42 has been sold for 3.5 STRK!",
+//   "channels": ["email"],
+//   "userEmail": "deextralucid@gmail.com",
+//   "metadata": {
+//     "nftId": "nft-42",
+//     "txHash": "0x123abc",
+//     "price": "3.5 STRK",
+//     "nftName": "CryptoCat #42"
+//   }
+// }'
+
+///Reponse from curl
+///{"userId":"user-123","type":"sale","status":"pending","content":"Your CryptoCat #42 has been sold for 3.5 ETH!","channels":["email"],"metadata":{"nftId":"nft-42","txHash":"0x123abc"},"_id":"68a65c4e45316975de9eabf9","createdAt":"2025-08-20T23:37:50.977Z","updatedAt":"2025-08-20T23:37:50.977Z","__v":0}

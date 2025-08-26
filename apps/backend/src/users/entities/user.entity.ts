@@ -7,7 +7,7 @@ import { Transaction } from '../../transactions/entities/transaction.entity';
 
 
 
-@Entity()
+@Entity({ schema: 'nftopia_user_service' })
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
