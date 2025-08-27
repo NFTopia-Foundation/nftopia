@@ -33,6 +33,7 @@ export default function LoginPage() {
   const [walletType, setWalletType] = useState<"argentx" | "braavos" | null>(
     null
   );
+  const [network, setNetwork] = useState<"mainnet" | "sepolia">("sepolia");
 
   const { t, locale } = useTranslation();
 
@@ -61,6 +62,16 @@ export default function LoginPage() {
 
       if (!detectedType) {
         throw new Error("Unsupported wallet type");
+      }
+
+      // Detect network based on chain ID
+      try {
+        const chainId = await account.getChainId();
+        const detectedNetwork = chainId === "0x534e5f4d41494e" ? "mainnet" : "sepolia";
+        setNetwork(detectedNetwork);
+      } catch (err) {
+        console.warn("Could not detect network, defaulting to sepolia:", err);
+        setNetwork("sepolia");
       }
 
       setWalletAddress(address);
@@ -118,7 +129,7 @@ export default function LoginPage() {
         domain: {
           name: "NFTopia",
           version: "1",
-          chainId: "SN_SEPOLIA",
+          chainId: network === "mainnet" ? "SN_MAIN" : "SN_SEPOLIA",
         },
         message: { nonce },
       };
@@ -136,7 +147,7 @@ export default function LoginPage() {
         throw new Error("Unsupported wallet type");
       }
 
-      await verifySignature(walletAddress, signature, nonce, walletType, locale);
+      await verifySignature(walletAddress, signature, nonce, walletType, network, locale);
     } catch (err) {
       console.error("Login failed:", err);
       setLocalError(err instanceof Error ? err.message : "Login failed");
