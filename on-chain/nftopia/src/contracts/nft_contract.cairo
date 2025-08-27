@@ -164,6 +164,7 @@ pub mod NftContract {
         creators: Map<u256, ContractAddress>,
         // Token collection mapping: token_id => collection
         collections: Map<u256, ContractAddress>,
+
         #[substorage(v0)]
         reentrancy_storage: ReentrancyGuardComponent::Storage,
         #[substorage(v0)]
@@ -268,7 +269,6 @@ pub mod NftContract {
         fn exists(self: @ContractState, token_id: u256) -> bool {
             InternalImpl::_exists(self, token_id)
         }
-
         // State-changing functions
 
         // Mint a new token

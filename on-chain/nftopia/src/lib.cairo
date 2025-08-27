@@ -5,6 +5,9 @@ pub mod contracts {
     pub mod transaction_contract;
     pub mod marketplace_settlement_contract;
     pub mod paymaster_contract;
+    pub mod nftopia_token;
+    pub mod dao_governance;
+    pub mod dao_treasury;
 }
 pub mod components {
     pub mod reentrancy_guard_component;
