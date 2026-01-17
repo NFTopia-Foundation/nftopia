@@ -1,6 +1,0 @@
-{
-  "/not-found": "app/not-found.js",
-  "/[locale]/page": "app/[locale]/page.js",
-  "/[locale]/auth/register/page": "app/[locale]/auth/register/page.js",
-  "/[locale]/auth/login/page": "app/[locale]/auth/login/page.js"
-}
