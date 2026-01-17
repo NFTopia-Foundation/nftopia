@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="nftopia-frontend/public/nftopia-04.svg" alt="NFTopia" width="420" />
+</p>
+
 # NFTopia
 
 NFTopia is a revolutionary decentralized platform for NFT storage, management, and trading built on the Stellar blockchain. It empowers creators and collectors to securely mint, store, showcase, and trade unique digital assets directly on-chain, leveraging Stellar's fast, low-cost transactions and Soroban smart contracts for scalability and security. By integrating seamless wallet connections and a user-friendly interface, NFTopia eliminates intermediaries, ensuring transparency, immutability, and global accessibility for NFTs.
@@ -32,14 +36,15 @@ NFTopia is organized as a monorepo to streamline development across frontend, ba
 
 ```
 nftopia/
-├── apps/
-│   ├── nftopia-marketplace-service/  # Handles NFT listings, auctions, and trades
-│   ├── nftopia-mobile-app/           # React Native app for mobile users
-│   ├── nftopia-notification-service/ # Push/email notifications for events
-│   ├── nftopia-payment-service/      # Stellar-integrated payment processing
-│   └── nftopia-stellar/              # Soroban Rust contracts and Stellar SDK utils
+├── nftopia-frontend/ 
+├── nftopia-backend/ 
+├── nftopia-marketplace-service/  # Handles NFT listings, auctions, and trades
+├── nftopia-mobile-app/           # React Native app for mobile users
+├── nftopia-notification-service/ # Push/email notifications for events
+├── nftopia-payment-service/      # Stellar-integrated payment processing
+├── nftopia-stellar/ # Soroban Rust contracts and Stellar SDK utils
 ├── nftopia_analytics/                # Event tracking, dashboards, and Kafka integration
-├── on-chain/                         # Legacy contracts (migrating to nftopia-stellar)
+├── nftopia-starknet/                 # Legacy contracts (built with Cairo for Starknet)
 ├── packages/                         # Shared utilities (e.g., UI components, Stellar helpers)
 ├── .pnpm-workspace.yaml              # Workspace configuration for pnpm
 ├── turbo.json                        # Build and dev pipelines
