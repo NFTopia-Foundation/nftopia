@@ -1,6 +1,9 @@
 packages:
-  - "apps/frontend"
-  - "apps/backend"
-  - "on-chain"
+  - "nftopia-frontend"
+  - "nftopia-backend"
+  - "nftopia-starknet"
   - "nftopia_analytics"
   - "nftopia-notification-service"
+  - "nftopia-payment-service"
+  - "nftopia-marketplace-service"
+  - "nftopia-mobile-app"
