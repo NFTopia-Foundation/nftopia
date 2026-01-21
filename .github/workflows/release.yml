@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Generate Changelog
+      uses: requarks/changelog-action@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.ref_name }}
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Release ${{ github.ref_name }}
+        body_path: CHANGELOG.md
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        files: |
+          CHANGELOG.md
+    
+    - name: Publish to NPM (if applicable)
+      run: |
+        for dir in nftopia-*/; do
+          if [ -f "$dir/package.json" ] && [ -f "$dir/.npmignore" ]; then
+            echo "Publishing $dir to npm"
+            cd "$dir"
+            npm publish --access public || echo "Package already published or not configured"
+            cd ..
+          fi
+        done
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
