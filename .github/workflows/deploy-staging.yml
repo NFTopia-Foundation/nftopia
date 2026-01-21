@@ -1,0 +1,45 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [ develop, staging ]
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Deployment Variables
+      run: |
+        echo "DEPLOY_ENV=staging" >> $GITHUB_ENV
+        echo "API_URL=https://staging-api.nftopia.com" >> $GITHUB_ENV
+    
+    - name: Deploy Backend Services
+      run: |
+        echo "Deploying backend services to staging..."
+        # Add your deployment commands here
+        # Example for Railway deployments:
+        # railway up --service nftopia-backend
+    
+    - name: Deploy Frontend
+      run: |
+        echo "Deploying frontend to Vercel staging..."
+        # Add Vercel deployment commands
+    
+    - name: Run Integration Tests
+      run: |
+        echo "Running integration tests against staging..."
+        # Add integration test commands
+    
+    - name: Notify Deployment
+      uses: 8398a7/action-slack@v3
+      with:
+        channel: '#deployments'
+        status: ${{ job.status }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
