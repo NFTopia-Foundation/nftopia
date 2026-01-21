@@ -1,0 +1,60 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  pr-size:
+    name: PR Size Check
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Check PR Size
+      uses: srt32/pr-size-action@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        fail_if_greater_than: 1000
+    
+  commitlint:
+    name: Lint Commit Messages
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install commitlint
+      run: npm install -g @commitlint/cli @commitlint/config-conventional
+    
+    - name: Validate commit messages
+      run: |
+        npx commitlint --from HEAD~${{ github.event.pull_request.commits }} --to HEAD --verbose
+
+  require-tests:
+    name: Require Tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check for test file changes
+      uses: tj-actions/changed-files@v41
+      with:
+        files: |
+          **/test/**/*
+          **/*.test.*
+          **/*.spec.*
+        since_last_remote_commit: true
+    
+    - name: Fail if no test changes with code changes
+      if: env.any_changed == 'false'
+      run: |
+        echo "No test files changed. Please consider adding tests for your changes."
+        # Uncomment to fail the check:
+        # exit 1

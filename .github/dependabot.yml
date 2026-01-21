@@ -1,0 +1,41 @@
+version: 2
+updates:
+  # Node.js dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+    
+  # Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/nftopia_analytics"
+    schedule:
+      interval: "weekly"
+    
+  # Java dependencies
+  - package-ecosystem: "maven"
+    directory: "/nftopia-payment-service"
+    schedule:
+      interval: "weekly"
+    
+  # PHP dependencies
+  - package-ecosystem: "composer"
+    directory: "/nftopia-marketplace-service"
+    schedule:
+      interval: "weekly"
+    
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    
+  # Docker dependencies
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
