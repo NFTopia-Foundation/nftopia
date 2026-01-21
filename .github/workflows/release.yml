@@ -23,7 +23,7 @@ jobs:
         tag: ${{ github.ref_name }}
     
     - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         name: Release ${{ github.ref_name }}
         body_path: CHANGELOG.md
