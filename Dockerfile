@@ -1,5 +1,5 @@
 # Use an official Node.js LTS image
-FROM node:18-alpine
+FROM node:25-alpine
 
 # Set the working directory for the backend service
 WORKDIR /app/apps/backend
