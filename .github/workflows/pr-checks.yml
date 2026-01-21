@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check for test file changes
-      uses: tj-actions/changed-files@v41
+      uses: tj-actions/changed-files@v47
       with:
         files: |
           **/test/**/*
