@@ -1,14 +1,146 @@
-use soroban_sdk::{Address, Env, Map, String, Vec};
+use soroban_sdk::{Address, Env, Map, String, Vec, symbol_short};
 
 use crate::{
     errors::Error,
-    events::Event,
     storage::{DataKey, TokenMetadata, RoyaltyInfo},
 };
 
 pub struct Collection;
 
 impl Collection {
+    // ERC721-like methods
+    pub fn balance_of(env: &Env, collection_id: u64, address: &Address) -> u32 {
+        DataKey::get_balance(env, collection_id, address)
+    }
+    
+    pub fn owner_of(env: &Env, collection_id: u64, token_id: u32) -> Result<Address, Error> {
+        DataKey::get_token_owner(env, collection_id, token_id)
+            .ok_or(Error::TokenNotFound)
+    }
+    
+    pub fn get_approved(env: &Env, collection_id: u64, token_id: u32) -> Option<Address> {
+        DataKey::get_approved(env, collection_id, token_id)
+    }
+    
+    pub fn is_approved_for_all(env: &Env, collection_id: u64, owner: &Address, operator: &Address) -> bool {
+        DataKey::get_approved_for_all(env, collection_id, owner, operator)
+    }
+    
+    pub fn approve(env: &Env, collection_id: u64, caller: &Address, approved: &Address, token_id: u32) -> Result<(), Error> {
+        let owner = Self::owner_of(env, collection_id, token_id)?;
+        
+        // Check if caller is owner or approved for all
+        if &owner != caller && !Self::is_approved_for_all(env, collection_id, &owner, caller) {
+            return Err(Error::NotTokenOwner);
+        }
+        
+        DataKey::set_approved(env, collection_id, token_id, approved);
+        
+        // Emit approval event
+        env.events().publish(
+            (symbol_short!("approved"), collection_id),
+            (caller.clone(), approved.clone(), token_id)
+        );
+        
+        Ok(())
+    }
+    
+    pub fn set_approval_for_all(env: &Env, collection_id: u64, owner: &Address, operator: &Address, approved: bool) -> Result<(), Error> {
+        DataKey::set_approved_for_all(env, collection_id, owner, operator, approved);
+        
+        // Emit approval for all event
+        env.events().publish(
+            (symbol_short!("approval_for_all"), collection_id),
+            (owner.clone(), operator.clone(), approved)
+        );
+        
+        Ok(())
+    }
+    
+    pub fn transfer_from(
+        env: &Env,
+        collection_id: u64,
+        caller: &Address,
+        from: &Address,
+        to: &Address,
+        token_id: u32,
+    ) -> Result<(), Error> {
+        // Check ownership or approval
+        let owner = Self::owner_of(env, collection_id, token_id)?;
+        if &owner != from {
+            return Err(Error::NotTokenOwner);
+        }
+        
+        let approved = Self::get_approved(env, collection_id, token_id);
+        if caller != from && approved.as_ref() != Some(caller) 
+            && !Self::is_approved_for_all(env, collection_id, from, caller) {
+            return Err(Error::NotApproved);
+        }
+        
+        // Perform transfer
+        DataKey::set_token_owner(env, collection_id, token_id, to);
+        DataKey::decrement_balance(env, collection_id, from);
+        DataKey::increment_balance(env, collection_id, to);
+        DataKey::remove_approved(env, collection_id, token_id);
+        
+        // Emit event with symbol_short for efficiency
+        let collection_info = DataKey::get_collection_info(env, collection_id)?;
+        env.events().publish(
+            (symbol_short!("token_transferred"), collection_id),
+            (collection_info.address, token_id, from.clone(), to.clone())
+        );
+        
+        Ok(())
+    }
+    
+    // Set whitelist
+    pub fn set_whitelist(
+        env: &Env,
+        collection_id: u64,
+        caller: &Address,
+        address: &Address,
+        whitelisted: bool,
+    ) -> Result<(), Error> {
+        let info = DataKey::get_collection_info(env, collection_id)?;
+        if &info.creator != caller {
+            return Err(Error::Unauthorized);
+        }
+        
+        DataKey::set_whitelisted_for_mint(env, collection_id, address, whitelisted);
+        
+        // Emit event with symbol_short
+        env.events().publish(
+            (symbol_short!("whitelist_updated"), collection_id),
+            (info.address, address.clone(), whitelisted)
+        );
+        
+        Ok(())
+    }
+    
+    // Token URI
+    pub fn token_uri(env: &Env, collection_id: u64, token_id: u32) -> Result<String, Error> {
+        let metadata = DataKey::get_token_metadata(env, collection_id, token_id)
+            .ok_or(Error::TokenNotFound)?;
+        Ok(metadata.uri)
+    }
+    
+    // Token metadata
+    pub fn token_metadata(env: &Env, collection_id: u64, token_id: u32) -> Result<TokenMetadata, Error> {
+        DataKey::get_token_metadata(env, collection_id, token_id)
+            .ok_or(Error::TokenNotFound)
+    }
+    
+    // Total supply
+    pub fn total_supply(env: &Env, collection_id: u64) -> Result<u32, Error> {
+        let info = DataKey::get_collection_info(env, collection_id)?;
+        Ok(info.total_tokens)
+    }
+    
+    // Royalty info
+    pub fn royalty_info(env: &Env, collection_id: u64) -> Option<RoyaltyInfo> {
+        DataKey::get_royalty_info(env, collection_id)
+    }
+
     // Mint a new token
     pub fn mint(
         env: &Env,
@@ -54,13 +186,11 @@ impl Collection {
         info.total_tokens += 1;
         DataKey::set_collection_info(env, collection_id, &info);
 
-        Event::TokenMinted(
-            info.address.clone(),
-            token_id,
-            to.clone(),
-            uri,
-        )
-        .emit(env);
+        // Emit event using symbol_short for efficiency
+        env.events().publish(
+            (symbol_short!("token_minted"), collection_id),
+            (info.address.clone(), token_id, to.clone(), uri)
+        );
 
         Ok(token_id)
     }
@@ -87,20 +217,18 @@ impl Collection {
             token_ids.push_back(token_id);
         }
 
-        let collection = DataKey::get_collection_info(env, collection_id)?.address;
+        let collection_info = DataKey::get_collection_info(env, collection_id)?;
 
-        Event::BatchMinted(
-            collection,
-            start_token_id,
-            uris.len() as u32,
-            to.clone(),
-        )
-        .emit(env);
+        // Emit event with symbol_short
+        env.events().publish(
+            (symbol_short!("batch_minted"), collection_id),
+            (collection_info.address, start_token_id, uris.len() as u32, to.clone())
+        );
 
         Ok(token_ids)
     }
 
-    // Transfer token
+    // Transfer token (simplified version)
     pub fn transfer(
         env: &Env,
         collection_id: u64,
@@ -108,38 +236,7 @@ impl Collection {
         to: &Address,
         token_id: u32,
     ) -> Result<(), Error> {
-        if DataKey::is_collection_paused(env, collection_id) {
-            return Err(Error::MintingPaused);
-        }
-
-        let owner = DataKey::get_token_owner(env, collection_id, token_id)
-            .ok_or(Error::TokenNotFound)?;
-
-        if &owner != from {
-            let approved = DataKey::get_approved(env, collection_id, token_id);
-            if approved.as_ref() != Some(from)
-                && !DataKey::get_approved_for_all(env, collection_id, &owner, from)
-            {
-                return Err(Error::NotTokenOwner);
-            }
-        }
-
-        DataKey::set_token_owner(env, collection_id, token_id, to);
-        DataKey::decrement_balance(env, collection_id, from);
-        DataKey::increment_balance(env, collection_id, to);
-        DataKey::remove_approved(env, collection_id, token_id);
-
-        let collection = DataKey::get_collection_info(env, collection_id)?.address;
-
-        Event::TokenTransferred(
-            collection,
-            token_id,
-            from.clone(),
-            to.clone(),
-        )
-        .emit(env);
-
-        Ok(())
+        Self::transfer_from(env, collection_id, from, from, to, token_id)
     }
 
     // Batch transfer
@@ -154,15 +251,13 @@ impl Collection {
             Self::transfer(env, collection_id, from, to, *token_id)?;
         }
 
-        let collection = DataKey::get_collection_info(env, collection_id)?.address;
+        let collection_info = DataKey::get_collection_info(env, collection_id)?;
 
-        Event::BatchTransferred(
-            collection,
-            token_ids.clone(),
-            from.clone(),
-            to.clone(),
-        )
-        .emit(env);
+        // Emit event with symbol_short
+        env.events().publish(
+            (symbol_short!("batch_transferred"), collection_id),
+            (collection_info.address, token_ids.clone(), from.clone(), to.clone())
+        );
 
         Ok(())
     }
@@ -189,12 +284,11 @@ impl Collection {
         info.total_tokens = info.total_tokens.saturating_sub(1);
         DataKey::set_collection_info(env, collection_id, &info);
 
-        Event::TokenBurned(
-            info.address,
-            token_id,
-            owner.clone(),
-        )
-        .emit(env);
+        // Emit event with symbol_short
+        env.events().publish(
+            (symbol_short!("token_burned"), collection_id),
+            (info.address, token_id, owner.clone())
+        );
 
         Ok(())
     }
@@ -216,15 +310,14 @@ impl Collection {
             return Err(Error::Unauthorized);
         }
 
-        let royalty = RoyaltyInfo { recipient, percentage };
+        let royalty = RoyaltyInfo { recipient: recipient.clone(), percentage };
         DataKey::set_royalty_info(env, collection_id, &royalty);
 
-        Event::RoyaltyUpdated(
-            info.address,
-            royalty.recipient.clone(),
-            percentage,
-        )
-        .emit(env);
+        // Emit event with symbol_short
+        env.events().publish(
+            (symbol_short!("royalty_updated"), collection_id),
+            (info.address, recipient, percentage)
+        );
 
         Ok(())
     }
@@ -244,7 +337,12 @@ impl Collection {
 
         DataKey::set_collection_paused(env, collection_id, paused);
 
-        Event::CollectionPaused(info.address, paused).emit(env);
+        // Emit event with symbol_short
+        env.events().publish(
+            (symbol_short!("collection_paused"), collection_id),
+            (info.address, paused)
+        );
+        
         Ok(())
     }
 }

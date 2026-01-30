@@ -1,6 +1,23 @@
-use soroban_sdk::{contracttype, Address, Env, Map, Vec, String};
+use soroban_sdk::{contracttype, Address, Env, Map, String};
 
 use crate::errors::Error;
+
+// ADD THIS DataKey ENUM
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum DataKey {
+    FactoryConfig,
+    CollectionInfo(u64),
+    NextTokenId(u64),
+    TokenOwner(u64, u32),
+    TokenMetadata(u64, u32),
+    Balance(u64, Address),
+    Approved(u64, u32),
+    ApprovedForAll(u64, Address, Address),
+    RoyaltyInfo(u64),
+    WhitelistForMint(u64, Address),
+    IsPaused(u64),
+}
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -65,7 +82,6 @@ pub struct FactoryConfig {
     pub accumulated_fees: i128,
     pub is_active: bool,
 }
-
 
 pub trait Storage {
     fn get_factory_config(env: &Env) -> Result<FactoryConfig, Error>;
@@ -142,9 +158,10 @@ impl Storage for DataKey {
     }
     
     fn increment_collections_count(env: &Env) {
-        let mut config = Self::get_factory_config(env).unwrap();
-        config.total_collections += 1;
-        Self::set_factory_config(env, &config);
+        if let Ok(mut config) = Self::get_factory_config(env) {
+            config.total_collections += 1;
+            Self::set_factory_config(env, &config);
+        }
     }
     
     fn get_next_token_id(env: &Env, collection_id: u64) -> u32 {

@@ -2,11 +2,11 @@ use soroban_sdk::{
     Address,
     Env,
     String,
+    symbol_short,
 };
 
 use crate::{
     errors::Error,
-    events::Event,
     storage::{DataKey, CollectionConfig, CollectionInfo, FactoryConfig},
 };
 
@@ -18,7 +18,7 @@ impl Factory {
     // ─────────────────────────────────────────────
     pub fn initialize(env: &Env, owner: Address) -> Result<(), Error> {
         if DataKey::get_factory_config(env).is_ok() {
-            return Err(Error::CollectionAlreadyExists);
+            return Err(Error::AlreadyInitialized);
         }
 
         let config = FactoryConfig {
@@ -59,13 +59,8 @@ impl Factory {
 
         let collection_id = factory_config.total_collections as u64 + 1;
 
-        // 🚨 Placeholder address (safe + deterministic)
-        let collection_address = Address::from_string(
-            &String::from_str(
-                env,
-                &format!("COLLECTION-{}", collection_id),
-            ),
-        );
+        // All collections share the same contract address but different collection_id
+        let collection_address = env.current_contract_address();
 
         let info = CollectionInfo {
             address: collection_address.clone(),
@@ -90,15 +85,11 @@ impl Factory {
         factory_config.accumulated_fees += factory_config.factory_fee;
         DataKey::set_factory_config(env, &factory_config);
 
-        // ✅ NEW EVENT STYLE
-        Event::CollectionCreated(
-            caller.clone(),
-            collection_id,
-            collection_address,
-            config.name,
-            config.symbol,
-        )
-        .emit(env);
+        // Emit event using Soroban event system with symbol_short for efficiency
+        env.events().publish(
+            (symbol_short!("col_created"), collection_id),
+            (caller.clone(), collection_id, collection_address, config.name.clone(), config.symbol.clone())
+        );
 
         Ok(collection_id)
     }
@@ -116,6 +107,10 @@ impl Factory {
 
     pub fn get_collection_info(env: &Env, collection_id: u64) -> Result<CollectionInfo, Error> {
         DataKey::get_collection_info(env, collection_id)
+    }
+
+    pub fn get_factory_config(env: &Env) -> Result<FactoryConfig, Error> {
+        DataKey::get_factory_config(env)
     }
 
     // ─────────────────────────────────────────────
@@ -136,7 +131,12 @@ impl Factory {
         config.factory_fee = fee;
         DataKey::set_factory_config(env, &config);
 
-        Event::FactoryFeeUpdated(old_fee, fee, caller.clone()).emit(env);
+        // Emit event
+        env.events().publish(
+            (symbol_short!("fee_updated"),),
+            (old_fee, fee, caller.clone())
+        );
+        
         Ok(())
     }
 
@@ -159,7 +159,12 @@ impl Factory {
         config.accumulated_fees -= amount;
         DataKey::set_factory_config(env, &config);
 
-        Event::FeesWithdrawn(recipient, amount).emit(env);
+        // Emit event
+        env.events().publish(
+            (symbol_short!("fees_withdrawn"),),
+            (recipient.clone(), amount)
+        );
+        
         Ok(())
     }
 
@@ -192,6 +197,13 @@ impl Factory {
 
         config.is_active = active;
         DataKey::set_factory_config(env, &config);
+        
+        // Emit event
+        env.events().publish(
+            (symbol_short!("factory_active"),),
+            (caller.clone(), active)
+        );
+        
         Ok(())
     }
 
@@ -203,7 +215,7 @@ impl Factory {
             return Err(Error::InvalidConfig);
         }
 
-        if config.royalty_percentage > 2500 {
+        if config.royalty_percentage > 2500 { // 25% max
             return Err(Error::InvalidRoyaltyPercentage);
         }
 

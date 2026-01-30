@@ -1,4 +1,4 @@
-use soroban_sdk::{contracterror, Address, Env, Symbol};
+use soroban_sdk::{contracterror, Symbol, Env};
 
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
@@ -11,6 +11,7 @@ pub enum Error {
     InsufficientFee = 1003,
     CollectionNotFound = 1004,
     CollectionAlreadyExists = 1005,
+    AlreadyInitialized = 1006, // ADD THIS
 
     // Collection errors (2000-2999)
     MaxSupplyExceeded = 2000,
@@ -21,6 +22,7 @@ pub enum Error {
     WhitelistRequired = 2005,
     InvalidTokenId = 2006,
     InvalidRoyaltyPercentage = 2007,
+    NotApproved = 2008, // ADD THIS - used in collection.rs
 
     // General errors (3000-3999)
     InvalidInput = 3000,
@@ -39,10 +41,12 @@ impl Error {
             Error::InsufficientFee => Symbol::new(env, "INSUFFICIENT_FEE"),
             Error::CollectionNotFound => Symbol::new(env, "COLLECTION_NOT_FOUND"),
             Error::CollectionAlreadyExists => Symbol::new(env, "COLLECTION_ALREADY_EXISTS"),
+            Error::AlreadyInitialized => Symbol::new(env, "ALREADY_INITIALIZED"), // ADD THIS
             Error::MaxSupplyExceeded => Symbol::new(env, "MAX_SUPPLY_EXCEEDED"),
             Error::TokenNotFound => Symbol::new(env, "TOKEN_NOT_FOUND"),
             Error::NotTokenOwner => Symbol::new(env, "NOT_TOKEN_OWNER"),
             Error::NotApprovedForAll => Symbol::new(env, "NOT_APPROVED_FOR_ALL"),
+            Error::NotApproved => Symbol::new(env, "NOT_APPROVED"), // ADD THIS
             Error::MintingPaused => Symbol::new(env, "MINTING_PAUSED"),
             Error::WhitelistRequired => Symbol::new(env, "WHITELIST_REQUIRED"),
             Error::InvalidTokenId => Symbol::new(env, "INVALID_TOKEN_ID"),

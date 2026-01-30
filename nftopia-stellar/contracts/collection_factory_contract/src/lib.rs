@@ -1,16 +1,14 @@
 #![no_std]
 
-use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, String, Vec, Map, Val};
+use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec, Map};
 
 mod errors;
-mod events;
 mod storage;
 mod collection;
 mod factory;
 
 use errors::Error;
-use events::Event;
-use storage::{DataKey, CollectionConfig, TokenMetadata};
+use storage::{DataKey, CollectionConfig, TokenMetadata, MetadataSchema, RoyaltyInfo};
 use collection::Collection;
 use factory::Factory;
 
@@ -40,6 +38,14 @@ impl CollectionFactoryContract {
         is_pausable: bool,
         is_upgradeable: bool,
     ) -> Result<u64, Error> {
+        // Convert metadata_schema u32 to MetadataSchema enum
+        let schema = match metadata_schema {
+            0 => MetadataSchema::Basic,
+            1 => MetadataSchema::Extended,
+            2 => MetadataSchema::Advanced,
+            _ => return Err(Error::InvalidConfig),
+        };
+        
         let config = CollectionConfig {
             name,
             symbol,
@@ -48,8 +54,8 @@ impl CollectionFactoryContract {
             max_supply,
             is_public_mint,
             royalty_percentage,
-            royalty_recipient,
-            metadata_schema: storage::MetadataSchema::Basic, // Simplified
+            royalty_recipient: royalty_recipient.clone(),
+            metadata_schema: schema,
             is_pausable,
             is_upgradeable,
         };
@@ -63,6 +69,14 @@ impl CollectionFactoryContract {
     
     pub fn get_collection_address(env: Env, collection_id: u64) -> Result<Address, Error> {
         Factory::get_collection_address(&env, collection_id)
+    }
+    
+    pub fn get_collection_info(env: Env, collection_id: u64) -> Result<storage::CollectionInfo, Error> {
+        Factory::get_collection_info(&env, collection_id)
+    }
+    
+    pub fn get_factory_config(env: Env) -> Result<storage::FactoryConfig, Error> {
+        Factory::get_factory_config(&env)
     }
     
     pub fn set_factory_fee(env: Env, caller: Address, fee: i128) -> Result<(), Error> {
@@ -84,6 +98,14 @@ impl CollectionFactoryContract {
         max: Option<u32>,
     ) -> Result<(), Error> {
         Factory::set_max_collections(&env, &caller, max)
+    }
+    
+    pub fn set_factory_active(
+        env: Env,
+        caller: Address,
+        active: bool,
+    ) -> Result<(), Error> {
+        Factory::set_factory_active(&env, &caller, active)
     }
     
     // Collection functions
@@ -139,21 +161,21 @@ impl CollectionFactoryContract {
     pub fn approve(
         env: Env,
         collection_id: u64,
-        owner: Address,
+        caller: Address,
         approved: Address,
         token_id: u32,
     ) -> Result<(), Error> {
-        Collection::approve(&env, collection_id, &owner, &approved, token_id)
+        Collection::approve(&env, collection_id, &caller, &approved, token_id)
     }
     
     pub fn set_approval_for_all(
         env: Env,
         collection_id: u64,
-        owner: Address,
+        caller: Address,
         operator: Address,
         approved: bool,
     ) -> Result<(), Error> {
-        Collection::set_approval_for_all(&env, collection_id, &owner, &operator, approved)
+        Collection::set_approval_for_all(&env, collection_id, &caller, &operator, approved)
     }
     
     pub fn set_royalty_info(
@@ -173,7 +195,7 @@ impl CollectionFactoryContract {
         address: Address,
         whitelisted: bool,
     ) -> Result<(), Error> {
-        Collection::set_whitelist(&env, collection_id, &caller, address, whitelisted)
+        Collection::set_whitelist(&env, collection_id, &caller, &address, whitelisted)
     }
     
     pub fn set_paused(
@@ -190,7 +212,7 @@ impl CollectionFactoryContract {
         env: Env,
         collection_id: u64,
         address: Address,
-    ) -> Result<u32, Error> {
+    ) -> u32 {
         Collection::balance_of(&env, collection_id, &address)
     }
     
@@ -206,7 +228,7 @@ impl CollectionFactoryContract {
         env: Env,
         collection_id: u64,
         token_id: u32,
-    ) -> Result<Option<Address>, Error> {
+    ) -> Option<Address> {
         Collection::get_approved(&env, collection_id, token_id)
     }
     
@@ -215,7 +237,7 @@ impl CollectionFactoryContract {
         collection_id: u64,
         owner: Address,
         operator: Address,
-    ) -> Result<bool, Error> {
+    ) -> bool {
         Collection::is_approved_for_all(&env, collection_id, &owner, &operator)
     }
     
@@ -245,8 +267,19 @@ impl CollectionFactoryContract {
     pub fn royalty_info(
         env: Env,
         collection_id: u64,
-    ) -> Result<Option<storage::RoyaltyInfo>, Error> {
+    ) -> Option<storage::RoyaltyInfo> {
         Collection::royalty_info(&env, collection_id)
+    }
+    
+    pub fn transfer_from(
+        env: Env,
+        collection_id: u64,
+        caller: Address,
+        from: Address,
+        to: Address,
+        token_id: u32,
+    ) -> Result<(), Error> {
+        Collection::transfer_from(&env, collection_id, &caller, &from, &to, token_id)
     }
 }
 
