@@ -1,4 +1,4 @@
-use soroban_sdk::{Address, Env, Map, String, Vec, symbol_short};
+use soroban_sdk::{Address, Env, Map, String, Vec};
 
 use crate::{
     errors::Error,
@@ -170,7 +170,7 @@ impl Collection {
         uris: Vec<String>,
         attributes_list: Option<Vec<Map<String, String>>>,
     ) -> Result<Vec<u32>, Error> {
-        let start_token_id = <DataKey as Storage>::get_next_token_id(env, collection_id);
+        let _start_token_id = <DataKey as Storage>::get_next_token_id(env, collection_id);
         let mut token_ids = Vec::new(env);
 
         for i in 0..uris.len() {
@@ -198,7 +198,7 @@ impl Collection {
         Self::transfer_from(env, collection_id, from, from, to, token_id)
     }
 
-    // Batch transfer - FIXED dereferencing issue
+    // Batch transfer - FIXED: use token_id directly
     pub fn batch_transfer(
         env: &Env,
         collection_id: u64,
@@ -206,8 +206,8 @@ impl Collection {
         to: &Address,
         token_ids: Vec<u32>,
     ) -> Result<(), Error> {
-        for &token_id in token_ids.iter() {  // Use &token_id instead of *token_id
-            Self::transfer(env, collection_id, from, to, token_id)?;
+        for token_id in token_ids.iter() {
+            Self::transfer(env, collection_id, from, to, *token_id)?;
         }
         Ok(())
     }
