@@ -1,13 +1,12 @@
 use soroban_sdk::{
     Address,
     Env,
-    String,
     symbol_short,
 };
 
 use crate::{
     errors::Error,
-    storage::{DataKey, CollectionConfig, CollectionInfo, FactoryConfig},
+    storage::{DataKey, Storage, CollectionConfig, CollectionInfo, FactoryConfig},
 };
 
 pub struct Factory;
@@ -17,7 +16,7 @@ impl Factory {
     // Initialize factory
     // ─────────────────────────────────────────────
     pub fn initialize(env: &Env, owner: Address) -> Result<(), Error> {
-        if DataKey::get_factory_config(env).is_ok() {
+        if <DataKey as Storage>::get_factory_config(env).is_ok() {
             return Err(Error::AlreadyInitialized);
         }
 
@@ -30,7 +29,7 @@ impl Factory {
             is_active: true,
         };
 
-        DataKey::set_factory_config(env, &config);
+        <DataKey as Storage>::set_factory_config(env, &config);
         Ok(())
     }
 
@@ -43,7 +42,7 @@ impl Factory {
         config: CollectionConfig,
         initial_royalty_recipient: Option<Address>,
     ) -> Result<u64, Error> {
-        let mut factory_config = DataKey::get_factory_config(env)?;
+        let mut factory_config = <DataKey as Storage>::get_factory_config(env)?;
 
         if !factory_config.is_active {
             return Err(Error::Unauthorized);
@@ -71,25 +70,19 @@ impl Factory {
             is_paused: false,
         };
 
-        DataKey::set_collection_info(env, collection_id, &info);
+        <DataKey as Storage>::set_collection_info(env, collection_id, &info);
 
         if let Some(recipient) = initial_royalty_recipient {
             let royalty = crate::storage::RoyaltyInfo {
                 recipient,
                 percentage: config.royalty_percentage,
             };
-            DataKey::set_royalty_info(env, collection_id, &royalty);
+            <DataKey as Storage>::set_royalty_info(env, collection_id, &royalty);
         }
 
         factory_config.total_collections += 1;
         factory_config.accumulated_fees += factory_config.factory_fee;
-        DataKey::set_factory_config(env, &factory_config);
-
-        // Emit event using Soroban event system with symbol_short for efficiency
-        env.events().publish(
-            (symbol_short!("col_created"), collection_id),
-            (caller.clone(), collection_id, collection_address, config.name.clone(), config.symbol.clone())
-        );
+        <DataKey as Storage>::set_factory_config(env, &factory_config);
 
         Ok(collection_id)
     }
@@ -98,19 +91,19 @@ impl Factory {
     // Queries
     // ─────────────────────────────────────────────
     pub fn get_collection_count(env: &Env) -> Result<u32, Error> {
-        Ok(DataKey::get_factory_config(env)?.total_collections)
+        Ok(<DataKey as Storage>::get_factory_config(env)?.total_collections)
     }
 
     pub fn get_collection_address(env: &Env, collection_id: u64) -> Result<Address, Error> {
-        Ok(DataKey::get_collection_info(env, collection_id)?.address)
+        Ok(<DataKey as Storage>::get_collection_info(env, collection_id)?.address)
     }
 
     pub fn get_collection_info(env: &Env, collection_id: u64) -> Result<CollectionInfo, Error> {
-        DataKey::get_collection_info(env, collection_id)
+        <DataKey as Storage>::get_collection_info(env, collection_id)
     }
 
     pub fn get_factory_config(env: &Env) -> Result<FactoryConfig, Error> {
-        DataKey::get_factory_config(env)
+        <DataKey as Storage>::get_factory_config(env)
     }
 
     // ─────────────────────────────────────────────
@@ -121,7 +114,7 @@ impl Factory {
         caller: &Address,
         fee: i128,
     ) -> Result<(), Error> {
-        let mut config = DataKey::get_factory_config(env)?;
+        let mut config = <DataKey as Storage>::get_factory_config(env)?;
 
         if &config.owner != caller {
             return Err(Error::Unauthorized);
@@ -129,13 +122,7 @@ impl Factory {
 
         let old_fee = config.factory_fee;
         config.factory_fee = fee;
-        DataKey::set_factory_config(env, &config);
-
-        // Emit event
-        env.events().publish(
-            (symbol_short!("fee_updated"),),
-            (old_fee, fee, caller.clone())
-        );
+        <DataKey as Storage>::set_factory_config(env, &config);
         
         Ok(())
     }
@@ -146,7 +133,7 @@ impl Factory {
         recipient: Address,
         amount: i128,
     ) -> Result<(), Error> {
-        let mut config = DataKey::get_factory_config(env)?;
+        let mut config = <DataKey as Storage>::get_factory_config(env)?;
 
         if &config.owner != caller {
             return Err(Error::Unauthorized);
@@ -157,13 +144,7 @@ impl Factory {
         }
 
         config.accumulated_fees -= amount;
-        DataKey::set_factory_config(env, &config);
-
-        // Emit event
-        env.events().publish(
-            (symbol_short!("fees_withdrawn"),),
-            (recipient.clone(), amount)
-        );
+        <DataKey as Storage>::set_factory_config(env, &config);
         
         Ok(())
     }
@@ -173,14 +154,14 @@ impl Factory {
         caller: &Address,
         max: Option<u32>,
     ) -> Result<(), Error> {
-        let mut config = DataKey::get_factory_config(env)?;
+        let mut config = <DataKey as Storage>::get_factory_config(env)?;
 
         if &config.owner != caller {
             return Err(Error::Unauthorized);
         }
 
         config.max_collections = max;
-        DataKey::set_factory_config(env, &config);
+        <DataKey as Storage>::set_factory_config(env, &config);
         Ok(())
     }
 
@@ -189,21 +170,14 @@ impl Factory {
         caller: &Address,
         active: bool,
     ) -> Result<(), Error> {
-        let mut config = DataKey::get_factory_config(env)?;
+        let mut config = <DataKey as Storage>::get_factory_config(env)?;
 
         if &config.owner != caller {
             return Err(Error::Unauthorized);
         }
 
         config.is_active = active;
-        DataKey::set_factory_config(env, &config);
-        
-        // Emit event
-        env.events().publish(
-            (symbol_short!("factory_active"),),
-            (caller.clone(), active)
-        );
-        
+        <DataKey as Storage>::set_factory_config(env, &config);
         Ok(())
     }
 

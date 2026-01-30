@@ -1,3 +1,4 @@
+rust:contracts/collection_factory_contract/src/lib.rs
 #![no_std]
 
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec, Map};
@@ -8,7 +9,7 @@ mod collection;
 mod factory;
 
 use errors::Error;
-use storage::{DataKey, CollectionConfig, TokenMetadata, MetadataSchema, RoyaltyInfo};
+use storage::{CollectionConfig, TokenMetadata, MetadataSchema, RoyaltyInfo};
 use collection::Collection;
 use factory::Factory;
 
