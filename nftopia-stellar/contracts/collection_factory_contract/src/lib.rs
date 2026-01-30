@@ -8,7 +8,7 @@ mod collection;
 mod factory;
 
 use errors::Error;
-use storage::{CollectionConfig, TokenMetadata, MetadataSchema, RoyaltyInfo};
+use storage::{CollectionConfig, TokenMetadata, MetadataSchema};
 use collection::Collection;
 use factory::Factory;
 

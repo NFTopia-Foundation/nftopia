@@ -1,7 +1,6 @@
 use soroban_sdk::{
     Address,
     Env,
-    symbol_short,
 };
 
 use crate::{
@@ -120,7 +119,7 @@ impl Factory {
             return Err(Error::Unauthorized);
         }
 
-        let old_fee = config.factory_fee;
+        let _old_fee = config.factory_fee;
         config.factory_fee = fee;
         <DataKey as Storage>::set_factory_config(env, &config);
         
@@ -130,7 +129,7 @@ impl Factory {
     pub fn withdraw_fees(
         env: &Env,
         caller: &Address,
-        recipient: Address,
+        _recipient: Address,
         amount: i128,
     ) -> Result<(), Error> {
         let mut config = <DataKey as Storage>::get_factory_config(env)?;
