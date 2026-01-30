@@ -1,4 +1,3 @@
-rust:contracts/collection_factory_contract/src/lib.rs
 #![no_std]
 
 use soroban_sdk::{contract, contractimpl, Address, Env, String, Vec, Map};
