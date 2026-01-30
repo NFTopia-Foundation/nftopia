@@ -1,4 +1,4 @@
-use soroban_sdk::{contracterror, Address, Env};
+use soroban_sdk::{contracterror, Address, Env, Symbol};
 
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
@@ -11,7 +11,7 @@ pub enum Error {
     InsufficientFee = 1003,
     CollectionNotFound = 1004,
     CollectionAlreadyExists = 1005,
-    
+
     // Collection errors (2000-2999)
     MaxSupplyExceeded = 2000,
     TokenNotFound = 2001,
@@ -21,7 +21,7 @@ pub enum Error {
     WhitelistRequired = 2005,
     InvalidTokenId = 2006,
     InvalidRoyaltyPercentage = 2007,
-    
+
     // General errors (3000-3999)
     InvalidInput = 3000,
     Overflow = 3001,
@@ -31,7 +31,7 @@ pub enum Error {
 }
 
 impl Error {
-    pub fn to_symbol(&self, env: &Env) -> soroban_sdk::Symbol {
+    pub fn to_symbol(&self, env: &Env) -> Symbol {
         match self {
             Error::Unauthorized => Symbol::new(env, "UNAUTHORIZED"),
             Error::InvalidConfig => Symbol::new(env, "INVALID_CONFIG"),

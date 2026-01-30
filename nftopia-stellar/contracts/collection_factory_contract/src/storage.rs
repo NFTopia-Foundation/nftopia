@@ -1,13 +1,13 @@
-use soroban_sdk::{contracttype, Address, Env, Map, Vec};
+use soroban_sdk::{contracttype, Address, Env, Map, Vec, String};
 
 use crate::errors::Error;
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum MetadataSchema {
-    Basic,      // Just URI
-    Extended,   // URI + attributes
-    Advanced,   // URI + attributes + mutable metadata
+    Basic,
+    Extended,
+    Advanced,
 }
 
 #[contracttype]
@@ -17,9 +17,9 @@ pub struct CollectionConfig {
     pub symbol: String,
     pub description: String,
     pub base_uri: String,
-    pub max_supply: Option<u32>,       // None = unlimited
+    pub max_supply: Option<u32>,
     pub is_public_mint: bool,
-    pub royalty_percentage: u32,       // Basis points (100 = 1%)
+    pub royalty_percentage: u32,
     pub royalty_recipient: Address,
     pub metadata_schema: MetadataSchema,
     pub is_pausable: bool,
@@ -31,7 +31,7 @@ pub struct CollectionConfig {
 pub struct TokenMetadata {
     pub token_id: u32,
     pub uri: String,
-    pub attributes: Map<String, String>, // Key-value pairs
+    pub attributes: Map<String, String>,
     pub creator: Address,
     pub created_at: u64,
     pub updated_at: Option<u64>,
@@ -52,42 +52,20 @@ pub struct CollectionInfo {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RoyaltyInfo {
     pub recipient: Address,
-    pub percentage: u32, // Basis points
+    pub percentage: u32,
 }
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct FactoryConfig {
     pub owner: Address,
-    pub factory_fee: i128,         // Fee for creating a collection
-    pub max_collections: Option<u32>, // Maximum collections allowed
+    pub factory_fee: i128,
+    pub max_collections: Option<u32>,
     pub total_collections: u32,
     pub accumulated_fees: i128,
     pub is_active: bool,
 }
 
-// Storage keys
-#[contracttype]
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum DataKey {
-    // Factory storage
-    FactoryConfig,
-    Collections,                    // Map<u64, CollectionInfo>
-    CollectionIdByAddress,          // Map<Address, u64>
-    Whitelist(u64),                 // Map<Address, bool> for collection
-    
-    // Collection storage
-    CollectionInfo(u64),
-    NextTokenId(u64),
-    TokenOwner(u64, u32),           // token_id -> owner
-    TokenMetadata(u64, u32),        // token_id -> metadata
-    Balance(u64, Address),          // address -> token count
-    Approved(u64, u32),             // token_id -> approved address
-    ApprovedForAll(u64, Address, Address), // owner -> operator -> bool
-    RoyaltyInfo(u64),
-    WhitelistForMint(u64, Address), // address -> bool
-    IsPaused(u64),
-}
 
 pub trait Storage {
     fn get_factory_config(env: &Env) -> Result<FactoryConfig, Error>;

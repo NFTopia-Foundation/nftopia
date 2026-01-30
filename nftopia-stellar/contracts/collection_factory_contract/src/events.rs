@@ -1,77 +1,86 @@
-use soroban_sdk::{contracttype, Address, Env, Symbol};
+use soroban_sdk::{
+    contractevent,
+    Address,
+    String,
+    Vec,
+};
 
-#[contracttype]
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[contractevent]
+#[derive(Clone, Debug)]
 pub enum Event {
+    // ─────────────────────────────────────────────
     // Factory events
-    CollectionCreated {
-        creator: Address,
-        collection_id: u64,
-        collection_address: Address,
-        name: String,
-        symbol: String,
-    },
-    FactoryFeeUpdated {
-        old_fee: i128,
-        new_fee: i128,
-        updater: Address,
-    },
-    FeesWithdrawn {
-        recipient: Address,
-        amount: i128,
-    },
-    
-    // Collection events
-    TokenMinted {
-        collection: Address,
-        token_id: u32,
-        owner: Address,
-        uri: String,
-    },
-    BatchMinted {
-        collection: Address,
-        start_token_id: u32,
-        count: u32,
-        owner: Address,
-    },
-    TokenTransferred {
-        collection: Address,
-        token_id: u32,
-        from: Address,
-        to: Address,
-    },
-    BatchTransferred {
-        collection: Address,
-        token_ids: Vec<u32>,
-        from: Address,
-        to: Address,
-    },
-    TokenBurned {
-        collection: Address,
-        token_id: u32,
-        owner: Address,
-    },
-    RoyaltyUpdated {
-        collection: Address,
-        recipient: Address,
-        percentage: u32,
-    },
-    WhitelistUpdated {
-        collection: Address,
-        address: Address,
-        added: bool,
-    },
-    CollectionPaused {
-        collection: Address,
-        paused: bool,
-    },
-}
+    // ─────────────────────────────────────────────
+    CollectionCreated(
+        Address, // creator
+        u64,     // collection_id
+        Address, // collection_address
+        String,  // name
+        String,  // symbol
+    ),
 
-impl Event {
-    pub fn publish(&self, env: &Env) {
-        env.events().publish(
-            (Symbol::new(env, "nftopia_event"), self.clone()),
-            self.clone(),
-        );
-    }
+    FactoryFeeUpdated(
+        i128,    // old_fee
+        i128,    // new_fee
+        Address, // updater
+    ),
+
+    FeesWithdrawn(
+        Address, // recipient
+        i128,    // amount
+    ),
+
+    // ─────────────────────────────────────────────
+    // Collection events
+    // ─────────────────────────────────────────────
+    TokenMinted(
+        Address, // collection
+        u32,     // token_id
+        Address, // owner
+        String,  // uri
+    ),
+
+    BatchMinted(
+        Address, // collection
+        u32,     // start_token_id
+        u32,     // count
+        Address, // owner
+    ),
+
+    TokenTransferred(
+        Address, // collection
+        u32,     // token_id
+        Address, // from
+        Address, // to
+    ),
+
+    BatchTransferred(
+        Address,     // collection
+        Vec<u32>,    // token_ids
+        Address,     // from
+        Address,     // to
+    ),
+
+    TokenBurned(
+        Address, // collection
+        u32,     // token_id
+        Address, // owner
+    ),
+
+    RoyaltyUpdated(
+        Address, // collection
+        Address, // recipient
+        u32,     // percentage
+    ),
+
+    WhitelistUpdated(
+        Address, // collection
+        Address, // address
+        bool,    // added
+    ),
+
+    CollectionPaused(
+        Address, // collection
+        bool,    // paused
+    ),
 }
