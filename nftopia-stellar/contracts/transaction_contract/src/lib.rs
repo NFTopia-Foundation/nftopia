@@ -1,7 +1,9 @@
 #![no_std]
+#![allow(deprecated)]
 
 use soroban_sdk::{
-    contract, contractimpl, contracttype, contracterror, Address, BytesN, Env, Map, String, Vec, symbol_short,
+    contract, contracterror, contractimpl, contracttype, symbol_short, Address, BytesN, Env, Map,
+    String, Vec,
 };
 
 // ============================================================================
@@ -13,13 +15,13 @@ use soroban_sdk::{
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u32)]
 pub enum TransactionStatus {
-    Draft = 0,       // Transaction created but not yet submitted
-    Pending = 1,     // Awaiting execution
-    Executing = 2,   // Currently being executed
-    Completed = 3,   // Successfully completed
-    Failed = 4,      // Execution failed
-    Cancelled = 5,   // Cancelled by user
-    RolledBack = 6,  // Rolled back due to error
+    Draft = 0,      // Transaction created but not yet submitted
+    Pending = 1,    // Awaiting execution
+    Executing = 2,  // Currently being executed
+    Completed = 3,  // Successfully completed
+    Failed = 4,     // Execution failed
+    Cancelled = 5,  // Cancelled by user
+    RolledBack = 6, // Rolled back due to error
 }
 
 /// Operation types for NFT transactions
@@ -45,29 +47,29 @@ pub enum OperationType {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Operation {
     pub op_type: OperationType,
-    pub target_contract: Address,  // Contract to call
-    pub target_nft_id: String,     // NFT identifier
+    pub target_contract: Address,    // Contract to call
+    pub target_nft_id: String,       // NFT identifier
     pub params: Map<String, String>, // Operation parameters
-    pub gas_estimate: u64,         // Estimated gas cost
-    pub dependencies: Vec<u32>,    // Indices of operations this depends on
+    pub gas_estimate: u64,           // Estimated gas cost
+    pub dependencies: Vec<u32>,      // Indices of operations this depends on
 }
 
 /// Transaction metadata
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Transaction {
-    pub id: String,                // Unique transaction ID
-    pub creator: Address,          // Transaction creator
-    pub status: TransactionStatus, // Current status
-    pub operations: Vec<Operation>, // List of operations
+    pub id: String,                           // Unique transaction ID
+    pub creator: Address,                     // Transaction creator
+    pub status: TransactionStatus,            // Current status
+    pub operations: Vec<Operation>,           // List of operations
     pub signatures: Map<Address, BytesN<64>>, // Multi-sig signatures
-    pub required_signers: Vec<Address>, // Required signers for execution
-    pub gas_budget: u64,           // Total gas budget
-    pub gas_used: u64,             // Gas used so far
-    pub created_at: u64,           // Creation timestamp
-    pub executed_at: u64,          // Execution timestamp
-    pub error_message: String,     // Error message if failed
-    pub checkpoint: u32,           // Last successful operation index
+    pub required_signers: Vec<Address>,       // Required signers for execution
+    pub gas_budget: u64,                      // Total gas budget
+    pub gas_used: u64,                        // Gas used so far
+    pub created_at: u64,                      // Creation timestamp
+    pub executed_at: u64,                     // Execution timestamp
+    pub error_message: String,                // Error message if failed
+    pub checkpoint: u32,                      // Last successful operation index
 }
 
 /// Gas estimation result
@@ -83,8 +85,8 @@ pub struct GasEstimate {
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BatchResult {
-    pub successful: Vec<String>,  // Transaction IDs that succeeded
-    pub failed: Vec<String>,      // Transaction IDs that failed
+    pub successful: Vec<String>, // Transaction IDs that succeeded
+    pub failed: Vec<String>,     // Transaction IDs that failed
     pub total_gas_used: u64,
 }
 
@@ -94,13 +96,13 @@ pub struct BatchResult {
 
 #[contracttype]
 pub enum DataKey {
-    Transaction(String),           // Transaction data by ID
-    TransactionCounter,            // Counter for transaction IDs
-    PendingTransactions,           // List of pending transaction IDs
-    CompletedTransactions,         // List of completed transaction IDs
-    FailedTransactions,            // List of failed transaction IDs
-    GasPrice,                      // Current gas price
-    Admin,                         // Admin address
+    Transaction(String),   // Transaction data by ID
+    TransactionCounter,    // Counter for transaction IDs
+    PendingTransactions,   // List of pending transaction IDs
+    CompletedTransactions, // List of completed transaction IDs
+    FailedTransactions,    // List of failed transaction IDs
+    GasPrice,              // Current gas price
+    Admin,                 // Admin address
 }
 
 // ============================================================================
@@ -141,7 +143,9 @@ impl TransactionContract {
     pub fn initialize(env: Env, admin: Address) {
         admin.require_auth();
         env.storage().instance().set(&DataKey::Admin, &admin);
-        env.storage().instance().set(&DataKey::TransactionCounter, &0u64);
+        env.storage()
+            .instance()
+            .set(&DataKey::TransactionCounter, &0u64);
         env.storage().instance().set(&DataKey::GasPrice, &100u64); // Default gas price
     }
 
@@ -159,7 +163,8 @@ impl TransactionContract {
         creator.require_auth();
 
         // Generate transaction ID
-        let counter: u64 = env.storage()
+        let counter: u64 = env
+            .storage()
             .instance()
             .get(&DataKey::TransactionCounter)
             .unwrap_or(0);
@@ -214,7 +219,8 @@ impl TransactionContract {
         dependencies: Vec<u32>,
     ) -> Result<(), Error> {
         // Load transaction
-        let mut transaction: Transaction = env.storage()
+        let mut transaction: Transaction = env
+            .storage()
             .instance()
             .get(&DataKey::Transaction(tx_id.clone()))
             .ok_or(Error::TransactionNotFound)?;
@@ -269,7 +275,8 @@ impl TransactionContract {
 
     /// Submit transaction for execution (moves from Draft to Pending)
     pub fn submit_transaction(env: Env, tx_id: String) -> Result<(), Error> {
-        let mut transaction: Transaction = env.storage()
+        let mut transaction: Transaction = env
+            .storage()
             .instance()
             .get(&DataKey::Transaction(tx_id.clone()))
             .ok_or(Error::TransactionNotFound)?;
@@ -289,7 +296,8 @@ impl TransactionContract {
             .set(&DataKey::Transaction(tx_id.clone()), &transaction);
 
         // Add to pending list
-        let mut pending: Vec<String> = env.storage()
+        let mut pending: Vec<String> = env
+            .storage()
             .instance()
             .get(&DataKey::PendingTransactions)
             .unwrap_or(Vec::new(&env));
@@ -316,7 +324,8 @@ impl TransactionContract {
     ) -> Result<(), Error> {
         signer.require_auth();
 
-        let mut transaction: Transaction = env.storage()
+        let mut transaction: Transaction = env
+            .storage()
             .instance()
             .get(&DataKey::Transaction(tx_id.clone()))
             .ok_or(Error::TransactionNotFound)?;
@@ -343,17 +352,16 @@ impl TransactionContract {
             .set(&DataKey::Transaction(tx_id.clone()), &transaction);
 
         // Emit event
-        env.events().publish(
-            (symbol_short!("tx_sign"), tx_id),
-            signer,
-        );
+        env.events()
+            .publish((symbol_short!("tx_sign"), tx_id), signer);
 
         Ok(())
     }
 
     /// Execute a transaction
     pub fn execute_transaction(env: Env, tx_id: String) -> Result<(), Error> {
-        let mut transaction: Transaction = env.storage()
+        let mut transaction: Transaction = env
+            .storage()
             .instance()
             .get(&DataKey::Transaction(tx_id.clone()))
             .ok_or(Error::TransactionNotFound)?;
@@ -384,7 +392,8 @@ impl TransactionContract {
                 transaction.status = TransactionStatus::Completed;
 
                 // Move to completed list
-                let mut completed: Vec<String> = env.storage()
+                let mut completed: Vec<String> = env
+                    .storage()
                     .instance()
                     .get(&DataKey::CompletedTransactions)
                     .unwrap_or(Vec::new(&env));
@@ -404,7 +413,8 @@ impl TransactionContract {
                 transaction.error_message = String::from_str(&env, "Operation failed");
 
                 // Move to failed list
-                let mut failed: Vec<String> = env.storage()
+                let mut failed: Vec<String> = env
+                    .storage()
                     .instance()
                     .get(&DataKey::FailedTransactions)
                     .unwrap_or(Vec::new(&env));
@@ -414,10 +424,8 @@ impl TransactionContract {
                     .set(&DataKey::FailedTransactions, &failed);
 
                 // Emit event
-                env.events().publish(
-                    (symbol_short!("tx_fail"), tx_id.clone()),
-                    e as u32,
-                );
+                env.events()
+                    .publish((symbol_short!("tx_fail"), tx_id.clone()), e as u32);
             }
         }
 
@@ -434,7 +442,8 @@ impl TransactionContract {
 
     /// Cancel a pending transaction
     pub fn cancel_transaction(env: Env, tx_id: String) -> Result<(), Error> {
-        let mut transaction: Transaction = env.storage()
+        let mut transaction: Transaction = env
+            .storage()
             .instance()
             .get(&DataKey::Transaction(tx_id.clone()))
             .ok_or(Error::TransactionNotFound)?;
@@ -443,7 +452,8 @@ impl TransactionContract {
 
         // Can only cancel Draft or Pending transactions
         if transaction.status != TransactionStatus::Draft
-            && transaction.status != TransactionStatus::Pending {
+            && transaction.status != TransactionStatus::Pending
+        {
             return Err(Error::CannotCancel);
         }
 
@@ -459,17 +469,16 @@ impl TransactionContract {
         Self::remove_from_pending(&env, &tx_id);
 
         // Emit event
-        env.events().publish(
-            (symbol_short!("tx_cancel"), tx_id),
-            transaction.creator,
-        );
+        env.events()
+            .publish((symbol_short!("tx_cancel"), tx_id), transaction.creator);
 
         Ok(())
     }
 
     /// Estimate gas cost for a transaction
     pub fn estimate_gas(env: Env, tx_id: String) -> Result<GasEstimate, Error> {
-        let transaction: Transaction = env.storage()
+        let transaction: Transaction = env
+            .storage()
             .instance()
             .get(&DataKey::Transaction(tx_id))
             .ok_or(Error::TransactionNotFound)?;
@@ -537,7 +546,8 @@ impl TransactionContract {
         for tx_id in tx_ids.iter() {
             match Self::execute_transaction(env.clone(), tx_id.clone()) {
                 Ok(_) => {
-                    let transaction: Transaction = env.storage()
+                    let transaction: Transaction = env
+                        .storage()
                         .instance()
                         .get(&DataKey::Transaction(tx_id.clone()))
                         .unwrap();
@@ -562,9 +572,11 @@ impl TransactionContract {
         let mut results = Vec::new(&env);
 
         for tx_id in tx_ids.iter() {
-            let is_valid = match env.storage()
+            let is_valid = match env
+                .storage()
                 .instance()
-                .get::<DataKey, Transaction>(&DataKey::Transaction(tx_id)) {
+                .get::<DataKey, Transaction>(&DataKey::Transaction(tx_id))
+            {
                 Some(tx) => {
                     // Verify signatures
                     tx.signatures.len() >= tx.required_signers.len()
@@ -599,7 +611,8 @@ impl TransactionContract {
 
     /// Get transaction status
     pub fn get_status(env: Env, tx_id: String) -> Result<TransactionStatus, Error> {
-        let transaction: Transaction = env.storage()
+        let transaction: Transaction = env
+            .storage()
             .instance()
             .get(&DataKey::Transaction(tx_id))
             .ok_or(Error::TransactionNotFound)?;
@@ -638,10 +651,7 @@ impl TransactionContract {
     pub fn set_gas_price(env: Env, admin: Address, new_price: u64) {
         admin.require_auth();
 
-        let stored_admin: Address = env.storage()
-            .instance()
-            .get(&DataKey::Admin)
-            .unwrap();
+        let stored_admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
 
         if admin != stored_admin {
             panic!("Unauthorized");
@@ -735,7 +745,7 @@ impl TransactionContract {
             let mut progress = false;
 
             for i in 0..num_ops {
-                if executed.contains(&i) {
+                if executed.contains(i) {
                     continue;
                 }
 
@@ -744,7 +754,7 @@ impl TransactionContract {
 
                 // Check if all dependencies are executed
                 for dep in operation.dependencies.iter() {
-                    if !executed.contains(&dep) {
+                    if !executed.contains(dep) {
                         can_execute = false;
                         break;
                     }
@@ -784,7 +794,7 @@ impl TransactionContract {
 
             // Check if any dependency points back to the new operation
             let dep_op = operations.get(dep).unwrap();
-            if dep_op.dependencies.contains(&num_ops) {
+            if dep_op.dependencies.contains(num_ops) {
                 return true;
             }
         }
@@ -812,7 +822,8 @@ impl TransactionContract {
 
     /// Remove transaction from pending list
     fn remove_from_pending(env: &Env, tx_id: &String) {
-        let pending: Vec<String> = env.storage()
+        let pending: Vec<String> = env
+            .storage()
             .instance()
             .get(&DataKey::PendingTransactions)
             .unwrap_or(Vec::new(env));

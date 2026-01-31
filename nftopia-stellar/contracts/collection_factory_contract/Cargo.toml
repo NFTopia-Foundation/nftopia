@@ -1,6 +1,25 @@
 [package]
-name = "collection_factory_contract"
+name = "collection-factory"
 version = "0.1.0"
-edition = "2024"
+description = "NFT Collection Factory for NFTopia on Stellar Soroban"
+edition = "2021"
+license = "Apache-2.0"
+
+[lib]
+crate-type = ["cdylib"]
 
 [dependencies]
+soroban-sdk = "25.0.2"
+
+[dev-dependencies]
+soroban-sdk = { version = "25.0.2", features = ["testutils"] }
+
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true
