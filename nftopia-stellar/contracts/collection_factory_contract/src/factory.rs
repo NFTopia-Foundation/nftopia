@@ -1,11 +1,8 @@
-use soroban_sdk::{
-    Address,
-    Env,
-};
+use soroban_sdk::{Address, Env};
 
 use crate::{
     errors::Error,
-    storage::{DataKey, Storage, CollectionConfig, CollectionInfo, FactoryConfig},
+    storage::{CollectionConfig, CollectionInfo, DataKey, FactoryConfig, Storage},
 };
 
 pub struct Factory;
@@ -108,11 +105,7 @@ impl Factory {
     // ─────────────────────────────────────────────
     // Admin
     // ─────────────────────────────────────────────
-    pub fn set_factory_fee(
-        env: &Env,
-        caller: &Address,
-        fee: i128,
-    ) -> Result<(), Error> {
+    pub fn set_factory_fee(env: &Env, caller: &Address, fee: i128) -> Result<(), Error> {
         let mut config = <DataKey as Storage>::get_factory_config(env)?;
 
         if &config.owner != caller {
@@ -122,7 +115,7 @@ impl Factory {
         let _old_fee = config.factory_fee;
         config.factory_fee = fee;
         <DataKey as Storage>::set_factory_config(env, &config);
-        
+
         Ok(())
     }
 
@@ -144,15 +137,11 @@ impl Factory {
 
         config.accumulated_fees -= amount;
         <DataKey as Storage>::set_factory_config(env, &config);
-        
+
         Ok(())
     }
 
-    pub fn set_max_collections(
-        env: &Env,
-        caller: &Address,
-        max: Option<u32>,
-    ) -> Result<(), Error> {
+    pub fn set_max_collections(env: &Env, caller: &Address, max: Option<u32>) -> Result<(), Error> {
         let mut config = <DataKey as Storage>::get_factory_config(env)?;
 
         if &config.owner != caller {
@@ -164,11 +153,7 @@ impl Factory {
         Ok(())
     }
 
-    pub fn set_factory_active(
-        env: &Env,
-        caller: &Address,
-        active: bool,
-    ) -> Result<(), Error> {
+    pub fn set_factory_active(env: &Env, caller: &Address, active: bool) -> Result<(), Error> {
         let mut config = <DataKey as Storage>::get_factory_config(env)?;
 
         if &config.owner != caller {
@@ -184,11 +169,12 @@ impl Factory {
     // Validation
     // ─────────────────────────────────────────────
     fn validate_collection_config(config: &CollectionConfig) -> Result<(), Error> {
-        if config.name.len() == 0 || config.symbol.len() == 0 {
+        if config.name.is_empty() || config.symbol.is_empty() {
             return Err(Error::InvalidConfig);
         }
 
-        if config.royalty_percentage > 2500 { // 25% max
+        if config.royalty_percentage > 2500 {
+            // 25% max
             return Err(Error::InvalidRoyaltyPercentage);
         }
 

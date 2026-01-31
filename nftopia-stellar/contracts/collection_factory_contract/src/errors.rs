@@ -1,8 +1,9 @@
-use soroban_sdk::{contracterror, Symbol, Env};
+use soroban_sdk::{contracterror, Env, Symbol};
 
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(u32)]
+#[allow(clippy::enum_variant_names)]
 pub enum Error {
     // Factory errors (1000-1999)
     Unauthorized = 1000,
@@ -33,7 +34,7 @@ pub enum Error {
 }
 
 impl Error {
-    pub fn to_symbol(&self, env: &Env) -> Symbol {
+    pub fn to_symbol(self, env: &Env) -> Symbol {
         match self {
             Error::Unauthorized => Symbol::new(env, "UNAUTHORIZED"),
             Error::InvalidConfig => Symbol::new(env, "INVALID_CONFIG"),

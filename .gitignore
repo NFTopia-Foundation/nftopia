@@ -29,6 +29,7 @@ on-chain/node_modules/
 
 # testing
 /coverage
+test_snapshots/
 
 # next.js
 /.next/
