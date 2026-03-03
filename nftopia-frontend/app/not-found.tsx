@@ -1,6 +1,6 @@
 "use client";
 
-import LottiePlayer from "@/components/animations/LottiePlayer";
+import LottiePlayer from "@/components/animations/LottiePlayer"; //Adding another comment
 import Link from "next/link";
 import React from "react";
 import { useMobile } from "@/hooks";
